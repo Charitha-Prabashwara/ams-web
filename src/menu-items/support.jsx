@@ -18,19 +18,20 @@ const support = {
   type: 'group',
   children: [
     {
-      id: 'lecturer',
-      title: 'Lecturer',
-      type: 'item',
-      url: '/lecturer',
-      icon: icons.FaChalkboardTeacher
-    },
-    {
       id: 'hod',
       title: 'Department Executive',
       type: 'item',
       url: '/hod',
       icon: icons.FaUserShield
     },
+    {
+      id: 'lecturer',
+      title: 'Lecturer',
+      type: 'item',
+      url: '/lecturer',
+      icon: icons.FaChalkboardTeacher
+    },
+    
     {
       id: 'student',
       title: 'Student',

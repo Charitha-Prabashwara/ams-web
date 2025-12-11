@@ -7,6 +7,7 @@ import {
   FontSizeOutlined,
   LoadingOutlined
 } from '@ant-design/icons';
+import { PiBuilding } from "react-icons/pi";
 
 // icons
 const icons = {
@@ -15,8 +16,10 @@ const icons = {
   BarcodeOutlined,
   AntDesignOutlined,
   LoadingOutlined,
-  AppstoreAddOutlined
+  AppstoreAddOutlined,
+  PiBuilding
 };
+
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
 
@@ -51,7 +54,8 @@ const utilities = {
       title: 'Department',
       type: 'item',
       url: '/department',
-      icon: icons.BarcodeOutlined
+      icon: icons.PiBuilding
+
     }
   ]
 };

@@ -30,7 +30,8 @@ export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000 // reload every 10s
   });
-
+  console.log(data?.departments);
+  
   const departments = data?.departments || [];
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(5);
@@ -107,7 +108,7 @@ export default function DepartmentPage() {
       await axiosClient.delete('/department/id/', {
         data: {
           id: selectedDept.id,
-          safe: false
+          safe: true
         }
       });
       mutate();
