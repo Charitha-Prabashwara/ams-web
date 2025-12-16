@@ -17,6 +17,7 @@ const Hod = Loadable(lazy(() => import('pages/extra-pages/hod')));
 const Lecturer = Loadable(lazy(() => import('pages/extra-pages/lecturer')));
 const Student = Loadable(lazy(() => import('pages/extra-pages/student')));
 const Department = Loadable(lazy(() => import('pages/extra-pages/department')));
+const Courses =  Loadable(lazy(() => import('pages/extra-pages/courses.jsx')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -63,6 +64,10 @@ const MainRoutes = {
     {
       path: 'department',
       element: <Department />
+    },
+     {
+      path: 'courses',
+      element: <Courses />
     }
   ]
 };

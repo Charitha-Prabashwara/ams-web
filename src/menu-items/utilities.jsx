@@ -5,7 +5,8 @@ import {
   BarcodeOutlined,
   BgColorsOutlined,
   FontSizeOutlined,
-  LoadingOutlined
+  LoadingOutlined,
+  BookOutlined 
 } from '@ant-design/icons';
 import { PiBuilding } from "react-icons/pi";
 
@@ -17,7 +18,8 @@ const icons = {
   AntDesignOutlined,
   LoadingOutlined,
   AppstoreAddOutlined,
-  PiBuilding
+  PiBuilding,
+  BookOutlined
 };
 
 
@@ -43,11 +45,11 @@ const utilities = {
       icon: icons.BgColorsOutlined
     },
     {
-      id: 'util-shadow',
-      title: 'Shadow',
+      id: 'course',
+      title: 'Courses',
       type: 'item',
-      url: '/shadow',
-      icon: icons.BarcodeOutlined
+      url: '/courses',
+      icon: icons.BookOutlined
     },
      {
       id: 'department',
