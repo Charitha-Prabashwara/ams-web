@@ -6,7 +6,8 @@ import {
   BgColorsOutlined,
   FontSizeOutlined,
   LoadingOutlined,
-  BookOutlined 
+  BookOutlined,
+  PartitionOutlined  
 } from '@ant-design/icons';
 import { PiBuilding } from "react-icons/pi";
 
@@ -19,7 +20,8 @@ const icons = {
   LoadingOutlined,
   AppstoreAddOutlined,
   PiBuilding,
-  BookOutlined
+  BookOutlined,
+  PartitionOutlined  
 };
 
 
@@ -39,10 +41,10 @@ const utilities = {
     },
     {
       id: 'util-color',
-      title: 'Color',
+      title: 'Batch',
       type: 'item',
-      url: '/color',
-      icon: icons.BgColorsOutlined
+      url: '/baches',
+      icon: icons.PartitionOutlined 
     },
     {
       id: 'course',
