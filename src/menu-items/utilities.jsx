@@ -7,7 +7,8 @@ import {
   FontSizeOutlined,
   LoadingOutlined,
   BookOutlined,
-  PartitionOutlined  
+  PartitionOutlined,
+  ScheduleOutlined  
 } from '@ant-design/icons';
 import { PiBuilding } from "react-icons/pi";
 
@@ -21,7 +22,8 @@ const icons = {
   AppstoreAddOutlined,
   PiBuilding,
   BookOutlined,
-  PartitionOutlined  
+  PartitionOutlined,
+  ScheduleOutlined
 };
 
 
@@ -54,13 +56,23 @@ const utilities = {
       icon: icons.BookOutlined
     },
      {
+      id: 'semester',
+      title: 'Semester',
+      type: 'item',
+      url: '/semester',
+      icon: icons.ScheduleOutlined
+
+    },
+     {
       id: 'department',
       title: 'Department',
       type: 'item',
       url: '/department',
       icon: icons.PiBuilding
 
-    }
+    },
+        
+
   ]
 };
 
