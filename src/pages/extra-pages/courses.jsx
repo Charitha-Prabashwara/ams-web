@@ -158,9 +158,10 @@ export default function CoursePage() {
   <DialogTitle>Create New Course</DialogTitle>
 
   <DialogContent dividers>
-    {/* Row 1: Code + Name */}
-    <Grid container spacing={2} mt={1}>
-      <Grid item xs={12} sm={4}>
+    {/* ================= ROW 1: CODE + NAME ================= */}
+    <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
+      {/* Course Code */}
+      <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
         <Typography fontWeight="bold">Course Code</Typography>
         <TextField
           fullWidth
@@ -171,24 +172,23 @@ export default function CoursePage() {
             setNewCourse({ ...newCourse, code: e.target.value.toUpperCase() })
           }
         />
-      </Grid>
+      </Box>
 
-      <Grid item xs={12} sm={8}>
+      {/* Course Name */}
+      <Box flex="1">
         <Typography fontWeight="bold">Course Name</Typography>
         <TextField
           fullWidth
           placeholder="Ex: Introduction to IT"
           value={newCourse.name}
           inputProps={{ maxLength: 150 }}
-          onChange={(e) =>
-            setNewCourse({ ...newCourse, name: e.target.value })
-          }
+          onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })}
         />
-      </Grid>
-    </Grid>
+      </Box>
+    </Box>
 
-    {/* Row 2: Department (ALWAYS BELOW) */}
-    <Box mt={3}>
+    {/* ================= ROW 2: DEPARTMENT ================= */}
+    <Box mt={2}>
       <Typography fontWeight="bold">Department</Typography>
       <TextField
         select
@@ -214,15 +214,19 @@ export default function CoursePage() {
     </Button>
   </DialogActions>
 </Dialog>
+
       {/* ====================== EDIT DIALOG ====================== */}
+{/* ====================== EDIT COURSE DIALOG ====================== */}
 <Dialog open={openEdit} maxWidth="sm" fullWidth>
   <DialogTitle>Edit Course</DialogTitle>
 
   <DialogContent dividers>
     {selectedCourse && (
       <>
-        <Grid container spacing={2} mt={1}>
-          <Grid item xs={4}>
+        {/* ================= ROW 1: CODE + NAME ================= */}
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
+          {/* Course Code */}
+          <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
             <Typography fontWeight="bold">Code</Typography>
             <TextField
               fullWidth
@@ -231,9 +235,10 @@ export default function CoursePage() {
                 setSelectedCourse({ ...selectedCourse, code: e.target.value.toUpperCase() })
               }
             />
-          </Grid>
+          </Box>
 
-          <Grid item xs={8}>
+          {/* Course Name */}
+          <Box flex="1">
             <Typography fontWeight="bold">Course Name</Typography>
             <TextField
               fullWidth
@@ -242,10 +247,11 @@ export default function CoursePage() {
                 setSelectedCourse({ ...selectedCourse, name: e.target.value })
               }
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
 
-        <Box mt={3}>
+        {/* ================= ROW 2: DEPARTMENT ================= */}
+        <Box mt={2}>
           <Typography fontWeight="bold">Department</Typography>
           <TextField
             select
@@ -254,10 +260,7 @@ export default function CoursePage() {
             onChange={(e) =>
               setSelectedCourse({
                 ...selectedCourse,
-                department: {
-                  ...selectedCourse.department,
-                  _id: e.target.value
-                }
+                department: { ...selectedCourse.department, _id: e.target.value },
               })
             }
           >
@@ -269,7 +272,8 @@ export default function CoursePage() {
           </TextField>
         </Box>
 
-        <Box mt={3}>
+        {/* ================= ROW 3: ACTIVE ================= */}
+        <Box mt={2}>
           <Typography fontWeight="bold">Active</Typography>
           <TextField
             select
@@ -294,11 +298,10 @@ export default function CoursePage() {
     <Button variant="contained" onClick={handleUpdate}>
       Save
     </Button>
-    <Button onClick={() => setOpenEdit(false)}>
-      Close
-    </Button>
+    <Button onClick={() => setOpenEdit(false)}>Close</Button>
   </DialogActions>
 </Dialog>
+
       {/* ================= CONFIRM DELETE ================= */}
       <Dialog
         open={openConfirmDelete}

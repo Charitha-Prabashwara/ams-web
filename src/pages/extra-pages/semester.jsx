@@ -98,6 +98,8 @@ const BATCHES = [
 
   const handleSaveEdit = async () => {
     try {
+      
+       delete selectedSemester.updatedAt_timestamp
       await axiosClient.put('/semester/id/', selectedSemester);
       mutate();
       setOpenEditDialog(false);
@@ -163,8 +165,8 @@ const BATCHES = [
                 <TableCell align="center">{sem.department}</TableCell>
                 <TableCell align="center">{sem.course}</TableCell>
                 <TableCell align="center">{sem.batch}</TableCell>
-                <TableCell align="center">{new Date(sem.createdAt_timestamp).toISOString()}</TableCell>
-                <TableCell align="center">{new Date(sem.updatedAt_timestamp).toISOString()}</TableCell>
+                <TableCell align="center">{new Date(sem.createdAt_timestamp).toLocaleString()}</TableCell>
+                <TableCell align="center">{new Date(sem.updatedAt_timestamp).toLocaleString()}</TableCell>
                 <TableCell align="center">
                   <Button size="small" variant="outlined" onClick={() => handleOpenEditDialog(sem)}>
                     Edit / Delete
