@@ -22,33 +22,80 @@ export default function LogoIcon() {
      * <img src={theme.palette.mode === ThemeMode.DARK ? logoIconDark : logoIcon} alt="Mantis" width="100" />
      *
      */
-    <svg width="129" height="129" viewBox="0 0 129 129" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M7.27577 57.2242L17.5616 46.9384L17.5724 46.9276H36.9234L29.2238 54.6273L27.2358 56.6152L19.3511 64.5L20.3276 65.4792L64.5 109.649L109.649 64.5L101.761 56.6152L101.206 56.0572L92.0766 46.9276H111.428L111.438 46.9384L119.5 55.0002L129 64.5L64.5 129L0 64.5L7.27577 57.2242ZM64.5 0L101.77 37.2695H82.4185L64.5 19.3511L46.5816 37.2695H27.2305L64.5 0Z"
-        fill={theme.palette.primary.dark}
-      />
-      <path
-        d="M19.3509 64.5L27.2357 56.6152L29.2236 54.6273L21.5267 46.9276H17.5722L17.5615 46.9384L7.27561 57.2242L17.1483 67.0487L19.3509 64.5Z"
-        fill="url(#paint0_linear)"
-      />
-      <path
-        d="M101.762 56.6152L109.649 64.5L108.868 65.2807L108.871 65.2834L119.5 55.0002L111.438 46.9384L111.428 46.9276H110.644L101.206 56.0572L101.762 56.6152Z"
-        fill="url(#paint1_linear)"
-      />
-      <path
-        d="M17.5508 46.9276L17.5615 46.9384L27.2357 56.6152L64.4999 93.8767L111.449 46.9276H17.5508Z"
-        fill={theme.palette.primary.main}
-      />
-      <defs>
-        <linearGradient id="paint0_linear" x1="25.0225" y1="49.3259" x2="11.4189" y2="62.9295" gradientUnits="userSpaceOnUse">
-          <stop stopColor={theme.palette.primary.darker} />
-          <stop offset="0.9637" stopColor={theme.palette.primary.dark} stopOpacity="0" />
-        </linearGradient>
-        <linearGradient id="paint1_linear" x1="103.5" y1="49.5" x2="114.5" y2="62" gradientUnits="userSpaceOnUse">
-          <stop stopColor={theme.palette.primary.darker} />
-          <stop offset="1" stopColor={theme.palette.primary.dark} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-    </svg>
+     <svg
+  width="140"
+  height="140"
+  viewBox="-20 0 140 140"
+  xmlns="http://www.w3.org/2000/svg"
+  fill="none"
+>
+  {/* Primary lotus petal layer */}
+  <path
+    fill="#f8bbd0" // soft pink
+    stroke="#ec407a" // darker pink border
+    strokeWidth="0.5"
+    filter="url(#shadow)"
+    d="M67.45,38.21c2.386-0.735,4.701-1.243,6.837-1.59c-0.093-3.854-0.606-7.039-0.977-8.869
+    c-1.529,0.566-3.999,1.585-6.803,3.117
+    C67.438,37.08,67.453,37.646,67.45,38.21z"
+  />
+
+  {/* Success petal layer */}
+  <path
+    fill="#ce93d8" // soft purple
+    stroke="#ab47bc"
+    strokeWidth="0.5"
+    opacity="0.7"
+    filter="url(#shadow)"
+    d="M76.453,53.136c2.3-4.647,3.571-9.216,4.185-12.318c-8.436,0.364-26.668-1.547-32.941,23.198
+    c-0.422,1.665-1.195,4.001-1.822,5.779C47.808,69.527,66.508,73.23,76.453,53.136z"
+  />
+
+  {/* Accent petal layers */}
+  <path
+    fill="#f48fb1" // lighter pink
+    stroke="#d81b60"
+    strokeWidth="0.4"
+    d="M80.278,52.645c-0.294,0.651-0.603,1.306-0.937,1.962c-3.69,7.25-8.723,12.306-15.028,15.132
+    C82.337,71.826,97.5,60.68,97.5,60.68S90.425,55.336,80.278,52.645z"
+  />
+  <path
+    fill="#f48fb1"
+    stroke="#d81b60"
+    strokeWidth="0.4"
+    d="M49.97,49.317c3.307-3.979,7.621-7.131,12.923-9.428c0.425-0.184,0.849-0.358,1.271-0.524
+    c0.051-0.875,0.057-1.757,0.005-2.646c-0.687-11.733-9.869-21.63-13.045-24.72
+    c-2.019,2.018-6.491,6.902-9.557,13.308c-2.413,5.043-3.47,9.912-3.183,14.584
+    C43.182,42.243,47.052,45.395,49.97,49.317z"
+  />
+  <path
+    fill="#f48fb1"
+    stroke="#d81b60"
+    strokeWidth="0.4"
+    d="M22.501,53.768c-0.073-0.14-0.141-0.277-0.211-0.416c-8.953,2.861-8.482,2.56-14.79,7.328
+    c0,0,14.662,10.778,32.285,9.155C32.494,67.09,26.692,61.702,22.501,53.768z"
+  />
+  <path
+    fill="#f48fb1"
+    stroke="#d81b60"
+    strokeWidth="0.4"
+    d="M21.002,40.168c0.672,3.045,1.968,7.545,4.365,12.084c4.217,7.985,10.187,13.117,17.759,15.273
+    c0.175-0.484,1.199-8.642,4.928-14.881C42.058,41.77,27.632,40.313,21.002,40.168z"
+  />
+  <path
+    fill="#f48fb1"
+    stroke="#d81b60"
+    strokeWidth="0.4"
+    d="M36.04,31.073c-2.962-1.652-5.584-2.733-7.183-3.324c-0.36,1.796-0.86,4.894-0.97,8.638
+    c2.323,0.475,4.782,1.146,7.246,2.09C35.123,36.046,35.42,33.574,36.04,31.073z"
+  />
+
+  {/* Shadow filter */}
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#888" floodOpacity="0.4" />
+    </filter>
+  </defs>
+</svg>
   );
 }
