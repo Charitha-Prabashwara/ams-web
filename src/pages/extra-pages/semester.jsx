@@ -17,7 +17,11 @@ import {
   DialogActions,
   Grid,
   Typography,
-  Fade
+  Fade,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
 } from '@mui/material';
 
 import MainCard from 'components/MainCard';
@@ -27,6 +31,23 @@ import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
 
 export default function SemesterPage() {
+  const DEPARTMENTS = [
+  { id: 'CSE', name: 'Computer Science & Engineering' },
+  { id: 'IT', name: 'Information Technology' },
+  { id: 'ECE', name: 'Electronics Engineering' }
+];
+
+const COURSES = [
+  { id: 'SE', name: 'Software Engineering' },
+  { id: 'CS', name: 'Computer Science' },
+  { id: 'AI', name: 'Artificial Intelligence' }
+];
+
+const BATCHES = [
+  { id: '2023', name: 'Batch 2023' },
+  { id: '2024', name: 'Batch 2024' },
+  { id: '2025', name: 'Batch 2025' }
+];
   const { data, error, isLoading, mutate } = useSWR('/semester/find/', fetcher, {
     refreshInterval: 10000
   });
@@ -122,7 +143,7 @@ export default function SemesterPage() {
         <Table stickyHeader>
           <TableHead>
             <TableRow sx={{ backgroundColor: '#ceffd3' }}>
-              <TableCell align="center">#</TableCell>
+             
               <TableCell align="center">Code</TableCell>
               <TableCell align="center">Name</TableCell>
               <TableCell align="center">Department</TableCell>
@@ -136,7 +157,7 @@ export default function SemesterPage() {
           <TableBody>
             {paginatedSemesters.map((sem, idx) => (
               <TableRow key={sem.id}>
-                <TableCell align="center">{(page - 1) * rowsPerPage + idx + 1}</TableCell>
+                
                 <TableCell align="center">{sem.code}</TableCell>
                 <TableCell align="center">{sem.name}</TableCell>
                 <TableCell align="center">{sem.department}</TableCell>
@@ -158,65 +179,126 @@ export default function SemesterPage() {
       <Box display="flex" justifyContent="center" mt={2}>
         <Pagination count={totalPages} page={page} onChange={(e, val) => setPage(val)} />
       </Box>
+ <Dialog open={openCreateDialog} maxWidth="sm" fullWidth>
+  <DialogTitle>Create New Semester</DialogTitle>
 
-      {/* ====================== CREATE DIALOG ====================== */}
-      <Dialog open={openCreateDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Semester</DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2} mt={1}>
-            <Grid item xs={6}>
-              <Typography fontWeight="bold">Code</Typography>
-              <TextField
-                fullWidth
-                value={newSemester.code}
-                placeholder="Ex: SEM2522"
-                onChange={(e) => setNewSemester({ ...newSemester, code: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <Typography fontWeight="bold">Name</Typography>
-              <TextField
-                fullWidth
-                value={newSemester.name}
-                placeholder="Ex: Second semester of..."
-                onChange={(e) => setNewSemester({ ...newSemester, name: e.target.value })}
-              />
-            </Grid>
-          </Grid>
-          <Grid container spacing={2} mt={2}>
-            <Grid item xs={4}>
-              <Typography fontWeight="bold">Department ID</Typography>
-              <TextField
-                fullWidth
-                value={newSemester.department}
-                onChange={(e) => setNewSemester({ ...newSemester, department: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Typography fontWeight="bold">Course ID</Typography>
-              <TextField
-                fullWidth
-                value={newSemester.course}
-                onChange={(e) => setNewSemester({ ...newSemester, course: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Typography fontWeight="bold">Batch ID</Typography>
-              <TextField
-                fullWidth
-                value={newSemester.batch}
-                onChange={(e) => setNewSemester({ ...newSemester, batch: e.target.value })}
-              />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmitCreate}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+  <DialogContent dividers>
+    {/* ================= ROW 1: CODE + NAME ================= */}
+    <Box
+      display="flex"
+      flexWrap="wrap"
+      gap={2}
+      mb={2}
+    >
+      {/* CODE */}
+      <Box
+        flex={{ xs: '1 1 100%', sm: '0 0 120px' }} // full width on mobile, fixed on desktop
+      >
+        <Typography fontWeight="bold">Code</Typography>
+        <TextField
+          fullWidth
+          value={newSemester.code}
+          placeholder="Ex: SEM2522"
+          onChange={(e) =>
+            setNewSemester({ ...newSemester, code: e.target.value })
+          }
+        />
+      </Box>
+
+      {/* NAME */}
+      <Box
+        flex={{ xs: '1 1 100%', sm: '1' }} // full width on mobile, take remaining on desktop
+      >
+        <Typography fontWeight="bold">Name</Typography>
+        <TextField
+          fullWidth
+          value={newSemester.name}
+          placeholder="Ex: Second semester of..."
+          onChange={(e) =>
+            setNewSemester({ ...newSemester, name: e.target.value })
+          }
+        />
+      </Box>
+    </Box>
+
+    {/* ================= ROW 2: DEPARTMENT / COURSE / BATCH ================= */}
+    <Box
+      display="flex"
+      flexWrap="wrap"
+      gap={2}
+    >
+      {/* DEPARTMENT */}
+      <Box flex={{ xs: '1 1 100%', sm: '1' }}>
+        <FormControl fullWidth>
+          <InputLabel>Department</InputLabel>
+          <Select
+            value={newSemester.department}
+            label="Department"
+            onChange={(e) =>
+              setNewSemester({ ...newSemester, department: e.target.value })
+            }
+          >
+            {DEPARTMENTS.map((d) => (
+              <MenuItem key={d.id} value={d.id}>
+                {d.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* COURSE */}
+      <Box flex={{ xs: '1 1 100%', sm: '1' }}>
+        <FormControl fullWidth>
+          <InputLabel>Course</InputLabel>
+          <Select
+            value={newSemester.course}
+            label="Course"
+            onChange={(e) =>
+              setNewSemester({ ...newSemester, course: e.target.value })
+            }
+          >
+            {COURSES.map((c) => (
+              <MenuItem key={c.id} value={c.id}>
+                {c.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* BATCH */}
+      <Box flex={{ xs: '1 1 100%', sm: '1' }}>
+        <FormControl fullWidth>
+          <InputLabel>Batch</InputLabel>
+          <Select
+            value={newSemester.batch}
+            label="Batch"
+            onChange={(e) =>
+              setNewSemester({ ...newSemester, batch: e.target.value })
+            }
+          >
+            {BATCHES.map((b) => (
+              <MenuItem key={b.id} value={b.id}>
+                {b.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+    </Box>
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
+    <Button variant="contained" onClick={handleSubmitCreate}>
+      Save
+    </Button>
+  </DialogActions>
+</Dialog>
+
+
+
 
       {/* ====================== CONFIRM CREATE ====================== */}
       <Dialog open={openConfirmCreateDialog} maxWidth="sm" fullWidth>
@@ -236,69 +318,117 @@ export default function SemesterPage() {
         </DialogActions>
       </Dialog>
 
-      {/* ====================== EDIT DIALOG ====================== */}
-      <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Semester</DialogTitle>
-        <DialogContent dividers>
-          {selectedSemester && (
-            <>
-              <Grid container spacing={2} mt={1}>
-                <Grid item xs={6}>
-                  <Typography fontWeight="bold">Code</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedSemester.code}
-                    onChange={(e) => setSelectedSemester({ ...selectedSemester, code: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography fontWeight="bold">Name</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedSemester.name}
-                    onChange={(e) => setSelectedSemester({ ...selectedSemester, name: e.target.value })}
-                  />
-                </Grid>
-              </Grid>
-              <Grid container spacing={2} mt={2}>
-                <Grid item xs={4}>
-                  <Typography fontWeight="bold">Department ID</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedSemester.department}
-                    onChange={(e) => setSelectedSemester({ ...selectedSemester, department: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography fontWeight="bold">Course ID</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedSemester.course}
-                    onChange={(e) => setSelectedSemester({ ...selectedSemester, course: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography fontWeight="bold">Batch ID</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedSemester.batch}
-                    onChange={(e) => setSelectedSemester({ ...selectedSemester, batch: e.target.value })}
-                  />
-                </Grid>
-              </Grid>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
-            Delete
-          </Button>
-          <Button variant="contained" onClick={handleSaveEdit}>
-            Save
-          </Button>
-          <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+     {/* ====================== EDIT DIALOG ====================== */}
+<Dialog open={openEditDialog} maxWidth="sm" fullWidth>
+  <DialogTitle>Edit Semester</DialogTitle>
+
+  <DialogContent dividers>
+    {selectedSemester && (
+      <>
+        {/* ================= ROW 1: CODE + NAME ================= */}
+        <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
+          {/* CODE */}
+          <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
+            <Typography fontWeight="bold">Code</Typography>
+            <TextField
+              fullWidth
+              value={selectedSemester.code}
+              onChange={(e) =>
+                setSelectedSemester({ ...selectedSemester, code: e.target.value })
+              }
+            />
+          </Box>
+
+          {/* NAME */}
+          <Box flex={{ xs: '1 1 100%', sm: '1' }}>
+            <Typography fontWeight="bold">Name</Typography>
+            <TextField
+              fullWidth
+              value={selectedSemester.name}
+              onChange={(e) =>
+                setSelectedSemester({ ...selectedSemester, name: e.target.value })
+              }
+            />
+          </Box>
+        </Box>
+
+        {/* ================= ROW 2: DEPARTMENT / COURSE / BATCH ================= */}
+        <Box display="flex" flexWrap="wrap" gap={2}>
+          {/* DEPARTMENT */}
+          <Box flex={{ xs: '1 1 100%', sm: '1' }}>
+            <FormControl fullWidth>
+              <InputLabel>Department</InputLabel>
+              <Select
+                value={selectedSemester.department}
+                label="Department"
+                onChange={(e) =>
+                  setSelectedSemester({ ...selectedSemester, department: e.target.value })
+                }
+              >
+                {DEPARTMENTS.map((d) => (
+                  <MenuItem key={d.id} value={d.id}>
+                    {d.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* COURSE */}
+          <Box flex={{ xs: '1 1 100%', sm: '1' }}>
+            <FormControl fullWidth>
+              <InputLabel>Course</InputLabel>
+              <Select
+                value={selectedSemester.course}
+                label="Course"
+                onChange={(e) =>
+                  setSelectedSemester({ ...selectedSemester, course: e.target.value })
+                }
+              >
+                {COURSES.map((c) => (
+                  <MenuItem key={c.id} value={c.id}>
+                    {c.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+
+          {/* BATCH */}
+          <Box flex={{ xs: '1 1 100%', sm: '1' }}>
+            <FormControl fullWidth>
+              <InputLabel>Batch</InputLabel>
+              <Select
+                value={selectedSemester.batch}
+                label="Batch"
+                onChange={(e) =>
+                  setSelectedSemester({ ...selectedSemester, batch: e.target.value })
+                }
+              >
+                {BATCHES.map((b) => (
+                  <MenuItem key={b.id} value={b.id}>
+                    {b.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
+        </Box>
+      </>
+    )}
+  </DialogContent>
+
+  <DialogActions>
+    <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
+      Delete
+    </Button>
+    <Button variant="contained" onClick={handleSaveEdit}>
+      Save
+    </Button>
+    <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
+  </DialogActions>
+</Dialog>
+
 
       {/* ====================== CONFIRM DELETE ====================== */}
       <Dialog
