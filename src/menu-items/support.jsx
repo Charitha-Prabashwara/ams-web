@@ -1,6 +1,6 @@
 // assets
 import { ChromeOutlined, QuestionOutlined } from '@ant-design/icons';
-import { FaUserShield, FaChalkboardTeacher, FaUserGraduate } from "react-icons/fa";
+import { FaUserShield, FaChalkboardTeacher, FaUserGraduate } from 'react-icons/fa';
 // icons
 const icons = {
   ChromeOutlined,
@@ -31,7 +31,7 @@ const support = {
       url: '/lecturer',
       icon: icons.FaChalkboardTeacher
     },
-    
+
     {
       id: 'student',
       title: 'Student',

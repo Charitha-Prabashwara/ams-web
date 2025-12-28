@@ -8,9 +8,9 @@ import {
   LoadingOutlined,
   BookOutlined,
   PartitionOutlined,
-  ScheduleOutlined  
+  ScheduleOutlined
 } from '@ant-design/icons';
-import { PiBuilding } from "react-icons/pi";
+import { PiBuilding } from 'react-icons/pi';
 
 // icons
 const icons = {
@@ -25,7 +25,6 @@ const icons = {
   PartitionOutlined,
   ScheduleOutlined
 };
-
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
 
@@ -46,7 +45,7 @@ const utilities = {
       title: 'Batch',
       type: 'item',
       url: '/baches',
-      icon: icons.PartitionOutlined 
+      icon: icons.PartitionOutlined
     },
     {
       id: 'course',
@@ -55,24 +54,20 @@ const utilities = {
       url: '/courses',
       icon: icons.BookOutlined
     },
-     {
+    {
       id: 'semester',
       title: 'Semester',
       type: 'item',
       url: '/semester',
       icon: icons.ScheduleOutlined
-
     },
-     {
+    {
       id: 'department',
       title: 'Department',
       type: 'item',
       url: '/department',
       icon: icons.PiBuilding
-
-    },
-        
-
+    }
   ]
 };
 

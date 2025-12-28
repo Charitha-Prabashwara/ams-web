@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 
 // Create a global Axios instance

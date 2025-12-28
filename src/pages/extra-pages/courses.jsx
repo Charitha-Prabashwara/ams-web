@@ -135,11 +135,15 @@ export default function CoursePage() {
                 <TableCell align="center">{course.name}</TableCell>
                 <TableCell align="center">{course.department?.name?.short}</TableCell>
                 <TableCell align="center">{course.isActive ? 'Yes' : 'No'}</TableCell>
+                <TableCell align="center">{new Date(course.createdAt_timestamp).toISOString()}</TableCell>
                 <TableCell align="center">
-                  {new Date(course.createdAt_timestamp).toISOString()}
-                </TableCell>
-                <TableCell align="center">
-                  <Button size="small" onClick={() => { setSelectedCourse(course); setOpenEdit(true); }}>
+                  <Button
+                    size="small"
+                    onClick={() => {
+                      setSelectedCourse(course);
+                      setOpenEdit(true);
+                    }}
+                  >
                     Edit / Delete
                   </Button>
                 </TableCell>
@@ -153,162 +157,147 @@ export default function CoursePage() {
         <Pagination count={totalPages} page={page} onChange={(e, v) => setPage(v)} />
       </Box>
 
-{/* ====================== CREATE COURSE DIALOG ====================== */}
-<Dialog open={openCreate} maxWidth="sm" fullWidth>
-  <DialogTitle>Create New Course</DialogTitle>
+      {/* ====================== CREATE COURSE DIALOG ====================== */}
+      <Dialog open={openCreate} maxWidth="sm" fullWidth>
+        <DialogTitle>Create New Course</DialogTitle>
 
-  <DialogContent dividers>
-    {/* ================= ROW 1: CODE + NAME ================= */}
-    <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
-      {/* Course Code */}
-      <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
-        <Typography fontWeight="bold">Course Code</Typography>
-        <TextField
-          fullWidth
-          placeholder="Ex: IT101"
-          value={newCourse.code}
-          inputProps={{ maxLength: 15 }}
-          onChange={(e) =>
-            setNewCourse({ ...newCourse, code: e.target.value.toUpperCase() })
-          }
-        />
-      </Box>
+        <DialogContent dividers>
+          {/* ================= ROW 1: CODE + NAME ================= */}
+          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
+            {/* Course Code */}
+            <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
+              <Typography fontWeight="bold">Course Code</Typography>
+              <TextField
+                fullWidth
+                placeholder="Ex: IT101"
+                value={newCourse.code}
+                inputProps={{ maxLength: 15 }}
+                onChange={(e) => setNewCourse({ ...newCourse, code: e.target.value.toUpperCase() })}
+              />
+            </Box>
 
-      {/* Course Name */}
-      <Box flex="1">
-        <Typography fontWeight="bold">Course Name</Typography>
-        <TextField
-          fullWidth
-          placeholder="Ex: Introduction to IT"
-          value={newCourse.name}
-          inputProps={{ maxLength: 150 }}
-          onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })}
-        />
-      </Box>
-    </Box>
+            {/* Course Name */}
+            <Box flex="1">
+              <Typography fontWeight="bold">Course Name</Typography>
+              <TextField
+                fullWidth
+                placeholder="Ex: Introduction to IT"
+                value={newCourse.name}
+                inputProps={{ maxLength: 150 }}
+                onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })}
+              />
+            </Box>
+          </Box>
 
-    {/* ================= ROW 2: DEPARTMENT ================= */}
-    <Box mt={2}>
-      <Typography fontWeight="bold">Department</Typography>
-      <TextField
-        select
-        fullWidth
-        value={newCourse.department}
-        onChange={(e) =>
-          setNewCourse({ ...newCourse, department: e.target.value })
-        }
-      >
-        {departments.map((dept) => (
-          <MenuItem key={dept.id} value={dept.id}>
-            {dept.name.long}
-          </MenuItem>
-        ))}
-      </TextField>
-    </Box>
-  </DialogContent>
+          {/* ================= ROW 2: DEPARTMENT ================= */}
+          <Box mt={2}>
+            <Typography fontWeight="bold">Department</Typography>
+            <TextField
+              select
+              fullWidth
+              value={newCourse.department}
+              onChange={(e) => setNewCourse({ ...newCourse, department: e.target.value })}
+            >
+              {departments.map((dept) => (
+                <MenuItem key={dept.id} value={dept.id}>
+                  {dept.name.long}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Box>
+        </DialogContent>
 
-  <DialogActions>
-    <Button onClick={() => setOpenCreate(false)}>Close</Button>
-    <Button variant="contained" onClick={handleCreate}>
-      Save
-    </Button>
-  </DialogActions>
-</Dialog>
+        <DialogActions>
+          <Button onClick={() => setOpenCreate(false)}>Close</Button>
+          <Button variant="contained" onClick={handleCreate}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* ====================== EDIT DIALOG ====================== */}
-{/* ====================== EDIT COURSE DIALOG ====================== */}
-<Dialog open={openEdit} maxWidth="sm" fullWidth>
-  <DialogTitle>Edit Course</DialogTitle>
+      {/* ====================== EDIT COURSE DIALOG ====================== */}
+      <Dialog open={openEdit} maxWidth="sm" fullWidth>
+        <DialogTitle>Edit Course</DialogTitle>
 
-  <DialogContent dividers>
-    {selectedCourse && (
-      <>
-        {/* ================= ROW 1: CODE + NAME ================= */}
-        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
-          {/* Course Code */}
-          <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
-            <Typography fontWeight="bold">Code</Typography>
-            <TextField
-              fullWidth
-              value={selectedCourse.code}
-              onChange={(e) =>
-                setSelectedCourse({ ...selectedCourse, code: e.target.value.toUpperCase() })
-              }
-            />
-          </Box>
+        <DialogContent dividers>
+          {selectedCourse && (
+            <>
+              {/* ================= ROW 1: CODE + NAME ================= */}
+              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
+                {/* Course Code */}
+                <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
+                  <Typography fontWeight="bold">Code</Typography>
+                  <TextField
+                    fullWidth
+                    value={selectedCourse.code}
+                    onChange={(e) => setSelectedCourse({ ...selectedCourse, code: e.target.value.toUpperCase() })}
+                  />
+                </Box>
 
-          {/* Course Name */}
-          <Box flex="1">
-            <Typography fontWeight="bold">Course Name</Typography>
-            <TextField
-              fullWidth
-              value={selectedCourse.name}
-              onChange={(e) =>
-                setSelectedCourse({ ...selectedCourse, name: e.target.value })
-              }
-            />
-          </Box>
-        </Box>
+                {/* Course Name */}
+                <Box flex="1">
+                  <Typography fontWeight="bold">Course Name</Typography>
+                  <TextField
+                    fullWidth
+                    value={selectedCourse.name}
+                    onChange={(e) => setSelectedCourse({ ...selectedCourse, name: e.target.value })}
+                  />
+                </Box>
+              </Box>
 
-        {/* ================= ROW 2: DEPARTMENT ================= */}
-        <Box mt={2}>
-          <Typography fontWeight="bold">Department</Typography>
-          <TextField
-            select
-            fullWidth
-            value={selectedCourse.department?._id || ''}
-            onChange={(e) =>
-              setSelectedCourse({
-                ...selectedCourse,
-                department: { ...selectedCourse.department, _id: e.target.value },
-              })
-            }
-          >
-            {departments.map((dept) => (
-              <MenuItem key={dept.id} value={dept.id}>
-                {dept.name.long}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Box>
+              {/* ================= ROW 2: DEPARTMENT ================= */}
+              <Box mt={2}>
+                <Typography fontWeight="bold">Department</Typography>
+                <TextField
+                  select
+                  fullWidth
+                  value={selectedCourse.department?._id || ''}
+                  onChange={(e) =>
+                    setSelectedCourse({
+                      ...selectedCourse,
+                      department: { ...selectedCourse.department, _id: e.target.value }
+                    })
+                  }
+                >
+                  {departments.map((dept) => (
+                    <MenuItem key={dept.id} value={dept.id}>
+                      {dept.name.long}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Box>
 
-        {/* ================= ROW 3: ACTIVE ================= */}
-        <Box mt={2}>
-          <Typography fontWeight="bold">Active</Typography>
-          <TextField
-            select
-            fullWidth
-            value={selectedCourse.isActive}
-            onChange={(e) =>
-              setSelectedCourse({ ...selectedCourse, isActive: e.target.value === 'true' })
-            }
-          >
-            <MenuItem value={true}>Active</MenuItem>
-            <MenuItem value={false}>Inactive</MenuItem>
-          </TextField>
-        </Box>
-      </>
-    )}
-  </DialogContent>
+              {/* ================= ROW 3: ACTIVE ================= */}
+              <Box mt={2}>
+                <Typography fontWeight="bold">Active</Typography>
+                <TextField
+                  select
+                  fullWidth
+                  value={selectedCourse.isActive}
+                  onChange={(e) => setSelectedCourse({ ...selectedCourse, isActive: e.target.value === 'true' })}
+                >
+                  <MenuItem value={true}>Active</MenuItem>
+                  <MenuItem value={false}>Inactive</MenuItem>
+                </TextField>
+              </Box>
+            </>
+          )}
+        </DialogContent>
 
-  <DialogActions>
-    <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
-      Delete
-    </Button>
-    <Button variant="contained" onClick={handleUpdate}>
-      Save
-    </Button>
-    <Button onClick={() => setOpenEdit(false)}>Close</Button>
-  </DialogActions>
-</Dialog>
+        <DialogActions>
+          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
+            Delete
+          </Button>
+          <Button variant="contained" onClick={handleUpdate}>
+            Save
+          </Button>
+          <Button onClick={() => setOpenEdit(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
 
       {/* ================= CONFIRM DELETE ================= */}
-      <Dialog
-        open={openConfirmDelete}
-        TransitionComponent={Fade}
-        maxWidth="xs"
-        fullWidth
-      >
+      <Dialog open={openConfirmDelete} TransitionComponent={Fade} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent dividers>
           <Typography>Type course code to delete:</Typography>

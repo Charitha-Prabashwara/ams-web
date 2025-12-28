@@ -11,7 +11,7 @@ import ScrollTop from 'components/ScrollTop';
 
 export default function App() {
   return (
-        <SWRConfig
+    <SWRConfig
       value={{
         fetcher,
         onError: (err) => {
@@ -21,11 +21,11 @@ export default function App() {
         shouldRetryOnError: false
       }}
     >
-    <ThemeCustomization>
-      <ScrollTop>
-        <RouterProvider router={router} />
-      </ScrollTop>
-    </ThemeCustomization>
-     </SWRConfig>
+      <ThemeCustomization>
+        <ScrollTop>
+          <RouterProvider router={router} />
+        </ScrollTop>
+      </ThemeCustomization>
+    </SWRConfig>
   );
 }

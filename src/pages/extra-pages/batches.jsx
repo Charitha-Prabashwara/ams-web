@@ -151,10 +151,14 @@ export default function BatchPage() {
                 <TableCell align="center">{new Date(batch.createdAt_timestamp).toISOString()}</TableCell>
                 <TableCell align="center">{new Date(batch.updatedAt_timestamp).toISOString()}</TableCell>
                 <TableCell align="center">
-                  <Button size="small" variant="outlined" onClick={() => {
-                    setSelectedBatch(batch);
-                    setOpenEditDialog(true);
-                  }}>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      setSelectedBatch(batch);
+                      setOpenEditDialog(true);
+                    }}
+                  >
                     Edit / Delete
                   </Button>
                 </TableCell>
@@ -174,28 +178,25 @@ export default function BatchPage() {
         <DialogContent dividers>
           <Box mt={1}>
             <Typography fontWeight="bold">Batch Name</Typography>
-            <TextField fullWidth value={newBatch.name}
-              onChange={(e) => setNewBatch({ ...newBatch, name: e.target.value })} />
+            <TextField fullWidth value={newBatch.name} onChange={(e) => setNewBatch({ ...newBatch, name: e.target.value })} />
           </Box>
 
           <Grid container spacing={2} mt={2}>
             <Grid item xs={6}>
               <Typography fontWeight="bold">Lower Bound (Year)</Typography>
-              <TextField type="number" fullWidth
-                value={newBatch.lb}
-                onChange={(e) => setNewBatch({ ...newBatch, lb: e.target.value })} />
+              <TextField type="number" fullWidth value={newBatch.lb} onChange={(e) => setNewBatch({ ...newBatch, lb: e.target.value })} />
             </Grid>
             <Grid item xs={6}>
               <Typography fontWeight="bold">Upper Bound (Year)</Typography>
-              <TextField type="number" fullWidth
-                value={newBatch.ub}
-                onChange={(e) => setNewBatch({ ...newBatch, ub: e.target.value })} />
+              <TextField type="number" fullWidth value={newBatch.ub} onChange={(e) => setNewBatch({ ...newBatch, ub: e.target.value })} />
             </Grid>
           </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setOpenConfirmCreate(true)}>Save</Button>
+          <Button variant="contained" onClick={() => setOpenConfirmCreate(true)}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -204,9 +205,10 @@ export default function BatchPage() {
         <DialogTitle>Confirm Create Batch</DialogTitle>
         <DialogContent dividers>
           <Typography>Type this batch name:</Typography>
-          <Typography fontWeight="bold" color="blue">{newBatch.name}</Typography>
-          <TextField fullWidth value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)} />
+          <Typography fontWeight="bold" color="blue">
+            {newBatch.name}
+          </Typography>
+          <TextField fullWidth value={confirmText} onChange={(e) => setConfirmText(e.target.value)} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirmCreate(false)}>Cancel</Button>
@@ -223,13 +225,18 @@ export default function BatchPage() {
           {selectedBatch && (
             <>
               <Typography fontWeight="bold">Batch Name</Typography>
-              <TextField fullWidth value={selectedBatch.name}
-                onChange={(e) => setSelectedBatch({ ...selectedBatch, name: e.target.value })} />
+              <TextField
+                fullWidth
+                value={selectedBatch.name}
+                onChange={(e) => setSelectedBatch({ ...selectedBatch, name: e.target.value })}
+              />
 
               <Grid container spacing={2} mt={2}>
                 <Grid item xs={6}>
                   <Typography fontWeight="bold">Lower Bound</Typography>
-                  <TextField type="number" fullWidth
+                  <TextField
+                    type="number"
+                    fullWidth
                     value={selectedBatch.academic.lb}
                     onChange={(e) =>
                       setSelectedBatch({
@@ -241,7 +248,9 @@ export default function BatchPage() {
                 </Grid>
                 <Grid item xs={6}>
                   <Typography fontWeight="bold">Upper Bound</Typography>
-                  <TextField type="number" fullWidth
+                  <TextField
+                    type="number"
+                    fullWidth
                     value={selectedBatch.academic.ub}
                     onChange={(e) =>
                       setSelectedBatch({
@@ -256,8 +265,12 @@ export default function BatchPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>Delete</Button>
-          <Button variant="contained" onClick={handleSaveEdit}>Save</Button>
+          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
+            Delete
+          </Button>
+          <Button variant="contained" onClick={handleSaveEdit}>
+            Save
+          </Button>
           <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
@@ -272,9 +285,10 @@ export default function BatchPage() {
         <DialogTitle>Confirm Delete Batch</DialogTitle>
         <DialogContent dividers>
           <Typography>Type this batch name:</Typography>
-          <Typography fontWeight="bold" color="red">{selectedBatch?.name}</Typography>
-          <TextField fullWidth value={deleteText}
-            onChange={(e) => setDeleteText(e.target.value)} />
+          <Typography fontWeight="bold" color="red">
+            {selectedBatch?.name}
+          </Typography>
+          <TextField fullWidth value={deleteText} onChange={(e) => setDeleteText(e.target.value)} />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirmDelete(false)}>Cancel</Button>
