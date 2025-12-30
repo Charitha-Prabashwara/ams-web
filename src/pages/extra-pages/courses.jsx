@@ -26,6 +26,7 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
+import { showToast } from '../../utils/toast';
 
 export default function CoursePage() {
   const { data, isLoading, error, mutate } = useSWR('/course/find/', fetcher);
@@ -55,12 +56,19 @@ export default function CoursePage() {
   // ---------------- HANDLERS ----------------
   const handleCreate = async () => {
     try {
-      await axiosClient.post('/course/', newCourse);
+      const response = await axiosClient.post('/course/', newCourse);
       mutate();
       setOpenCreate(false);
       setNewCourse({ code: '', name: '', department: '' });
+      console.log(response);
+      
+      showToast({text: response.data.message || 'course created suceessfull',type: 'success',});
     } catch (e) {
-      alert('Failed to create course');
+      console.error(e)
+      showToast({
+        text: e.response.data.message,
+        type: 'error',
+      });
     }
   };
 
@@ -118,24 +126,23 @@ export default function CoursePage() {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell align="center">#</TableCell>
+             
               <TableCell align="center">Code</TableCell>
               <TableCell align="center">Name</TableCell>
               <TableCell align="center">Department</TableCell>
               <TableCell align="center">Active</TableCell>
-              <TableCell align="center">Created</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginated.map((course, idx) => (
               <TableRow key={course.id}>
-                <TableCell align="center">{(page - 1) * rowsPerPage + idx + 1}</TableCell>
+               
                 <TableCell align="center">{course.code}</TableCell>
                 <TableCell align="center">{course.name}</TableCell>
                 <TableCell align="center">{course.department?.name?.short}</TableCell>
                 <TableCell align="center">{course.isActive ? 'Yes' : 'No'}</TableCell>
-                <TableCell align="center">{new Date(course.createdAt_timestamp).toISOString()}</TableCell>
+                
                 <TableCell align="center">
                   <Button
                     size="small"

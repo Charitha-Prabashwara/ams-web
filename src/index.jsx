@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client';
 
 // style.scss
 import 'assets/style.css';
+import 'toastify-js/src/toastify.css';
 
 // scroll bar
 import 'simplebar-react/dist/simplebar.min.css';
