@@ -15,7 +15,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Grid,
   Typography,
   MenuItem,
   Fade
@@ -53,6 +52,9 @@ export default function CoursePage() {
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
   const [deleteText, setDeleteText] = useState('');
 
+  // ---------------- DETAILS BOX ----------------
+  const [selectedCourseDetails, setSelectedCourseDetails] = useState(null);
+
   // ---------------- HANDLERS ----------------
   const handleCreate = async () => {
     try {
@@ -60,13 +62,13 @@ export default function CoursePage() {
       mutate();
       setOpenCreate(false);
       setNewCourse({ code: '', name: '', department: '' });
-      console.log(response);
-      
-      showToast({text: response.data.message || 'course created suceessfull',type: 'success',});
-    } catch (e) {
-      console.error(e)
       showToast({
-        text: e.response.data.message,
+        text: response.data.message || 'Course created successfully',
+        type: 'success',
+      });
+    } catch (e) {
+      showToast({
+        text: e.response?.data?.message || 'Error creating course',
         type: 'error',
       });
     }
@@ -126,7 +128,6 @@ export default function CoursePage() {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-             
               <TableCell align="center">Code</TableCell>
               <TableCell align="center">Name</TableCell>
               <TableCell align="center">Department</TableCell>
@@ -135,18 +136,22 @@ export default function CoursePage() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {paginated.map((course, idx) => (
-              <TableRow key={course.id}>
-               
+            {paginated.map((course) => (
+              <TableRow
+                key={course.id}
+                hover
+                onClick={() => setSelectedCourseDetails(course)}
+                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#e0f7fa' } }}
+              >
                 <TableCell align="center">{course.code}</TableCell>
                 <TableCell align="center">{course.name}</TableCell>
                 <TableCell align="center">{course.department?.name?.short}</TableCell>
                 <TableCell align="center">{course.isActive ? 'Yes' : 'No'}</TableCell>
-                
                 <TableCell align="center">
                   <Button
                     size="small"
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation(); // prevent row click
                       setSelectedCourse(course);
                       setOpenEdit(true);
                     }}
@@ -160,18 +165,45 @@ export default function CoursePage() {
         </Table>
       </TableContainer>
 
+      {/* ================= PAGINATION ================= */}
       <Box mt={2} display="flex" justifyContent="center">
         <Pagination count={totalPages} page={page} onChange={(e, v) => setPage(v)} />
       </Box>
 
-      {/* ====================== CREATE COURSE DIALOG ====================== */}
+      {/* ================= COURSE DETAILS BOX ================= */}
+      {selectedCourseDetails && (
+        <Box
+          mt={2}
+          sx={{
+            p: 2,
+            border: 3,
+            borderColor: '#97c5ebff',
+            borderRadius: 2,
+            bgcolor: '#e5f1faff'
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            Course Details
+          </Typography>
+
+          <Typography><b>Code:</b> {selectedCourseDetails.code}</Typography>
+          <Typography><b>Name:</b> {selectedCourseDetails.name}</Typography>
+          <Typography>
+            <b>Department:</b> {selectedCourseDetails.department?.name?.long || 'N/A'}
+          </Typography>
+          <Typography>
+            <b>Active:</b> {selectedCourseDetails.isActive ? 'Yes' : 'No'}
+          </Typography>
+          <Typography><b>created :</b> {new Date(selectedCourseDetails.createdAt_timestamp).toLocaleString()}</Typography>
+          <Typography><b>updated :</b> {new Date(selectedCourseDetails.updatedAt_timestamp).toLocaleString()}</Typography>
+        </Box>
+      )}
+
+      {/* ================= CREATE COURSE DIALOG ================= */}
       <Dialog open={openCreate} maxWidth="sm" fullWidth>
         <DialogTitle>Create New Course</DialogTitle>
-
         <DialogContent dividers>
-          {/* ================= ROW 1: CODE + NAME ================= */}
           <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
-            {/* Course Code */}
             <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
               <Typography fontWeight="bold">Course Code</Typography>
               <TextField
@@ -182,8 +214,6 @@ export default function CoursePage() {
                 onChange={(e) => setNewCourse({ ...newCourse, code: e.target.value.toUpperCase() })}
               />
             </Box>
-
-            {/* Course Name */}
             <Box flex="1">
               <Typography fontWeight="bold">Course Name</Typography>
               <TextField
@@ -195,8 +225,6 @@ export default function CoursePage() {
               />
             </Box>
           </Box>
-
-          {/* ================= ROW 2: DEPARTMENT ================= */}
           <Box mt={2}>
             <Typography fontWeight="bold">Department</Typography>
             <TextField
@@ -213,7 +241,6 @@ export default function CoursePage() {
             </TextField>
           </Box>
         </DialogContent>
-
         <DialogActions>
           <Button onClick={() => setOpenCreate(false)}>Close</Button>
           <Button variant="contained" onClick={handleCreate}>
@@ -222,17 +249,13 @@ export default function CoursePage() {
         </DialogActions>
       </Dialog>
 
-      {/* ====================== EDIT DIALOG ====================== */}
-      {/* ====================== EDIT COURSE DIALOG ====================== */}
+      {/* ================= EDIT COURSE DIALOG ================= */}
       <Dialog open={openEdit} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Course</DialogTitle>
-
         <DialogContent dividers>
           {selectedCourse && (
             <>
-              {/* ================= ROW 1: CODE + NAME ================= */}
               <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
-                {/* Course Code */}
                 <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
                   <Typography fontWeight="bold">Code</Typography>
                   <TextField
@@ -241,8 +264,6 @@ export default function CoursePage() {
                     onChange={(e) => setSelectedCourse({ ...selectedCourse, code: e.target.value.toUpperCase() })}
                   />
                 </Box>
-
-                {/* Course Name */}
                 <Box flex="1">
                   <Typography fontWeight="bold">Course Name</Typography>
                   <TextField
@@ -252,8 +273,6 @@ export default function CoursePage() {
                   />
                 </Box>
               </Box>
-
-              {/* ================= ROW 2: DEPARTMENT ================= */}
               <Box mt={2}>
                 <Typography fontWeight="bold">Department</Typography>
                 <TextField
@@ -274,8 +293,6 @@ export default function CoursePage() {
                   ))}
                 </TextField>
               </Box>
-
-              {/* ================= ROW 3: ACTIVE ================= */}
               <Box mt={2}>
                 <Typography fontWeight="bold">Active</Typography>
                 <TextField
@@ -291,19 +308,14 @@ export default function CoursePage() {
             </>
           )}
         </DialogContent>
-
         <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
-            Delete
-          </Button>
-          <Button variant="contained" onClick={handleUpdate}>
-            Save
-          </Button>
+          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>Delete</Button>
+          <Button variant="contained" onClick={handleUpdate}>Save</Button>
           <Button onClick={() => setOpenEdit(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
-      {/* ================= CONFIRM DELETE ================= */}
+      {/* ================= CONFIRM DELETE DIALOG ================= */}
       <Dialog open={openConfirmDelete} TransitionComponent={Fade} maxWidth="xs" fullWidth>
         <DialogTitle>Confirm Delete</DialogTitle>
         <DialogContent dividers>
@@ -315,9 +327,7 @@ export default function CoursePage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenConfirmDelete(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleDelete}>
-            Delete
-          </Button>
+          <Button color="error" variant="contained" onClick={handleDelete}>Delete</Button>
         </DialogActions>
       </Dialog>
     </MainCard>

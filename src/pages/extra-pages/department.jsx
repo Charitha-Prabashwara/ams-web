@@ -142,21 +142,7 @@ export default function DepartmentPage() {
 
   return (
     <MainCard title="Departments">
-      {/* ----------------- Summary Cards ----------------- */}
-      <Box display="flex" justifyContent="space-between" mb={2} flexWrap="wrap">
-        <Paper sx={{ flex: 1, p: 1, mr: 1, mb: 1, bgcolor: '#e3f2fd', textAlign: 'center' }}>
-          <Typography variant="subtitle2">Total Active Departments</Typography>
-          <Typography variant="h6">{totalActive}</Typography>
-        </Paper>
-        <Paper sx={{ flex: 1, p: 1, mx: 1, mb: 1, bgcolor: '#fff3e0', textAlign: 'center' }}>
-          <Typography variant="subtitle2">Total Inactive Departments</Typography>
-          <Typography variant="h6">{totalInactive}</Typography>
-        </Paper>
-        <Paper sx={{ flex: 1, p: 1, ml: 1, mb: 1, bgcolor: '#ffebee', textAlign: 'center' }}>
-          <Typography variant="subtitle2">Total Deleted Departments</Typography>
-          <Typography variant="h6">{totalDeleted}</Typography>
-        </Paper>
-      </Box>
+     
 
       {/* ----------------- Action Buttons ----------------- */}
       <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>

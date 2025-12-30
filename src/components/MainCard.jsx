@@ -59,12 +59,12 @@ export default function MainCard({
       {...others}
     >
       {/* card header and action */}
-      {!darkTitle && title && (
+      {/* {!darkTitle && title && (
         <CardHeader sx={headerSX} slotProps={{ title: { variant: 'subtitle1' } }} title={title} action={secondary} subheader={subheader} />
-      )}
+      )} */}
 
       {/* content & header divider */}
-      {title && divider && <Divider />}
+      {/* {title && divider} */}
 
       {/* card content */}
       {content && <CardContent sx={contentSX}>{children}</CardContent>}
