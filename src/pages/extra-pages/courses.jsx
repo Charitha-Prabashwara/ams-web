@@ -17,9 +17,7 @@ import {
   DialogActions,
   Typography,
   MenuItem,
-  Fade,
-  Drawer,
-  IconButton
+  Fade
 } from '@mui/material';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import MainCard from 'components/MainCard';
@@ -28,6 +26,10 @@ import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
 import { showToast } from '../../utils/toast';
+import HelpDrawer from '../../components/HelpDrawer';
+import LogBox from '../../components/LogBox';
+import {courseHelp} from '../../utils/helpDrawerContents';
+import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 
 export default function CoursePage() {
   const { data, isLoading, error, mutate } = useSWR('/course/find/', fetcher);
@@ -41,11 +43,7 @@ export default function CoursePage() {
 
   // ---------------- CREATE ----------------
   const [openCreate, setOpenCreate] = useState(false);
-  const [newCourse, setNewCourse] = useState({
-    code: '',
-    name: '',
-    department: ''
-  });
+  const [newCourse, setNewCourse] = useState({code: '',name: '',department: ''});
 
   // ---------------- EDIT & DELETE ----------------
   const [openEdit, setOpenEdit] = useState(false);
@@ -78,7 +76,7 @@ export default function CoursePage() {
 
     // ---------------- HELP DRAWER ----------------
     const [openHelp, setOpenHelp] = useState(false);
-    const handleToggleHelp = () => setOpenHelp(!openHelp);
+    const toggleHelp = () => setOpenHelp(prev => !prev);
 
   const handleUpdate = async () => {
     try {
@@ -121,6 +119,12 @@ export default function CoursePage() {
     }
   };
 
+ const [logs, setLogs] = useState([
+    '[12:00:00] Department IT created successfully.',
+    '[12:05:12] Department CS updated.',
+    '[12:15:33] Error: Failed to delete department.'
+  ]);
+
   // ---------------- PAGINATION ----------------
   const paginated = courses.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(courses.length / rowsPerPage);
@@ -132,21 +136,10 @@ export default function CoursePage() {
     <MainCard title="Courses">
       
       <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>
-         <Button variant="contained" color="error" onClick={null}>
-                  Recover
-                </Button>
-        <Button variant="contained" color="success" onClick={() => setOpenCreate(true)}>
-          New Course
-        </Button>
-
-        <Button
-          variant="outlined"
-          color="primary"
-          startIcon={<HelpOutlineIcon />}
-          onClick={handleToggleHelp}
-        >
-          Help
-        </Button>
+        <Button variant="contained" color="error" onClick={null}>Recover</Button>
+        <Button variant="contained" color="success" onClick={() => setOpenCreate(true)}>New Course</Button>
+        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
+        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={courseHelp} title="Course Guidelines" />
       </Box>
 
       {/* ================= TABLE ================= */}
@@ -340,189 +333,19 @@ export default function CoursePage() {
           <Button onClick={() => setOpenEdit(false)}>Close</Button>
         </DialogActions>
       </Dialog>
+           <ConfirmDeleteDialog
+        open={openConfirmDelete}
+        onClose={() => setOpenConfirmDelete(false)}
+        onConfirm={handleDelete}
+        confirmText={selectedCourse?.code}
+        inputValue={deleteText}
+        onInputChange={setDeleteText}
+        title="Confirm Delete Course"
+        confirmLabel="Delete Course"
+      />
+      
 
-      {/* ================= CONFIRM DELETE DIALOG ================= */}
-      <Dialog open={openConfirmDelete} TransitionComponent={Fade} maxWidth="xs" fullWidth>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Type course code to delete:</Typography>
-          <Typography fontWeight="bold" color="red">
-            {selectedCourse?.code}
-          </Typography>
-          <TextField fullWidth value={deleteText} onChange={(e) => setDeleteText(e.target.value)} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmDelete(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleDelete}>Delete</Button>
-        </DialogActions>
-      </Dialog>
-      {/* ====================== HELP DRAWER ====================== */}
-<Drawer
-  anchor="right"
-  open={openHelp}
-  onClose={handleToggleHelp}
-  variant="temporary"
-  PaperProps={{
-    sx: { width: { xs: '80%', sm: 400 }, p: 2 }
-  }}
->
-  <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-    <Typography variant="h6">Course Guidelines</Typography>
-    <IconButton onClick={handleToggleHelp}>✖</IconButton>
-  </Box>
-
-  <Box sx={{ overflowY: 'auto', height: '100%', p: 2 }}>
-    {/* Section 1: What is a Course */}
-    <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-      1. What is a Course
-    </Typography>
-    <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-      A course represents a unit of study offered by a department. Each course has a unique code, a descriptive name, and belongs to a specific department. 
-      Courses form the core of the academic curriculum and are essential for students to acquire knowledge and skills in a structured way.
-    </Typography>
-
-    {/* Section 2: How to Maintain Courses */}
-    <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-      2. How to Maintain Courses
-    </Typography>
-    <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-      - Ensure each course has a unique code and a clear, descriptive name.<br/>
-      - Assign courses to the correct department to maintain academic organization.<br/>
-      - Keep course information up to date, including department, name, and active status.<br/>
-      - Use consistent naming conventions to avoid confusion for students and faculty.
-    </Typography>
-
-    {/* Section 3: How to Create Courses */}
-    <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-      3. How to Create Courses
-    </Typography>
-    <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-      - Click the "New Course" button to open the creation dialog.<br/>
-      - Enter a unique course code, a descriptive course name, and select the corresponding department.<br/>
-      - Confirm that all fields are correctly filled before saving.<br/>
-      - After saving, the course will appear in the course list and can be assigned to students.
-    </Typography>
-
-    {/* Section 4: How to Update Courses */}
-    <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-      4. How to Update Courses
-    </Typography>
-    <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-      - Select the course you want to update from the table.<br/>
-      - Click "Edit / Delete" to modify the course details.<br/>
-      - Update the course code, name, department, or active status as needed.<br/>
-      - Save changes to apply updates and ensure consistency in the system.
-    </Typography>
-
-    {/* Section 5: How to Delete Courses */}
-    <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-      5. How to Delete Courses
-    </Typography>
-    <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-      - Only inactive or obsolete courses should be deleted.<br/>
-      - Click "Edit / Delete" and then "Delete" to remove a course.<br/>
-      - Confirm the course code to prevent accidental deletion.<br/>
-      - Deleted courses can be restored by administrators if needed.
-    </Typography>
-
-    {/* Section 6: Maintaining System Integrity */}
-    <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-      6. Maintaining System Integrity
-    </Typography>
-    <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-      - Ensure course codes are unique to prevent conflicts in student enrollment and reporting.<br/>
-      - Avoid using special characters in course codes or names that could affect system logic.<br/>
-      - Verify updates before saving or deleting courses to maintain accurate academic records.<br/>
-      - Restrict modifications to authorized personnel only.
-    </Typography>
-
-    {/* Section 7: Contact Information */}
-    <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-      7. Contact Information
-    </Typography>
-    <Typography variant="body2" mb={1} sx={{ textAlign: 'justify' }}>
-      For any questions or assistance regarding course management, please contact the academic system administrator.
-    </Typography>
-  </Box>
-</Drawer>
-
-
-         {/* ====================== LOG DATA BOX ====================== */}
-      <Box
-        mt={3}
-        p={2}
-        border="1px solid #ddd"
-        borderRadius={0}
-        bgcolor="#f5f5f5"
-        sx={{ 
-          height: 200,       // fixed height for scrolling
-          overflowY: 'auto', // scroll if content exceeds height
-          fontFamily: 'monospace',
-          fontSize: 14
-        }}
-      >
-        <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-          Log / Debug Data
-        </Typography>
-        {/* Replace this with dynamic log content */}
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-        <Typography>
-          {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-        </Typography>
-      </Box>
+       <LogBox logs={logs} />
 
     </MainCard>
 

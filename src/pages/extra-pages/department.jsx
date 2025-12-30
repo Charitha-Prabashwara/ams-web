@@ -27,7 +27,11 @@ import { useState, useMemo } from 'react';
 import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
-
+import HelpDrawer from '../../components/HelpDrawer';
+import LogBox from '../../components/LogBox';
+import {departmentHelp} from '../../utils/helpDrawerContents';
+import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
+import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
 export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000
@@ -119,8 +123,8 @@ export default function DepartmentPage() {
   const [selectedDeptDetails, setSelectedDeptDetails] = useState(null);
 
   // ---------------- HELP DRAWER ----------------
-  const [openHelp, setOpenHelp] = useState(false);
-  const handleToggleHelp = () => setOpenHelp(!openHelp);
+    const [openHelp, setOpenHelp] = useState(false);
+    const toggleHelp = () => setOpenHelp(prev => !prev);
 
   // ---------- Pagination ----------
   const paginatedDepartments = departments.slice((page - 1) * rowsPerPage, page * rowsPerPage);
@@ -137,9 +141,16 @@ export default function DepartmentPage() {
     return { totalActive: active, totalInactive: inactive, totalDeleted: deleted };
   }, [departments]);
 
+   const [logs, setLogs] = useState([
+    '[12:00:00] Department IT created successfully.',
+    '[12:05:12] Department CS updated.',
+    '[12:15:33] Error: Failed to delete department.'
+  ]);
+
   if (error) return <div>Error loading departments</div>;
   if (isLoading) return <div>Loading...</div>;
 
+  
   return (
     <MainCard title="Departments">
      
@@ -152,14 +163,8 @@ export default function DepartmentPage() {
         <Button variant="contained" color="success" onClick={handleOpenCreateDialog}>
           New Department
         </Button>
-        <Button
-          variant="outlined"
-          color="primary"
-          startIcon={<HelpOutlineIcon />}
-          onClick={handleToggleHelp}
-        >
-          Help
-        </Button>
+        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
+        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={departmentHelp} title="Department Guidelines" />
       </Box>
 
       {/* ====================== TABLE ====================== */}
@@ -189,15 +194,22 @@ export default function DepartmentPage() {
                 <TableCell align="center">{dept.name.long}</TableCell>
                 <TableCell align="center">
                   <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenEditDialog(dept);
-                    }}
-                  >
-                    Edit / Delete
-                  </Button>
+  size="small"
+  variant="contained"
+  onClick={(e) => {
+    e.stopPropagation();
+    handleOpenEditDialog(dept);
+  }}
+  sx={{
+    backgroundColor: '#fbc02d',   // yellow
+    color: '#000',                // text color (black)
+    '&:hover': {
+      backgroundColor: '#f9a825' // darker yellow on hover
+    }
+  }}
+>
+  Manage
+</Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -233,164 +245,9 @@ export default function DepartmentPage() {
         </Box>
       )}
 
-       {/* ====================== HELP DRAWER ====================== */}
-      <Drawer
-        anchor="right"
-        open={openHelp}
-        onClose={handleToggleHelp}
-        variant="temporary"
-        PaperProps={{
-          sx: { width: { xs: '80%', sm: 400 }, p: 2 }
-        }}
-        
-      >
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-          <Typography variant="h6">Department Guidelines</Typography>
-          <IconButton onClick={handleToggleHelp}>✖</IconButton>
-        </Box>
-<Box sx={{ overflowY: 'auto', height: '100%', p: 2 }}>
-  {/* Section 1: What is a Department */}
-  <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-    1. What is a Department
-  </Typography>
-  <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-    A department represents a specific unit or division within the institution, such as "Information Technology" or "Mathematics". 
-    Each department organizes related courses, staff, and students under a unique identity. Properly maintaining departments ensures smooth academic and administrative operations.
-  </Typography>
+      
 
-  {/* Section 2: How to Maintain Departments */}
-  <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-    2. How to Maintain Departments
-  </Typography>
-  <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-    - Each department should have a unique full name and a short name used for internal references.<br/>
-    - Key names should be concise (maximum 10 characters) and easily identifiable.<br/>
-    - Provide a clear and detailed description for each department to facilitate administration and reporting.<br/>
-    - Ensure that the department’s active status is correctly set to reflect availability for courses and assignments.
-  </Typography>
-
-  {/* Section 3: How to Update Departments */}
-  <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-    3. How to Update Departments
-  </Typography>
-  <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-    - Select the department you want to update from the list.<br/>
-    - Click "Edit" to modify the short name, key, full name, or description.<br/>
-    - After making changes, click "Save" to apply updates.<br/>
-    - Always verify that the updated names are unique and comply with internal naming conventions to avoid conflicts.
-  </Typography>
-
-  {/* Section 4: How to Delete Departments */}
-  <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-    4. How to Delete Departments
-  </Typography>
-  <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-    - Only inactive or obsolete departments should be deleted.<br/>
-    - To delete, select the department and click "Delete".<br/>
-    - Confirm the department’s full name to prevent accidental deletion.<br/>
-    - Deleted departments can be restored by administrators if required.
-  </Typography>
-
-  {/* Section 5: Maintaining System Integrity & Application Safety */}
-  <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-    5. Maintaining System Integrity & Application Safety
-  </Typography>
-  <Typography variant="body2" mb={2} sx={{ textAlign: 'justify' }}>
-    - Ensure that department names and keys are unique to prevent conflicts in course assignments and reports.<br/>
-    - Avoid using special characters in names or keys that may break system logic.<br/>
-    - Always confirm changes before saving or deleting departments to maintain accurate records.<br/>
-    - Keep the system secure by granting modification permissions only to authorized personnel.<br/>
-    - Regularly review departments to ensure that inactive or redundant departments do not interfere with active operations.
-  </Typography>
-
-  {/* Section 6: Contact Information */}
-  <Typography variant="h6" mb={1} fontWeight="bold" sx={{ textAlign: 'justify' }}>
-    6. Contact Information
-  </Typography>
-  <Typography variant="body2" mb={1} sx={{ textAlign: 'justify' }}>
-    For any questions or further guidance regarding department management, please contact the system administrator.
-  </Typography>
-</Box>
-
-      </Drawer>
-
-      {/* ====================== LOG DATA BOX ====================== */}
-<Box
-  mt={3}
-  p={2}
-  border="1px solid #ddd"
-  borderRadius={0}
-  bgcolor="#f5f5f5"
-  sx={{ 
-    height: 200,       // fixed height for scrolling
-    overflowY: 'auto', // scroll if content exceeds height
-    fontFamily: 'monospace',
-    fontSize: 14
-  }}
->
-  <Typography variant="subtitle1" fontWeight="bold" mb={1}>
-    Log / Debug Data
-  </Typography>
-  {/* Replace this with dynamic log content */}
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-  <Typography>
-    {`[12:00:00] Department IT created successfully.\n[12:05:12] Department CS updated.\n[12:15:33] Error: Failed to delete department.`}
-  </Typography>
-</Box>
-
+     
 
       {/* ====================== CREATE DIALOG ====================== */}
       <Dialog open={openCreateDialog} maxWidth="sm" fullWidth>
@@ -466,6 +323,17 @@ export default function DepartmentPage() {
         </DialogActions>
       </Dialog>
 
+      <ConfirmCreateDialog
+      open={openConfirmCreateDialog}
+      onClose={() => setOpenConfirmCreateDialog(false)}
+      onConfirm={handleFinalCreate}
+      confirmText={newDept.fullName}
+      inputValue={confirmText}
+      onInputChange={setConfirmText}
+      title="Confirm Create Department"
+      confirmLabel="Create Department"
+    />
+
       {/* ====================== EDIT DIALOG ====================== */}
       <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Edit Department</DialogTitle>
@@ -520,26 +388,20 @@ export default function DepartmentPage() {
         </DialogActions>
       </Dialog>
 
-      {/* ====================== CONFIRM DELETE ====================== */}
-      <Dialog
-        open={openConfirmDelete}
-        TransitionComponent={Fade}
-        transitionDuration={200}
-        maxWidth={false}
-        fullWidth={false}
-        sx={{ '& .MuiDialog-paper': { width: 600, maxWidth: '90%' } }}
-      >
-        <DialogTitle>Confirm Delete Department</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Type this name to delete:</Typography>
-          <Typography fontWeight="bold" mt={1} color="red">{selectedDept?.name.long}</Typography>
-          <TextField fullWidth placeholder="Type exactly here" value={deleteText} onChange={(e) => setDeleteText(e.target.value)} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmDelete(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleFinalDelete}>Confirm Delete</Button>
-        </DialogActions>
-      </Dialog>
+
+
+         <ConfirmDeleteDialog
+              open={openConfirmDelete}
+              onClose={() => setOpenConfirmDelete(false)}
+              onConfirm={handleFinalDelete}
+              confirmText={selectedDept?.name.long}
+              inputValue={deleteText}
+              onInputChange={setDeleteText}
+              title="Confirm Delete Department"
+              confirmLabel="Delete Department"
+            />
+
+      <LogBox logs={logs} />
     </MainCard>
   );
 }

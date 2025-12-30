@@ -159,9 +159,9 @@ export default function SemesterPage() {
               <TableRow key={sem.id}>
                 <TableCell align="center">{sem.code}</TableCell>
                 <TableCell align="center">{sem.name}</TableCell>
-                <TableCell align="center">{sem.department.name.short}</TableCell>
-                <TableCell align="center">{sem.course.name}</TableCell>
-                <TableCell align="center">{sem.batch.name}</TableCell>
+           <TableCell align="center">{sem.department?.name?.short || '-'}</TableCell>
+<TableCell align="center">{sem.course?.name || '-'}</TableCell>
+<TableCell align="center">{sem.batch?.name || '-'}</TableCell>
                 <TableCell align="center">{new Date(sem.createdAt_timestamp).toLocaleString()}</TableCell>
                 <TableCell align="center">{new Date(sem.updatedAt_timestamp).toLocaleString()}</TableCell>
                 <TableCell align="center">
