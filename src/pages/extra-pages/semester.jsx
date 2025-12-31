@@ -33,6 +33,7 @@ import CreateSemesterDialog from '../../components/CreateSemestreDialog';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import {semesterHelp} from '../../utils/helpDrawerContents';
 import HelpDrawer from '../../components/HelpDrawer';
+import LogBox from '../../components/LogBox';
 export default function SemesterPage() {
   
   const DEPARTMENTS = [
@@ -139,6 +140,12 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
   // ---------- Pagination Data ----------
   const paginatedSemesters = semesters.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(semesters.length / rowsPerPage);
+
+   const [logs, setLogs] = useState([
+      '[12:00:00] Department IT created successfully.',
+      '[12:05:12] Department CS updated.',
+      '[12:15:33] Error: Failed to delete department.'
+    ]);
 
   useEffect(() => {
     console.log(newSemester.department)
@@ -353,6 +360,10 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
         title="Confirm Delete Semester"
         confirmLabel="Delete Semester"
       />
+      <LogBox logs={logs} />
     </MainCard>
+
+           
+
   );
 }
