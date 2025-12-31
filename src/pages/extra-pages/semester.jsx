@@ -30,10 +30,12 @@ import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
 import CreateSemesterDialog from '../../components/CreateSemestreDialog';
+import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import {semesterHelp} from '../../utils/helpDrawerContents';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
+import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 export default function SemesterPage() {
   
   const DEPARTMENTS = [
@@ -160,8 +162,12 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
   
 }, [newSemester]);
 
-  if (semError || deptError) return <div>Error loading semesters</div>;
-  if (semLoading || deptLoading) return <div>Loading...</div>;
+  // if (semError || deptError) return <div>Error loading semesters</div>;
+  // if (semLoading || deptLoading) return <div>Loading...</div>;
+
+  if (semError || deptError) return <LoadingErrorWrapper isLoading={false} isError={true} />
+  if (semLoading || deptLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
+
 
   
 
@@ -193,7 +199,11 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
           </TableHead>
           <TableBody>
             {paginatedSemesters.map((sem, idx) => (
-              <TableRow key={sem.id}>
+              <TableRow key={sem.id} onClick={() => setSelectedSemester(sem) }  hover 
+              sx={{
+                  cursor: 'pointer',
+                  '&:hover': { backgroundColor: '#e0f7fa' } // all rows hover color
+                }}>
                 <TableCell align="center">{sem.code}</TableCell>
                 <TableCell align="center">{sem.name}</TableCell>
            <TableCell align="center">{sem.department?.name?.short || '-'}</TableCell>
@@ -230,22 +240,16 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
 />
 
       {/* ====================== CONFIRM CREATE ====================== */}
-      <Dialog open={openConfirmCreateDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Confirm Create Semester</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Please type the semester name to confirm:</Typography>
-          <Typography fontWeight="bold" mt={1} color="blue">
-            {newSemester.name}
-          </Typography>
-          <TextField fullWidth placeholder="Type exactly here" value={confirmText} onChange={(e) => setConfirmText(e.target.value)} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmCreateDialog(false)}>Cancel</Button>
-          <Button color="success" variant="contained" onClick={handleFinalCreate}>
-            Confirm Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+           <ConfirmCreateDialog
+            open={openConfirmCreateDialog}
+            onClose={() => setOpenConfirmCreateDialog(false)}
+            onConfirm={handleFinalCreate}
+            confirmText={newSemester.name}
+            inputValue={confirmText}
+            onInputChange={setConfirmText}
+            title="Confirm Create Semester"
+            confirmLabel="Create Semester"
+          />
 
       {/* ====================== EDIT DIALOG ====================== */}
       <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
@@ -360,7 +364,34 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
         title="Confirm Delete Semester"
         confirmLabel="Delete Semester"
       />
-      <LogBox logs={logs} />
+     
+
+       {/* ====================== SELECTED Semester DETAILS ====================== */}
+            {selectedSemester && (
+              <Box mt={2}  sx={{
+            overflowY: 'auto',
+            height: '100%',
+            p: 2,
+            border: 3,                  // thick border
+            borderColor: '#97c5ebff',     // blue border
+            borderRadius: 2,
+            bgcolor: '#e5f1faff',         // very light blue background
+          }}>
+                <Typography variant="h6" mb={1}>
+                  Semester Details
+                </Typography>
+                <Typography mb={0.5}><strong>Code:</strong> {selectedSemester.code}</Typography>
+                <Typography mb={0.5}><strong>Name:</strong> {selectedSemester.name}</Typography>
+                <Typography mb={1}><strong>Department:</strong> {selectedSemester.department?.name?.short || "N/A"}</Typography>
+                <Typography mb={1}><strong>Course:</strong> {selectedSemester.course?.name || "N/A"}</Typography>
+                <Typography mb={1}><strong>Batch:</strong> {selectedSemester.batch?.name || "N/A"}</Typography>
+                
+                <Typography><strong>Created:</strong> {new Date(selectedSemester.createdAt_timestamp).toLocaleString()}</Typography>
+                <Typography><strong>Updated:</strong> {new Date(selectedSemester.updatedAt_timestamp).toLocaleString()}</Typography>
+              </Box>
+            )}
+
+             <LogBox logs={logs} />
     </MainCard>
 
            

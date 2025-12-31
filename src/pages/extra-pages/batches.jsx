@@ -25,6 +25,10 @@ import { useState } from 'react';
 import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
+import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
+import {courseHelp} from '../../utils/helpDrawerContents';
+import HelpDrawer from '../../components/HelpDrawer';
+import LogBox from '../../components/LogBox';
 
 export default function BatchPage() {
   const { data, error, isLoading, mutate } = useSWR('/batch/find/', fetcher, {
@@ -111,20 +115,32 @@ export default function BatchPage() {
       alert('Failed to delete batch');
     }
   };
+      // ---------------- HELP DRAWER ----------------
+    const [openHelp, setOpenHelp] = useState(false);
+    const toggleHelp = () => setOpenHelp(prev => !prev);
 
   // ================= Pagination =================
   const paginatedBatches = batches.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(batches.length / rowsPerPage);
 
-  if (error) return <div>Error loading batches</div>;
-  if (isLoading) return <div>Loading...</div>;
+  const [logs, setLogs] = useState([
+    '[12:00:00] Department IT created successfully.',
+    '[12:05:12] Department CS updated.',
+    '[12:15:33] Error: Failed to delete department.'
+  ]);
+
+  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />
+  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
 
   return (
     <MainCard title="Batches">
-      <Box display="flex" justifyContent="flex-end" mb={2}>
+      <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>
+        <Button variant="contained" color="error" onClick={null}>Recover</Button>
         <Button variant="contained" color="success" onClick={() => setOpenCreateDialog(true)}>
           New Batch
         </Button>
+        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
+        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={courseHelp} title="Course Guidelines" />
       </Box>
 
       {/* ================= TABLE ================= */}
@@ -297,6 +313,9 @@ export default function BatchPage() {
           </Button>
         </DialogActions>
       </Dialog>
+
+             <LogBox logs={logs} />
+      
     </MainCard>
   );
 }

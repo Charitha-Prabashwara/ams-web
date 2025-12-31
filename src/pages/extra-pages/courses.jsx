@@ -30,6 +30,7 @@ import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
 import {courseHelp} from '../../utils/helpDrawerContents';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
+import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 
 export default function CoursePage() {
   const { data, isLoading, error, mutate } = useSWR('/course/find/', fetcher);
@@ -129,8 +130,8 @@ export default function CoursePage() {
   const paginated = courses.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(courses.length / rowsPerPage);
 
-  if (error) return <div>Error loading courses</div>;
-  if (isLoading) return <div>Loading...</div>;
+  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />
+  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
 
   return (
     <MainCard title="Courses">

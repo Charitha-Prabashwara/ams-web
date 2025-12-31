@@ -32,6 +32,7 @@ import LogBox from '../../components/LogBox';
 import {departmentHelp} from '../../utils/helpDrawerContents';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
+import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000
@@ -147,10 +148,9 @@ export default function DepartmentPage() {
     '[12:15:33] Error: Failed to delete department.'
   ]);
 
-  if (error) return <div>Error loading departments</div>;
-  if (isLoading) return <div>Loading...</div>;
-
-  
+  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />
+  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
+ 
   return (
     <MainCard title="Departments">
      
