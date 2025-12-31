@@ -11,7 +11,9 @@ import {
   FormControl,
   InputLabel,
   Select,
-  MenuItem
+  MenuItem,
+  Backdrop,
+  CircularProgress
 } from '@mui/material';
 
 const CreateSemesterDialog = ({
@@ -23,23 +25,36 @@ const CreateSemesterDialog = ({
   departments = [],
   courses = [],
   batches = [],
-  isLoadingDepartments,
-  isLoadingCourses,
-  isLoadingBatches
+  isLoadingDepartments = false,
+  isLoadingCourses = false,
+  onDepartmentChange
 }) => {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="sm"
+      fullWidth
+      sx={{ position: 'center' }}
+    >
       <DialogTitle>Create New Semester</DialogTitle>
 
-      <DialogContent dividers>
+      {/* ================= DIALOG CONTENT ================= */}
+      <DialogContent
+        dividers
+        sx={{
+          filter: isLoadingCourses ? 'blur(3px)' : 'none',
+          pointerEvents: isLoadingCourses ? 'none' : 'auto',
+          transition: 'filter 0.2s ease'
+        }}
+      >
         {/* ================= ROW 1: CODE + NAME ================= */}
         <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
-          {/* CODE */}
           <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
             <Typography fontWeight="bold">Code</Typography>
             <TextField
               fullWidth
-              placeholder="Ex: SEM2522"
+              placeholder="SEM2522"
               value={semester.code}
               onChange={(e) =>
                 setSemester({ ...semester, code: e.target.value })
@@ -47,12 +62,11 @@ const CreateSemesterDialog = ({
             />
           </Box>
 
-          {/* NAME */}
           <Box flex={{ xs: '1 1 100%', sm: 1 }}>
             <Typography fontWeight="bold">Name</Typography>
             <TextField
               fullWidth
-              placeholder="Ex: Second semester of..."
+              placeholder="Second Semester"
               value={semester.name}
               onChange={(e) =>
                 setSemester({ ...semester, name: e.target.value })
@@ -61,19 +75,27 @@ const CreateSemesterDialog = ({
           </Box>
         </Box>
 
-        {/* ================= ROW 2: DEPARTMENT / COURSE / BATCH ================= */}
+        {/* ================= ROW 2 ================= */}
         <Box display="flex" flexWrap="wrap" gap={2}>
           {/* DEPARTMENT */}
           <Box flex={{ xs: '1 1 100%', sm: 1 }}>
             <FormControl fullWidth>
               <InputLabel>Department</InputLabel>
               <Select
-                label="Select a department"
+                label="Department"
                 value={semester.department}
-                onChange={(e) =>
-                  setSemester({ ...semester, department: e.target.value })
-                }
                 disabled={isLoadingDepartments}
+                onChange={(e) => {
+                  const departmentId = e.target.value;
+
+                  setSemester({
+                    ...semester,
+                    department: departmentId,
+                    course: ''
+                  });
+
+                  onDepartmentChange?.(departmentId);
+                }}
               >
                 {departments.map((d) => (
                   <MenuItem key={d.id} value={d.id}>
@@ -91,10 +113,10 @@ const CreateSemesterDialog = ({
               <Select
                 label="Course"
                 value={semester.course}
+                disabled={!semester.department || isLoadingCourses || courses.length==0}
                 onChange={(e) =>
                   setSemester({ ...semester, course: e.target.value })
                 }
-                disabled={isLoadingCourses}
               >
                 {courses.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
@@ -127,12 +149,31 @@ const CreateSemesterDialog = ({
         </Box>
       </DialogContent>
 
+      {/* ================= ACTIONS ================= */}
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={onSubmit}>
+        <Button onClick={onClose} disabled={isLoadingCourses}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          onClick={onSubmit}
+          disabled={isLoadingCourses}
+        >
           Save
         </Button>
       </DialogActions>
+
+      {/* ================= LOADER OVERLAY ================= */}
+      <Backdrop
+        open={isLoadingCourses}
+        sx={{
+          position: 'absolute',
+          zIndex: (theme) => theme.zIndex.dialog + 1,
+          color: '#fff'
+        }}
+      >
+        <CircularProgress />
+      </Backdrop>
     </Dialog>
   );
 };

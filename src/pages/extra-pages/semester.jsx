@@ -64,9 +64,12 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
 
   const semesters = semester?.semesters || [];
   const departments = department?.departments || [];
+
   const [courses, setCourses] = useState()
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(5);
+
+  const [isLoadingCourses, setIsLoadingCourses] = useState()
  
   // ---------------- CREATE ----------------
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
@@ -149,16 +152,22 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
       '[12:15:33] Error: Failed to delete department.'
     ]);
 
-  useEffect(() => {
-    console.log(newSemester.department)
-    //const search = {department: newSemester.department}
-    axiosClient.post('/course/find/',{department: newSemester.department})
-    .then((courses)=>{
-      console.log(courses?.data.courses);
+
+  const loadCourses = (id)=>{
+      setIsLoadingCourses(true)
+       axiosClient.post('/course/find/',{department: id})
+      .then((courses)=>{
+        console.log(courses?.data.courses)
       setCourses(courses?.data.courses)
+      setIsLoadingCourses(false)
+    }).finally(()=>{
+      setIsLoadingCourses(false)
     });
-   
     
+  }
+
+  useEffect(() => {
+
   
 }, [newSemester]);
 
@@ -178,7 +187,11 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
         <Button variant="contained" color="success" onClick={handleOpenCreateDialog}>
           New Semester
         </Button>
-        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
+        <Button variant="contained"
+         onClick={() => {
+          mutateDepartments(); // ← function call
+          toggleHelp();        // ← function call
+          }}>Open Help</Button>
         <HelpDrawer open={openHelp} onClose={toggleHelp} sections={semesterHelp} title="Semester Guidelines" />
       </Box>
 
@@ -236,7 +249,8 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
   courses={courses}
   batches={BATCHES}
   isLoadingDepartments={deptLoading}
-  isLoadingCourses={true}
+  isLoadingCourses={isLoadingCourses}
+  onDepartmentChange={loadCourses}
 />
 
       {/* ====================== CONFIRM CREATE ====================== */}
