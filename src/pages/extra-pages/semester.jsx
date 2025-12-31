@@ -25,12 +25,16 @@ import {
 } from '@mui/material';
 
 import MainCard from 'components/MainCard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
-
+import CreateSemesterDialog from '../../components/CreateSemestreDialog';
+import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
+import {semesterHelp} from '../../utils/helpDrawerContents';
+import HelpDrawer from '../../components/HelpDrawer';
 export default function SemesterPage() {
+  
   const DEPARTMENTS = [
     { id: 'CSE', name: 'Computer Science & Engineering' },
     { id: 'IT', name: 'Information Technology' },
@@ -48,14 +52,19 @@ export default function SemesterPage() {
     { id: '2024', name: 'Batch 2024' },
     { id: '2025', name: 'Batch 2025' }
   ];
-  const { data, error, isLoading, mutate } = useSWR('/semester/find/', fetcher, {
-    refreshInterval: 10000
-  });
 
-  const semesters = data?.semesters || [];
+const { data: semester, error: semError, isLoading: semLoading, mutate: mutateSemesters } =
+  useSWR('/semester/find/', fetcher, { refreshInterval: 10000 });
+
+const { data: department, error: deptError, isLoading: deptLoading , mutate: mutateDepartments} =
+  useSWR('/department/find/', fetcher);
+
+  const semesters = semester?.semesters || [];
+  const departments = department?.departments || [];
+  const [courses, setCourses] = useState()
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(5);
-
+ 
   // ---------------- CREATE ----------------
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [newSemester, setNewSemester] = useState({ code: '', name: '', department: '', course: '', batch: '' });
@@ -73,7 +82,8 @@ export default function SemesterPage() {
     }
     try {
       await axiosClient.post('/semester/', newSemester);
-      mutate();
+      mutateSemesters();
+      mutateDepartments()
       setOpenConfirmCreateDialog(false);
       setOpenCreateDialog(false);
       setConfirmText('');
@@ -96,6 +106,8 @@ export default function SemesterPage() {
     setOpenEditDialog(true);
   };
 
+      const [openHelp, setOpenHelp] = useState(false);
+    const toggleHelp = () => setOpenHelp(prev => !prev)
   const handleSaveEdit = async () => {
     try {
       delete selectedSemester.updatedAt_timestamp;
@@ -128,15 +140,33 @@ export default function SemesterPage() {
   const paginatedSemesters = semesters.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(semesters.length / rowsPerPage);
 
-  if (error) return <div>Error loading semesters</div>;
-  if (isLoading) return <div>Loading...</div>;
+  useEffect(() => {
+    console.log(newSemester.department)
+    //const search = {department: newSemester.department}
+    axiosClient.post('/course/find/',{department: newSemester.department})
+    .then((courses)=>{
+      console.log(courses?.data.courses);
+      setCourses(courses?.data.courses)
+    });
+   
+    
+  
+}, [newSemester]);
+
+  if (semError || deptError) return <div>Error loading semesters</div>;
+  if (semLoading || deptLoading) return <div>Loading...</div>;
+
+  
 
   return (
     <MainCard title="Semesters">
-      <Box display="flex" justifyContent="flex-end" mb={2}>
+      <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>
+        <Button variant="contained" color="error" onClick={null}>Recover</Button>
         <Button variant="contained" color="success" onClick={handleOpenCreateDialog}>
           New Semester
         </Button>
+        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
+        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={semesterHelp} title="Semester Guidelines" />
       </Box>
 
       {/* ====================== TABLE ===================== */}
@@ -160,8 +190,8 @@ export default function SemesterPage() {
                 <TableCell align="center">{sem.code}</TableCell>
                 <TableCell align="center">{sem.name}</TableCell>
            <TableCell align="center">{sem.department?.name?.short || '-'}</TableCell>
-<TableCell align="center">{sem.course?.name || '-'}</TableCell>
-<TableCell align="center">{sem.batch?.name || '-'}</TableCell>
+            <TableCell align="center">{sem.course?.name || '-'}</TableCell>
+            <TableCell align="center">{sem.batch?.name || '-'}</TableCell>
                 <TableCell align="center">{new Date(sem.createdAt_timestamp).toLocaleString()}</TableCell>
                 <TableCell align="center">{new Date(sem.updatedAt_timestamp).toLocaleString()}</TableCell>
                 <TableCell align="center">
@@ -178,100 +208,19 @@ export default function SemesterPage() {
       <Box display="flex" justifyContent="center" mt={2}>
         <Pagination count={totalPages} page={page} onChange={(e, val) => setPage(val)} />
       </Box>
-      <Dialog open={openCreateDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Semester</DialogTitle>
-
-        <DialogContent dividers>
-          {/* ================= ROW 1: CODE + NAME ================= */}
-          <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
-            {/* CODE */}
-            <Box
-              flex={{ xs: '1 1 100%', sm: '0 0 120px' }} // full width on mobile, fixed on desktop
-            >
-              <Typography fontWeight="bold">Code</Typography>
-              <TextField
-                fullWidth
-                value={newSemester.code}
-                placeholder="Ex: SEM2522"
-                onChange={(e) => setNewSemester({ ...newSemester, code: e.target.value })}
-              />
-            </Box>
-
-            {/* NAME */}
-            <Box
-              flex={{ xs: '1 1 100%', sm: '1' }} // full width on mobile, take remaining on desktop
-            >
-              <Typography fontWeight="bold">Name</Typography>
-              <TextField
-                fullWidth
-                value={newSemester.name}
-                placeholder="Ex: Second semester of..."
-                onChange={(e) => setNewSemester({ ...newSemester, name: e.target.value })}
-              />
-            </Box>
-          </Box>
-
-          {/* ================= ROW 2: DEPARTMENT / COURSE / BATCH ================= */}
-          <Box display="flex" flexWrap="wrap" gap={2}>
-            {/* DEPARTMENT */}
-            <Box flex={{ xs: '1 1 100%', sm: '1' }}>
-              <FormControl fullWidth>
-                <InputLabel>Department</InputLabel>
-                <Select
-                  value={newSemester.department}
-                  label="Department"
-                  onChange={(e) => setNewSemester({ ...newSemester, department: e.target.value })}
-                >
-                  {DEPARTMENTS.map((d) => (
-                    <MenuItem key={d.id} value={d.id}>
-                      {d.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* COURSE */}
-            <Box flex={{ xs: '1 1 100%', sm: '1' }}>
-              <FormControl fullWidth>
-                <InputLabel>Course</InputLabel>
-                <Select
-                  value={newSemester.course}
-                  label="Course"
-                  onChange={(e) => setNewSemester({ ...newSemester, course: e.target.value })}
-                >
-                  {COURSES.map((c) => (
-                    <MenuItem key={c.id} value={c.id}>
-                      {c.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-
-            {/* BATCH */}
-            <Box flex={{ xs: '1 1 100%', sm: '1' }}>
-              <FormControl fullWidth>
-                <InputLabel>Batch</InputLabel>
-                <Select value={newSemester.batch} label="Batch" onChange={(e) => setNewSemester({ ...newSemester, batch: e.target.value })}>
-                  {BATCHES.map((b) => (
-                    <MenuItem key={b.id} value={b.id}>
-                      {b.name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Box>
-          </Box>
-        </DialogContent>
-
-        <DialogActions>
-          <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmitCreate}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+ 
+      <CreateSemesterDialog
+  open={openCreateDialog}
+  onClose={() => setOpenCreateDialog(false)}
+  onSubmit={handleSubmitCreate}
+  semester={newSemester}
+  setSemester={setNewSemester}
+  departments={departments}
+  courses={courses}
+  batches={BATCHES}
+  isLoadingDepartments={deptLoading}
+  isLoadingCourses={true}
+/>
 
       {/* ====================== CONFIRM CREATE ====================== */}
       <Dialog open={openConfirmCreateDialog} maxWidth="sm" fullWidth>
@@ -393,34 +342,17 @@ export default function SemesterPage() {
       </Dialog>
 
       {/* ====================== CONFIRM DELETE ====================== */}
-      <Dialog
+
+       <ConfirmDeleteDialog
         open={openConfirmDelete}
-        TransitionComponent={Fade}
-        transitionDuration={200}
-        maxWidth={false}
-        fullWidth={false}
-        sx={{
-          '& .MuiDialog-paper': {
-            width: 600,
-            maxWidth: '90%'
-          }
-        }}
-      >
-        <DialogTitle>Confirm Delete Semester</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Type this semester name to delete:</Typography>
-          <Typography fontWeight="bold" mt={1} color="red">
-            {selectedSemester?.name}
-          </Typography>
-          <TextField fullWidth placeholder="Type exactly here" value={deleteText} onChange={(e) => setDeleteText(e.target.value)} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmDelete(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleFinalDelete}>
-            Confirm Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={() => setOpenConfirmDelete(false)}
+        onConfirm={handleFinalDelete}
+        confirmText={selectedSemester?.name}
+        inputValue={deleteText}
+        onInputChange={setDeleteText}
+        title="Confirm Delete Semester"
+        confirmLabel="Delete Semester"
+      />
     </MainCard>
   );
 }
