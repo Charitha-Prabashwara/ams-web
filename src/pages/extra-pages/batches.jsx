@@ -27,6 +27,7 @@ import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import {courseHelp} from '../../utils/helpDrawerContents';
+import { showToast } from '../../utils/toast';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
@@ -62,7 +63,7 @@ export default function BatchPage() {
     }
 
     try {
-      await axiosClient.post('/batch/', {
+     const response =  await axiosClient.post('/batch/', {
         name: newBatch.name,
         lb: Number(newBatch.lb),
         ub: Number(newBatch.ub)
@@ -72,9 +73,18 @@ export default function BatchPage() {
       setOpenCreateDialog(false);
       setConfirmText('');
       setNewBatch({ name: '', lb: '', ub: '' });
+
+      showToast({
+              text: response?.data?.message || "New batch created successfully",
+              type: 'success',
+      });
     } catch (err) {
-      console.error(err);
-      alert('Failed to create batch');
+        console.error(err);
+        showToast({
+              text: err.response?.data?.message,
+              type: 'error',
+            });
+      
     }
   };
 
@@ -87,7 +97,7 @@ export default function BatchPage() {
 
   const handleSaveEdit = async () => {
     try {
-      await axiosClient.put('/batch/id/', {
+      const response = await axiosClient.put('/batch/id/', {
         id: selectedBatch.id,
         name: selectedBatch.name,
         lb: Number(selectedBatch.academic.lb),
@@ -95,9 +105,17 @@ export default function BatchPage() {
       });
       mutate();
       setOpenEditDialog(false);
+       showToast({
+              text: response?.data?.message || "Batch updated successfully",
+              type: 'success',
+      });
     } catch (err) {
       console.error(err);
-      alert('Failed to update batch');
+      showToast({
+              text: err.response?.data?.message,
+              type: 'error',
+      });
+      
     }
   };
 
@@ -108,15 +126,23 @@ export default function BatchPage() {
     }
 
     try {
-      await axiosClient.delete('/batch/id/', {
+      const response = await axiosClient.delete('/batch/id/', {
         data: { id: selectedBatch.id }
       });
       mutate();
       setOpenConfirmDelete(false);
       setOpenEditDialog(false);
+
+       showToast({
+              text: response?.data?.message || "Batch Deleted successfully",
+              type: 'success',
+      });
     } catch (err) {
       console.error(err);
-      alert('Failed to delete batch');
+      showToast({
+              text: err.response?.data?.message,
+              type: 'error',
+      });
     }
   };
       // ---------------- HELP DRAWER ----------------
@@ -155,11 +181,9 @@ export default function BatchPage() {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell align="center">#</TableCell>
+              
               <TableCell align="center">Batch Name</TableCell>
               <TableCell align="center">Academic Years</TableCell>
-              <TableCell align="center">Created</TableCell>
-              <TableCell align="center">Updated</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -172,13 +196,12 @@ export default function BatchPage() {
                   cursor: 'pointer',
                   '&:hover': { backgroundColor: '#e0f7fa' } // all rows hover color
                 }}>
-                <TableCell align="center">{(page - 1) * rowsPerPage + idx + 1}</TableCell>
+            
                 <TableCell align="center">{batch.name}</TableCell>
                 <TableCell align="center">
                   {batch.academic?.lb} - {batch.academic?.ub}
                 </TableCell>
-                <TableCell align="center">{new Date(batch.createdAt_timestamp).toISOString()}</TableCell>
-                <TableCell align="center">{new Date(batch.updatedAt_timestamp).toISOString()}</TableCell>
+               
                 <TableCell align="center">
                   <Button
                     size="small"
