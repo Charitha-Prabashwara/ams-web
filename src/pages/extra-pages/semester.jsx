@@ -242,23 +242,26 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
       render: (row) => row.batch?.name || '-'
     }
   ]}
-  actionsColumn={{
-    render: (row) => (
-      <Button
-        size="small"
-        variant="outlined"
-        onClick={(e) => {
-          e.stopPropagation(); // prevent row click
-          handleOpenEditDialog(row);
-        }}
-      >
-        Edit / Delete
-      </Button>
-    )
-  }}
+   renderActions={(semester) => (
+    <Button
+      size="small"
+      variant="contained"
+      onClick={(e) => {
+        e.stopPropagation(); // prevent row click
+          handleOpenEditDialog(semester);
+      }}
+      sx={{
+        backgroundColor: '#fbc02d',
+        color: '#000',
+        '&:hover': { backgroundColor: '#f9a825' },
+      }}
+    >
+      Manage
+    </Button>
+  )}
 />
 
- 
+  
       <CreateSemesterDialog
   open={openCreateDialog}
   onClose={() => setOpenCreateDialog(false)}

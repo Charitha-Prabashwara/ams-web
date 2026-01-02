@@ -200,21 +200,24 @@ export default function BatchPage() {
       render: (row) => `${row.academic?.lb || 'N/A'} - ${row.academic?.ub || 'N/A'}`
     }
   ]}
-  actionsColumn={{
-    render: (row) => (
-      <Button
-        size="small"
-        variant="outlined"
-        onClick={(e) => {
-          e.stopPropagation();
-          setSelectedBatch(row);
+   renderActions={(batch) => (
+    <Button
+      size="small"
+      variant="contained"
+      onClick={(e) => {
+         e.stopPropagation();
+          setSelectedBatch(batch);
           setOpenEditDialog(true);
-        }}
-      >
-        Edit / Delete
-      </Button>
-    )
-  }}
+      }}
+      sx={{
+        backgroundColor: '#fbc02d',
+        color: '#000',
+        '&:hover': { backgroundColor: '#f9a825' },
+      }}
+    >
+      Manage
+    </Button>
+  )}
 />
 
       {/* ================= CREATE DIALOG ================= */}

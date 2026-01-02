@@ -160,35 +160,30 @@ export default function CoursePage() {
   columns={[
     { label: 'Code', key: 'code', align: 'center' },
     { label: 'Name', key: 'name', align: 'center' },
-    {
-      label: 'Department',
-      key: 'department',
-      align: 'center',
-      render: (row) => row.department?.name?.short || 'N/A'
-    },
-    {
-      label: 'Active',
-      key: 'isActive',
-      align: 'center',
-      render: (row) => (row.isActive ? 'Yes' : 'No')
-    }
+    {label: 'Department',key: 'department',align: 'center',render: (row) => row.department?.name?.short || 'N/A'},
+    {label: 'Active',key: 'isActive',align: 'center',render: (row) => (row.isActive ? 'Yes' : 'No')}
   ]}
-  actionsColumn={{
-    render: (row) => (
-      <Button
-        size="small"
-        onClick={(e) => {
-          e.stopPropagation(); // prevent row click
-          setSelectedCourse(row);
+  renderActions={(course) => (
+    <Button
+      size="small"
+      variant="contained"
+      onClick={(e) => {
+        e.stopPropagation(); // prevent row click
+          setSelectedCourse(course);
           setOpenEdit(true);
-        }}
-      >
-        Edit / Delete
-      </Button>
-    )
-  }}
+      }}
+      sx={{
+        backgroundColor: '#fbc02d',
+        color: '#000',
+        '&:hover': { backgroundColor: '#f9a825' },
+      }}
+    >
+      Manage
+    </Button>
+  )
+  }
 />
-
+  
       {/* ================= COURSE DETAILS BOX ================= */}
 
 
