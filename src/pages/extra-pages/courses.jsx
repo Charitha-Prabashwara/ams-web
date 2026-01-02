@@ -33,6 +33,7 @@ import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
+import UniversalActionBar from '../../components/UniversalActionBar';
 
 export default function CoursePage() {
   const { data, isLoading, error, mutate } = useSWR('/course/find/', fetcher);
@@ -138,13 +139,17 @@ export default function CoursePage() {
   return (
     <MainCard title="Courses">
       
-      <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>
-        <Button variant="contained" color="error" onClick={null}>Recover</Button>
-        <Button variant="contained" color="success" onClick={() => setOpenCreate(true)}>New Course</Button>
-        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
-        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={courseHelp} title="Course Guidelines" />
-      </Box>
-
+      <UniversalActionBar
+    buttons={[
+      { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
+      { label: 'New Course', color: 'success', onClick: setOpenCreate },
+      { label: 'Open Help', type: 'help' } // automatically handles drawer
+    ]}
+    helpDrawer={{
+      sections: courseHelp,
+      title: 'Course Guidelines'
+    }}
+  />
       {/* ================= TABLE ================= */}
 <UniversalTable
   data={paginated}

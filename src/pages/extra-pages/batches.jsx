@@ -36,7 +36,7 @@ import CreateBatchDialog from '../../components/CreateBatchDialog';
 import DetailsViewBox from '../../components/DetailsViewBox';
 import EditBatchDialog from '../../components/EditBatchDialog';
 import UniversalTable from '../../components/UniversalTable';
-
+import UniversalActionBar from '../../components/UniversalActionBar';
 export default function BatchPage() {
   const { data, error, isLoading, mutate } = useSWR('/batch/find/', fetcher, {
     refreshInterval: 10000
@@ -169,14 +169,20 @@ export default function BatchPage() {
 
   return (
     <MainCard title="Batches">
-      <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>
-        <Button variant="contained" color="error" onClick={null}>Recover</Button>
-        <Button variant="contained" color="success" onClick={() => setOpenCreateDialog(true)}>
-          New Batch
-        </Button>
-        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
-        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={courseHelp} title="Course Guidelines" />
-      </Box>
+
+
+      <UniversalActionBar
+  buttons={[
+    { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
+    { label: 'New Batch', color: 'success', onClick: setOpenCreateDialog },
+    { label: 'Open Help', type: 'help' } // automatically handles drawer
+  ]}
+  helpDrawer={{
+    sections: courseHelp,
+    title: 'Batch Guidelines'
+  }}
+/>
+
 
       {/* ================= TABLE ================= */}
      <UniversalTable

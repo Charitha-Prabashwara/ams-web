@@ -36,6 +36,7 @@ import CreateDepartmentDialog from '../../components/CreateDepartmentDialog';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
+import UniversalActionBar from '../../components/UniversalActionBar';
 export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000
@@ -159,16 +160,18 @@ export default function DepartmentPage() {
      
 
       {/* ----------------- Action Buttons ----------------- */}
-      <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>
-        <Button variant="contained" color="error" onClick={null}>
-          Recover
-        </Button>
-        <Button variant="contained" color="success" onClick={handleOpenCreateDialog}>
-          New Department
-        </Button>
-        <Button variant="contained" onClick={toggleHelp}>Open Help</Button>
-        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={departmentHelp} title="Department Guidelines" />
-      </Box>
+
+      <UniversalActionBar
+        buttons={[
+          { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
+          { label: 'New Department', color: 'success', onClick: handleOpenCreateDialog },
+          { label: 'Open Help', type: 'help' } // automatically handles drawer
+        ]}
+        helpDrawer={{
+          sections: departmentHelp,
+          title: 'Department Guidelines'
+          }}
+        />
 
       {/* ====================== TABLE ====================== */}
 <UniversalTable

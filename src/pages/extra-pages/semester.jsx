@@ -38,6 +38,7 @@ import LogBox from '../../components/LogBox';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
+import UniversalActionBar from '../../components/UniversalActionBar';
 export default function SemesterPage() {
   
   const DEPARTMENTS = [
@@ -193,20 +194,24 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
 
   return (
     <MainCard title="Semesters">
-      <Box display="flex" justifyContent="flex-end" mb={2} flexWrap="wrap" gap={1}>
-        <Button variant="contained" color="error" onClick={null}>Recover</Button>
-        <Button variant="contained" color="success" onClick={handleOpenCreateDialog}>
-          New Semester
-        </Button>
-        <Button variant="contained"
-         onClick={() => {
+
+      <UniversalActionBar
+  buttons={[
+    { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
+    { label: 'New Semester', color: 'success', onClick: ()=>{
           mutateSemesters();
           mutateDepartments();
           mutateBatch(); // ← function call
-          toggleHelp();        // ← function call
-          }}>Open Help</Button>
-        <HelpDrawer open={openHelp} onClose={toggleHelp} sections={semesterHelp} title="Semester Guidelines" />
-      </Box>
+          handleOpenCreateDialog()
+        }} ,
+    { label: 'Open Help', type: 'help' } // automatically handles drawer
+  ]}
+  helpDrawer={{
+    sections: semesterHelp,
+    title: 'Semester Guidelines'
+  }}
+/>
+
 
       {/* ====================== TABLE ===================== */}
 <UniversalTable
