@@ -32,6 +32,7 @@ import LogBox from '../../components/LogBox';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
 import CreateBatchDialog from '../../components/CreateBatchDialog';
+import DetailsViewBox from '../../components/DetailsViewBox';
 
 export default function BatchPage() {
   const { data, error, isLoading, mutate } = useSWR('/batch/find/', fetcher, {
@@ -126,6 +127,9 @@ export default function BatchPage() {
   const paginatedBatches = batches.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(batches.length / rowsPerPage);
 
+    // ---------------- SELECTED DEPARTMENT DETAILS ----------------
+    const [selectedBatchDetails, setSelectedBatchDetails] = useState(null);
+
   const [logs, setLogs] = useState([
     '[12:00:00] Department IT created successfully.',
     '[12:05:12] Department CS updated.',
@@ -161,7 +165,13 @@ export default function BatchPage() {
           </TableHead>
           <TableBody>
             {paginatedBatches.map((batch, idx) => (
-              <TableRow key={batch.id}>
+              <TableRow key={batch.id}
+              hover
+                onClick={() => setSelectedBatchDetails(batch)}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': { backgroundColor: '#e0f7fa' } // all rows hover color
+                }}>
                 <TableCell align="center">{(page - 1) * rowsPerPage + idx + 1}</TableCell>
                 <TableCell align="center">{batch.name}</TableCell>
                 <TableCell align="center">
@@ -285,6 +295,18 @@ export default function BatchPage() {
               title="Confirm Delete Batch"
               confirmLabel="Delete Batch"
             />
+        
+    {selectedBatchDetails &&  
+      <DetailsViewBox
+      title="Batch Details"
+      data={{
+
+        "Name": selectedBatchDetails.name,
+        'Academic Years': selectedBatchDetails.academic?.lb +"-"+ selectedBatchDetails.academic?.ub,
+      }}
+      createdAt={selectedBatchDetails.createdAt_timestamp}
+      updatedAt={selectedBatchDetails.updatedAt_timestamp}
+    />}    
 
              <LogBox logs={logs} />
       
