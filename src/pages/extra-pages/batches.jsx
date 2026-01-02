@@ -34,6 +34,8 @@ import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
 import CreateBatchDialog from '../../components/CreateBatchDialog';
 import DetailsViewBox from '../../components/DetailsViewBox';
+import EditBatchDialog from '../../components/EditBatchDialog';
+import UniversalTable from '../../components/UniversalTable';
 
 export default function BatchPage() {
   const { data, error, isLoading, mutate } = useSWR('/batch/find/', fetcher, {
@@ -177,52 +179,37 @@ export default function BatchPage() {
       </Box>
 
       {/* ================= TABLE ================= */}
-      <TableContainer component={Paper} sx={{ maxHeight: 330 }}>
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              
-              <TableCell align="center">Batch Name</TableCell>
-              <TableCell align="center">Academic Years</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedBatches.map((batch, idx) => (
-              <TableRow key={batch.id}
-              hover
-                onClick={() => setSelectedBatchDetails(batch)}
-                sx={{
-                  cursor: 'pointer',
-                  '&:hover': { backgroundColor: '#e0f7fa' } // all rows hover color
-                }}>
-            
-                <TableCell align="center">{batch.name}</TableCell>
-                <TableCell align="center">
-                  {batch.academic?.lb} - {batch.academic?.ub}
-                </TableCell>
-               
-                <TableCell align="center">
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => {
-                      setSelectedBatch(batch);
-                      setOpenEditDialog(true);
-                    }}
-                  >
-                    Edit / Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      <Box display="flex" justifyContent="center" mt={2}>
-        <Pagination count={totalPages} page={page} onChange={(e, val) => setPage(val)} />
-      </Box>
+     <UniversalTable
+  data={paginatedBatches}
+  page={page}
+  rowsPerPage={rowsPerPage}
+  onPageChange={setPage}
+  onRowClick={(batch) => setSelectedBatchDetails(batch)}
+  columns={[
+    { label: 'Batch Name', key: 'name', align: 'center' },
+    {
+      label: 'Academic Years',
+      key: 'academic',
+      align: 'center',
+      render: (row) => `${row.academic?.lb || 'N/A'} - ${row.academic?.ub || 'N/A'}`
+    }
+  ]}
+  actionsColumn={{
+    render: (row) => (
+      <Button
+        size="small"
+        variant="outlined"
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedBatch(row);
+          setOpenEditDialog(true);
+        }}
+      >
+        Edit / Delete
+      </Button>
+    )
+  }}
+/>
 
       {/* ================= CREATE DIALOG ================= */}
 
@@ -249,61 +236,15 @@ export default function BatchPage() {
                 />
 
       {/* ================= EDIT DIALOG ================= */}
-      <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Batch</DialogTitle>
-        <DialogContent dividers>
-          {selectedBatch && (
-            <>
-              <Typography fontWeight="bold">Batch Name</Typography>
-              <TextField
-                fullWidth
-                value={selectedBatch.name}
-                onChange={(e) => setSelectedBatch({ ...selectedBatch, name: e.target.value })}
-              />
-
-              <Grid container spacing={2} mt={2}>
-                <Grid item xs={6}>
-                  <Typography fontWeight="bold">Lower Bound</Typography>
-                  <TextField
-                    type="number"
-                    fullWidth
-                    value={selectedBatch.academic.lb}
-                    onChange={(e) =>
-                      setSelectedBatch({
-                        ...selectedBatch,
-                        academic: { ...selectedBatch.academic, lb: e.target.value }
-                      })
-                    }
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography fontWeight="bold">Upper Bound</Typography>
-                  <TextField
-                    type="number"
-                    fullWidth
-                    value={selectedBatch.academic.ub}
-                    onChange={(e) =>
-                      setSelectedBatch({
-                        ...selectedBatch,
-                        academic: { ...selectedBatch.academic, ub: e.target.value }
-                      })
-                    }
-                  />
-                </Grid>
-              </Grid>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
-            Delete
-          </Button>
-          <Button variant="contained" onClick={handleSaveEdit}>
-            Save
-          </Button>
-          <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+ 
+      <EditBatchDialog
+  open={openEditDialog}
+  batch={selectedBatch}
+  onChange={setSelectedBatch}
+  onSave={handleSaveEdit}
+  onDelete={() => setOpenConfirmDelete(true)}
+  onClose={() => setOpenEditDialog(false)}
+/>
 
       
 

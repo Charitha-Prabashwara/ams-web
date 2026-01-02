@@ -37,6 +37,7 @@ import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
+import UniversalTable from '../../components/UniversalTable';
 export default function SemesterPage() {
   
   const DEPARTMENTS = [
@@ -208,45 +209,50 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
       </Box>
 
       {/* ====================== TABLE ===================== */}
-      <TableContainer component={Paper} sx={{ maxHeight: 330, overflowY: 'auto' }}>
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#ceffd3' }}>
-              <TableCell align="center">Code</TableCell>
-              <TableCell align="center">Name</TableCell>
-              <TableCell align="center">Department</TableCell>
-              <TableCell align="center">Course</TableCell>
-              <TableCell align="center">Batch</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedSemesters.map((sem, idx) => (
-              <TableRow key={sem.id} onClick={() => setSelectedSemester(sem) }  hover 
-              sx={{
-                  cursor: 'pointer',
-                  '&:hover': { backgroundColor: '#e0f7fa' } // all rows hover color
-                }}>
-                <TableCell align="center">{sem.code}</TableCell>
-                <TableCell align="center">{sem.name}</TableCell>
-           <TableCell align="center">{sem.department?.name?.short || '-'}</TableCell>
-            <TableCell align="center">{sem.course?.name || '-'}</TableCell>
-            <TableCell align="center">{sem.batch?.name || '-'}</TableCell>
-            
-                <TableCell align="center">
-                  <Button size="small" variant="outlined" onClick={() => handleOpenEditDialog(sem)}>
-                    Edit / Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+<UniversalTable
+  data={paginatedSemesters}
+  page={page}
+  rowsPerPage={rowsPerPage}
+  onPageChange={setPage}
+  onRowClick={(sem) => setSelectedSemester(sem)}
+  columns={[
+    { label: 'Code', key: 'code', align: 'center' },
+    { label: 'Name', key: 'name', align: 'center' },
+    {
+      label: 'Department',
+      key: 'department',
+      align: 'center',
+      render: (row) => row.department?.name?.short || '-'
+    },
+    {
+      label: 'Course',
+      key: 'course',
+      align: 'center',
+      render: (row) => row.course?.name || '-'
+    },
+    {
+      label: 'Batch',
+      key: 'batch',
+      align: 'center',
+      render: (row) => row.batch?.name || '-'
+    }
+  ]}
+  actionsColumn={{
+    render: (row) => (
+      <Button
+        size="small"
+        variant="outlined"
+        onClick={(e) => {
+          e.stopPropagation(); // prevent row click
+          handleOpenEditDialog(row);
+        }}
+      >
+        Edit / Delete
+      </Button>
+    )
+  }}
+/>
 
-      <Box display="flex" justifyContent="center" mt={2}>
-        <Pagination count={totalPages} page={page} onChange={(e, val) => setPage(val)} />
-      </Box>
  
       <CreateSemesterDialog
   open={openCreateDialog}

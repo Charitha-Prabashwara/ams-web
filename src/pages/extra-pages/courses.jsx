@@ -32,6 +32,7 @@ import {courseHelp} from '../../utils/helpDrawerContents';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
+import UniversalTable from '../../components/UniversalTable';
 
 export default function CoursePage() {
   const { data, isLoading, error, mutate } = useSWR('/course/find/', fetcher);
@@ -145,51 +146,43 @@ export default function CoursePage() {
       </Box>
 
       {/* ================= TABLE ================= */}
-      <TableContainer component={Paper} sx={{ maxHeight: 330 }}>
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow>
-              <TableCell align="center">Code</TableCell>
-              <TableCell align="center">Name</TableCell>
-              <TableCell align="center">Department</TableCell>
-              <TableCell align="center">Active</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginated.map((course) => (
-              <TableRow
-                key={course.id}
-                hover
-                onClick={() => setSelectedCourseDetails(course)}
-                sx={{ cursor: 'pointer', '&:hover': { backgroundColor: '#e0f7fa' } }}
-              >
-                <TableCell align="center">{course.code}</TableCell>
-                <TableCell align="center">{course.name}</TableCell>
-                <TableCell align="center">{course.department?.name?.short}</TableCell>
-                <TableCell align="center">{course.isActive ? 'Yes' : 'No'}</TableCell>
-                <TableCell align="center">
-                  <Button
-                    size="small"
-                    onClick={(e) => {
-                      e.stopPropagation(); // prevent row click
-                      setSelectedCourse(course);
-                      setOpenEdit(true);
-                    }}
-                  >
-                    Edit / Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-
-      {/* ================= PAGINATION ================= */}
-      <Box mt={2} display="flex" justifyContent="center">
-        <Pagination count={totalPages} page={page} onChange={(e, v) => setPage(v)} />
-      </Box>
+<UniversalTable
+  data={paginated}
+  page={page}
+  rowsPerPage={rowsPerPage}
+  onPageChange={setPage}
+  onRowClick={(course) => setSelectedCourseDetails(course)}
+  columns={[
+    { label: 'Code', key: 'code', align: 'center' },
+    { label: 'Name', key: 'name', align: 'center' },
+    {
+      label: 'Department',
+      key: 'department',
+      align: 'center',
+      render: (row) => row.department?.name?.short || 'N/A'
+    },
+    {
+      label: 'Active',
+      key: 'isActive',
+      align: 'center',
+      render: (row) => (row.isActive ? 'Yes' : 'No')
+    }
+  ]}
+  actionsColumn={{
+    render: (row) => (
+      <Button
+        size="small"
+        onClick={(e) => {
+          e.stopPropagation(); // prevent row click
+          setSelectedCourse(row);
+          setOpenEdit(true);
+        }}
+      >
+        Edit / Delete
+      </Button>
+    )
+  }}
+/>
 
       {/* ================= COURSE DETAILS BOX ================= */}
 

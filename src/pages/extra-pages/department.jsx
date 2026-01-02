@@ -35,6 +35,7 @@ import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
 import CreateDepartmentDialog from '../../components/CreateDepartmentDialog';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
+import UniversalTable from '../../components/UniversalTable';
 export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000
@@ -170,59 +171,40 @@ export default function DepartmentPage() {
       </Box>
 
       {/* ====================== TABLE ====================== */}
-      <TableContainer component={Paper} sx={{ maxHeight: 330, overflowY: 'auto' }}>
-        <Table stickyHeader>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#ceffd3' }}>
-              <TableCell align="center">Short Name</TableCell>
-              <TableCell align="center">Key</TableCell>
-              <TableCell align="center">Full Name</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedDepartments.map((dept) => (
-              <TableRow
-                key={dept.id}
-                hover
-                onClick={() => setSelectedDeptDetails(dept)}
-                sx={{
-                  cursor: 'pointer',
-                  '&:hover': { backgroundColor: '#e0f7fa' } // all rows hover color
-                }}
-              >
-                <TableCell align="center">{dept.name.short}</TableCell>
-                <TableCell align="center">{dept.name.key}</TableCell>
-                <TableCell align="center">{dept.name.long}</TableCell>
-                <TableCell align="center">
-                  <Button
-  size="small"
-  variant="contained"
-  onClick={(e) => {
-    e.stopPropagation();
-    handleOpenEditDialog(dept);
-  }}
-  sx={{
-    backgroundColor: '#fbc02d',   // yellow
-    color: '#000',                // text color (black)
-    '&:hover': {
-      backgroundColor: '#f9a825' // darker yellow on hover
-    }
-  }}
->
-  Manage
-</Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+<UniversalTable
+  data={departments}
+  columns={[
+    { label: 'Key', key: 'name.key', align: 'center' },
+    { label: 'Short Name', key: 'name.short', align: 'center' },
+    { label: 'Full Name', key: 'name.long', align: 'center' },
+  
+  ]}
+  page={page}
+  rowsPerPage={5}
+  totalPages={totalPages}
+  onPageChange={setPage}
+  onRowClick={(dept) => setSelectedDeptDetails(dept)}
+  renderActions={(dept) => (
+    <Button
+      size="small"
+      variant="contained"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleOpenEditDialog(dept);
+      }}
+      sx={{
+        backgroundColor: '#fbc02d',
+        color: '#000',
+        '&:hover': { backgroundColor: '#f9a825' },
+      }}
+    >
+      Manage
+    </Button>
+  )}
+/>
 
-      {/* ====================== PAGINATION ====================== */}
-      <Box display="flex" justifyContent="center" mt={2}>
-        <Pagination count={totalPages} page={page} onChange={(e, val) => setPage(val)} />
-      </Box>
+
+
 
       {/* ====================== SELECTED DEPARTMENT DETAILS ====================== */}
       {selectedDeptDetails &&  
