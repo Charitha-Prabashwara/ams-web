@@ -177,9 +177,9 @@ export default function DepartmentPage() {
 <UniversalTable
   data={departments}
   columns={[
-    { label: 'Key', key: 'name.key', align: 'center' },
-    { label: 'Short Name', key: 'name.short', align: 'center' },
-    { label: 'Full Name', key: 'name.long', align: 'center' },
+    { label: 'Key', key: 'name.key', align: 'left' },
+    { label: 'Short Name', key: 'name.short', align: 'left' },
+    { label: 'Full Name', key: 'name.long', align: 'left' },
   
   ]}
   page={page}

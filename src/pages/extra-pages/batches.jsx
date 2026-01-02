@@ -192,13 +192,8 @@ export default function BatchPage() {
   onPageChange={setPage}
   onRowClick={(batch) => setSelectedBatchDetails(batch)}
   columns={[
-    { label: 'Batch Name', key: 'name', align: 'center' },
-    {
-      label: 'Academic Years',
-      key: 'academic',
-      align: 'center',
-      render: (row) => `${row.academic?.lb || 'N/A'} - ${row.academic?.ub || 'N/A'}`
-    }
+    { label: 'Batch Name', key: 'name', align: 'left' },
+    {label: 'Academic Years',key: 'academic',align: 'left',render: (row) => `${row.academic?.lb || 'N/A'} - ${row.academic?.ub || 'N/A'}`}
   ]}
    renderActions={(batch) => (
     <Button

@@ -158,10 +158,10 @@ export default function CoursePage() {
   onPageChange={setPage}
   onRowClick={(course) => setSelectedCourseDetails(course)}
   columns={[
-    { label: 'Code', key: 'code', align: 'center' },
-    { label: 'Name', key: 'name', align: 'center' },
-    {label: 'Department',key: 'department',align: 'center',render: (row) => row.department?.name?.short || 'N/A'},
-    {label: 'Active',key: 'isActive',align: 'center',render: (row) => (row.isActive ? 'Yes' : 'No')}
+    { label: 'Code', key: 'code', align: 'left' },
+    { label: 'Name', key: 'name', align: 'left' },
+    {label: 'Department',key: 'department',align: 'left',render: (row) => row.department?.name?.short || 'N/A'},
+    {label: 'Active',key: 'isActive',align: 'left',render: (row) => (row.isActive ? 'Yes' : 'No')}
   ]}
   renderActions={(course) => (
     <Button

@@ -221,24 +221,24 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
   onPageChange={setPage}
   onRowClick={(sem) => setSelectedSemester(sem)}
   columns={[
-    { label: 'Code', key: 'code', align: 'center' },
-    { label: 'Name', key: 'name', align: 'center' },
+    { label: 'Code', key: 'code', align: 'left' },
+    { label: 'Name', key: 'name', align: 'left' },
     {
       label: 'Department',
       key: 'department',
-      align: 'center',
+      align: 'left',
       render: (row) => row.department?.name?.short || '-'
     },
     {
       label: 'Course',
       key: 'course',
-      align: 'center',
+      align: 'left',
       render: (row) => row.course?.name || '-'
     },
     {
       label: 'Batch',
       key: 'batch',
-      align: 'center',
+      align: 'left',
       render: (row) => row.batch?.name || '-'
     }
   ]}
