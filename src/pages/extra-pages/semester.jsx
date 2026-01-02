@@ -62,8 +62,12 @@ const { data: semester, error: semError, isLoading: semLoading, mutate: mutateSe
 const { data: department, error: deptError, isLoading: deptLoading , mutate: mutateDepartments} =
   useSWR('/department/find/', fetcher);
 
+const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutateBatch} =
+  useSWR('/batch/find', fetcher);
+
   const semesters = semester?.semesters || [];
   const departments = department?.departments || [];
+  const batches = batch?.batches ||[]
 
   const [courses, setCourses] = useState()
   const [page, setPage] = useState(1);
@@ -88,8 +92,9 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
     }
     try {
       await axiosClient.post('/semester/', newSemester);
-      mutateSemesters();
-      mutateDepartments()
+            mutateSemesters();
+          mutateDepartments();
+          mutateBatch();
       setOpenConfirmCreateDialog(false);
       setOpenCreateDialog(false);
       setConfirmText('');
@@ -118,7 +123,9 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
     try {
       delete selectedSemester.updatedAt_timestamp;
       await axiosClient.put('/semester/id/', selectedSemester);
-      mutate();
+            mutateSemesters();
+          mutateDepartments();
+          mutateBatch();
       setOpenEditDialog(false);
     } catch (err) {
       console.error(err);
@@ -133,7 +140,9 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
     }
     try {
       await axiosClient.delete('/semester/id/', { data: { id: selectedSemester.id } });
-      mutate();
+            mutateSemesters();
+          mutateDepartments();
+          mutateBatch();
       setOpenConfirmDelete(false);
       setOpenEditDialog(false);
     } catch (err) {
@@ -189,7 +198,9 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
         </Button>
         <Button variant="contained"
          onClick={() => {
-          mutateDepartments(); // ← function call
+          mutateSemesters();
+          mutateDepartments();
+          mutateBatch(); // ← function call
           toggleHelp();        // ← function call
           }}>Open Help</Button>
         <HelpDrawer open={openHelp} onClose={toggleHelp} sections={semesterHelp} title="Semester Guidelines" />
@@ -205,8 +216,6 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
               <TableCell align="center">Department</TableCell>
               <TableCell align="center">Course</TableCell>
               <TableCell align="center">Batch</TableCell>
-              <TableCell align="center">Created</TableCell>
-              <TableCell align="center">Updated</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
           </TableHead>
@@ -222,8 +231,7 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
            <TableCell align="center">{sem.department?.name?.short || '-'}</TableCell>
             <TableCell align="center">{sem.course?.name || '-'}</TableCell>
             <TableCell align="center">{sem.batch?.name || '-'}</TableCell>
-                <TableCell align="center">{new Date(sem.createdAt_timestamp).toLocaleString()}</TableCell>
-                <TableCell align="center">{new Date(sem.updatedAt_timestamp).toLocaleString()}</TableCell>
+            
                 <TableCell align="center">
                   <Button size="small" variant="outlined" onClick={() => handleOpenEditDialog(sem)}>
                     Edit / Delete
@@ -247,9 +255,10 @@ const { data: department, error: deptError, isLoading: deptLoading , mutate: mut
   setSemester={setNewSemester}
   departments={departments}
   courses={courses}
-  batches={BATCHES}
+  batches={batches}
   isLoadingDepartments={deptLoading}
   isLoadingCourses={isLoadingCourses}
+  isLoadingBatches={batchLoading}
   onDepartmentChange={loadCourses}
 />
 

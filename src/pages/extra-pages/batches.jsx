@@ -29,6 +29,9 @@ import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import {courseHelp} from '../../utils/helpDrawerContents';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
+import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
+import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
+import CreateBatchDialog from '../../components/CreateBatchDialog';
 
 export default function BatchPage() {
   const { data, error, isLoading, mutate } = useSWR('/batch/find/', fetcher, {
@@ -189,50 +192,28 @@ export default function BatchPage() {
       </Box>
 
       {/* ================= CREATE DIALOG ================= */}
-      <Dialog open={openCreateDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Batch</DialogTitle>
-        <DialogContent dividers>
-          <Box mt={1}>
-            <Typography fontWeight="bold">Batch Name</Typography>
-            <TextField fullWidth value={newBatch.name} onChange={(e) => setNewBatch({ ...newBatch, name: e.target.value })} />
-          </Box>
 
-          <Grid container spacing={2} mt={2}>
-            <Grid item xs={6}>
-              <Typography fontWeight="bold">Lower Bound (Year)</Typography>
-              <TextField type="number" fullWidth value={newBatch.lb} onChange={(e) => setNewBatch({ ...newBatch, lb: e.target.value })} />
-            </Grid>
-            <Grid item xs={6}>
-              <Typography fontWeight="bold">Upper Bound (Year)</Typography>
-              <TextField type="number" fullWidth value={newBatch.ub} onChange={(e) => setNewBatch({ ...newBatch, ub: e.target.value })} />
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={() => setOpenConfirmCreate(true)}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+<CreateBatchDialog
+  open={openCreateDialog}
+  onClose={() => setOpenCreateDialog(false)}
+  batch={newBatch}
+  setBatch={setNewBatch}
+  onSave={() => setOpenConfirmCreate(true)}
+/>
+
 
       {/* ================= CONFIRM CREATE ================= */}
-      <Dialog open={openConfirmCreate} maxWidth="sm" fullWidth>
-        <DialogTitle>Confirm Create Batch</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Type this batch name:</Typography>
-          <Typography fontWeight="bold" color="blue">
-            {newBatch.name}
-          </Typography>
-          <TextField fullWidth value={confirmText} onChange={(e) => setConfirmText(e.target.value)} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmCreate(false)}>Cancel</Button>
-          <Button variant="contained" color="success" onClick={handleFinalCreate}>
-            Confirm Create
-          </Button>
-        </DialogActions>
-      </Dialog>
+ 
+                 <ConfirmCreateDialog
+                  open={openConfirmCreate}
+                  onClose={() => setOpenConfirmCreate(false)}
+                  onConfirm={handleFinalCreate}
+                  confirmText={newBatch.name}
+                  inputValue={confirmText}
+                  onInputChange={setConfirmText}
+                  title="Confirm Create Batch"
+                  confirmLabel="Create Batch"
+                />
 
       {/* ================= EDIT DIALOG ================= */}
       <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
@@ -291,28 +272,19 @@ export default function BatchPage() {
         </DialogActions>
       </Dialog>
 
+      
+
       {/* ================= CONFIRM DELETE ================= */}
-      <Dialog
-        open={openConfirmDelete}
-        TransitionComponent={Fade}
-        maxWidth={false}
-        sx={{ '& .MuiDialog-paper': { width: 600, maxWidth: '90%' } }}
-      >
-        <DialogTitle>Confirm Delete Batch</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Type this batch name:</Typography>
-          <Typography fontWeight="bold" color="red">
-            {selectedBatch?.name}
-          </Typography>
-          <TextField fullWidth value={deleteText} onChange={(e) => setDeleteText(e.target.value)} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmDelete(false)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleFinalDelete}>
-            Confirm Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+        <ConfirmDeleteDialog
+              open={openConfirmDelete}
+              onClose={() => setOpenConfirmDelete(false)}
+              onConfirm={handleFinalDelete}
+              confirmText={selectedBatch?.name}
+              inputValue={deleteText}
+              onInputChange={setDeleteText}
+              title="Confirm Delete Batch"
+              confirmLabel="Delete Batch"
+            />
 
              <LogBox logs={logs} />
       

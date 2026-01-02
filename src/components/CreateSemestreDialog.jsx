@@ -27,6 +27,7 @@ const CreateSemesterDialog = ({
   batches = [],
   isLoadingDepartments = false,
   isLoadingCourses = false,
+  isLoadingBatches = false,
   onDepartmentChange
 }) => {
   return (
@@ -134,6 +135,7 @@ const CreateSemesterDialog = ({
               <Select
                 label="Batch"
                 value={semester.batch}
+                disabled={isLoadingBatches}
                 onChange={(e) =>
                   setSemester({ ...semester, batch: e.target.value })
                 }
@@ -157,7 +159,7 @@ const CreateSemesterDialog = ({
         <Button
           variant="contained"
           onClick={onSubmit}
-          disabled={isLoadingCourses}
+          disabled={isLoadingCourses||isLoadingBatches || isLoadingDepartments}
         >
           Save
         </Button>
@@ -165,7 +167,7 @@ const CreateSemesterDialog = ({
 
       {/* ================= LOADER OVERLAY ================= */}
       <Backdrop
-        open={isLoadingCourses}
+        open={isLoadingCourses || isLoadingDepartments || isLoadingBatches}
         sx={{
           position: 'absolute',
           zIndex: (theme) => theme.zIndex.dialog + 1,
