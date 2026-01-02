@@ -32,7 +32,9 @@ import LogBox from '../../components/LogBox';
 import {departmentHelp} from '../../utils/helpDrawerContents';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
+import CreateDepartmentDialog from '../../components/CreateDepartmentDialog';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
+import DetailsViewBox from '../../components/DetailsViewBox';
 export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000
@@ -223,106 +225,33 @@ export default function DepartmentPage() {
       </Box>
 
       {/* ====================== SELECTED DEPARTMENT DETAILS ====================== */}
-      {selectedDeptDetails && (
-        <Box mt={2}  sx={{
-      overflowY: 'auto',
-      height: '100%',
-      p: 2,
-      border: 3,                  // thick border
-      borderColor: '#97c5ebff',     // blue border
-      borderRadius: 2,
-      bgcolor: '#e5f1faff',         // very light blue background
-    }}>
-          <Typography variant="h6" mb={1}>
-            Department Details
-          </Typography>
-          <Typography mb={0.5}><strong>Key:</strong> {selectedDeptDetails.name.key}</Typography>
-          <Typography mb={0.5}><strong>Short Name:</strong> {selectedDeptDetails.name.short}</Typography>
-          <Typography mb={1}><strong>Full Name:</strong> {selectedDeptDetails.name.long}</Typography>
-          <Typography mb={0.5}><strong>Description:</strong> {selectedDeptDetails.description || 'N/A'}</Typography>
-          <Typography><strong>Created:</strong> {new Date(selectedDeptDetails.createdAt_timestamp).toLocaleString()}</Typography>
-          <Typography><strong>Updated:</strong> {new Date(selectedDeptDetails.updatedAt_timestamp).toLocaleString()}</Typography>
-        </Box>
-      )}
+      {selectedDeptDetails &&  
+      <DetailsViewBox
+      title="Department Details"
+      data={{
+        "Key": selectedDeptDetails.name.key,
+        'Short Name': selectedDeptDetails.name.short,
+        'Full Name': selectedDeptDetails.name.long,
+        Description: selectedDeptDetails.description 
+      }}
+      createdAt={selectedDeptDetails.createdAt_timestamp}
+      updatedAt={selectedDeptDetails.updatedAt_timestamp}
+    />}
 
-      
-
-     
+         
 
       {/* ====================== CREATE DIALOG ====================== */}
-      <Dialog open={openCreateDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Department</DialogTitle>
-        <DialogContent dividers>
-          <Grid container spacing={2} mt={1}>
-            <Grid item xs={8}>
-              <Typography fontWeight="bold">Short Name (max 30)</Typography>
-              <TextField
-                fullWidth
-                value={newDept.shortName}
-                inputProps={{ maxLength: 30 }}
-                placeholder="Ex: IT"
-                onChange={(e) => setNewDept({ ...newDept, shortName: e.target.value })}
-              />
-            </Grid>
-            <Grid item xs={4}>
-              <Typography fontWeight="bold" align="right">Key (max 10)</Typography>
-              <TextField
-                fullWidth
-                value={newDept.keyName}
-                inputProps={{ maxLength: 10 }}
-                placeholder="Ex: INF"
-                onChange={(e) => setNewDept({ ...newDept, keyName: e.target.value })}
-              />
-            </Grid>
-          </Grid>
-          <Box mt={3}>
-            <Typography fontWeight="bold">Full Name (max 100)</Typography>
-            <TextField
-              fullWidth
-              value={newDept.fullName}
-              inputProps={{ maxLength: 100 }}
-              placeholder="Ex: Information Technology"
-              onChange={(e) => setNewDept({ ...newDept, fullName: e.target.value })}
-            />
-          </Box>
-          <Box mt={3}>
-            <Typography fontWeight="bold">Description (max 2000)</Typography>
-            <TextField
-              fullWidth
-              multiline
-              rows={5}
-              value={newDept.description}
-              inputProps={{ maxLength: 2000 }}
-              placeholder="Enter department description..."
-              onChange={(e) => setNewDept({ ...newDept, description: e.target.value })}
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCreateDialog(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleSubmitCreate}>Save</Button>
-        </DialogActions>
-      </Dialog>
+
+      <CreateDepartmentDialog
+  open={openCreateDialog}
+  onClose={() => setOpenCreateDialog(false)}
+  department={newDept}
+  setDepartment={setNewDept}
+  onSave={handleSubmitCreate}
+/>
 
       {/* ====================== CONFIRM CREATE ====================== */}
-      <Dialog open={openConfirmCreateDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Confirm Create Department</DialogTitle>
-        <DialogContent dividers>
-          <Typography>Please type the full name:</Typography>
-          <Typography fontWeight="bold" mt={1} color="blue">{newDept.fullName}</Typography>
-          <TextField
-            fullWidth
-            placeholder="Type exactly here"
-            value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenConfirmCreateDialog(false)}>Cancel</Button>
-          <Button color="success" variant="contained" onClick={handleFinalCreate}>Confirm Create</Button>
-        </DialogActions>
-      </Dialog>
-
+    
       <ConfirmCreateDialog
       open={openConfirmCreateDialog}
       onClose={() => setOpenConfirmCreateDialog(false)}

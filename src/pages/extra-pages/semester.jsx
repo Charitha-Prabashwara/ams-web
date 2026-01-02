@@ -36,6 +36,7 @@ import {semesterHelp} from '../../utils/helpDrawerContents';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
+import DetailsViewBox from '../../components/DetailsViewBox';
 export default function SemesterPage() {
   
   const DEPARTMENTS = [
@@ -390,29 +391,20 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
      
 
        {/* ====================== SELECTED Semester DETAILS ====================== */}
-            {selectedSemester && (
-              <Box mt={2}  sx={{
-            overflowY: 'auto',
-            height: '100%',
-            p: 2,
-            border: 3,                  // thick border
-            borderColor: '#97c5ebff',     // blue border
-            borderRadius: 2,
-            bgcolor: '#e5f1faff',         // very light blue background
-          }}>
-                <Typography variant="h6" mb={1}>
-                  Semester Details
-                </Typography>
-                <Typography mb={0.5}><strong>Code:</strong> {selectedSemester.code}</Typography>
-                <Typography mb={0.5}><strong>Name:</strong> {selectedSemester.name}</Typography>
-                <Typography mb={1}><strong>Department:</strong> {selectedSemester.department?.name?.short || "N/A"}</Typography>
-                <Typography mb={1}><strong>Course:</strong> {selectedSemester.course?.name || "N/A"}</Typography>
-                <Typography mb={1}><strong>Batch:</strong> {selectedSemester.batch?.name || "N/A"}</Typography>
-                
-                <Typography><strong>Created:</strong> {new Date(selectedSemester.createdAt_timestamp).toLocaleString()}</Typography>
-                <Typography><strong>Updated:</strong> {new Date(selectedSemester.updatedAt_timestamp).toLocaleString()}</Typography>
-              </Box>
-            )}
+                    {selectedSemester &&  
+                        <DetailsViewBox
+                        title="Semester Details"
+                        data={{
+                          "Code": selectedSemester.code,
+                          'Name': selectedSemester.name,
+                          'Department': selectedSemester.department?.name?.short || "N/A",
+                          'Course': selectedSemester.course?.name || "N/A",
+                          'Batch': selectedSemester.batch?.name || "N/A"
+                        }}
+                        createdAt={new Date(selectedSemester.createdAt_timestamp).toLocaleString()}
+                        updatedAt={new Date(selectedSemester.updatedAt_timestamp).toLocaleString()}
+                      />}
+            
 
              <LogBox logs={logs} />
     </MainCard>

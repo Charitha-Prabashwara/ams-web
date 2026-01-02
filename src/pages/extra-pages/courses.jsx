@@ -31,6 +31,7 @@ import LogBox from '../../components/LogBox';
 import {courseHelp} from '../../utils/helpDrawerContents';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
+import DetailsViewBox from '../../components/DetailsViewBox';
 
 export default function CoursePage() {
   const { data, isLoading, error, mutate } = useSWR('/course/find/', fetcher);
@@ -191,33 +192,20 @@ export default function CoursePage() {
       </Box>
 
       {/* ================= COURSE DETAILS BOX ================= */}
-      {selectedCourseDetails && (
-        <Box
-          mt={2}
-          sx={{
-            p: 2,
-            border: 3,
-            borderColor: '#97c5ebff',
-            borderRadius: 2,
-            bgcolor: '#e5f1faff'
-          }}
-        >
-          <Typography variant="h6" gutterBottom>
-            Course Details
-          </Typography>
 
-          <Typography><b>Code:</b> {selectedCourseDetails.code}</Typography>
-          <Typography><b>Name:</b> {selectedCourseDetails.name}</Typography>
-          <Typography>
-            <b>Department:</b> {selectedCourseDetails.department?.name?.long || 'N/A'}
-          </Typography>
-          <Typography>
-            <b>Active:</b> {selectedCourseDetails.isActive ? 'Yes' : 'No'}
-          </Typography>
-          <Typography><b>created :</b> {new Date(selectedCourseDetails.createdAt_timestamp).toLocaleString()}</Typography>
-          <Typography><b>updated :</b> {new Date(selectedCourseDetails.updatedAt_timestamp).toLocaleString()}</Typography>
-        </Box>
-      )}
+
+            {selectedCourseDetails &&  
+            <DetailsViewBox
+            title="Course Details"
+            data={{
+              "Code": selectedCourseDetails.code,
+              'Name': selectedCourseDetails.name,
+              'Department': selectedCourseDetails.department?.name?.long || 'N/A',
+              'Active': selectedCourseDetails.isActive ? 'Yes' : 'No' 
+            }}
+            createdAt={new Date(selectedCourseDetails.createdAt_timestamp).toLocaleString()}
+            updatedAt={new Date(selectedCourseDetails.updatedAt_timestamp).toLocaleString()}
+          />}
 
       {/* ================= CREATE COURSE DIALOG ================= */}
       <Dialog open={openCreate} maxWidth="sm" fullWidth>
