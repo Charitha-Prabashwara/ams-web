@@ -34,6 +34,8 @@ import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
 import UniversalActionBar from '../../components/UniversalActionBar';
+import EditCourseDialog from '../../components/EditCourseDialog';
+import CreateCourseDialog from '../../components/CreateCourseDialog';
 
 export default function CoursePage() {
   const { data, isLoading, error, mutate } = useSWR('/course/find/', fetcher);
@@ -199,124 +201,28 @@ export default function CoursePage() {
       )}
 
       {/* ================= CREATE COURSE DIALOG ================= */}
-      <Dialog open={openCreate} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Course</DialogTitle>
-        <DialogContent dividers>
-          <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
-            <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
-              <Typography fontWeight="bold">Course Code</Typography>
-              <TextField
-                fullWidth
-                placeholder="Ex: IT101"
-                value={newCourse.code}
-                inputProps={{ maxLength: 15 }}
-                onChange={(e) => setNewCourse({ ...newCourse, code: e.target.value.toUpperCase() })}
-              />
-            </Box>
-            <Box flex="1">
-              <Typography fontWeight="bold">Course Name</Typography>
-              <TextField
-                fullWidth
-                placeholder="Ex: Introduction to IT"
-                value={newCourse.name}
-                inputProps={{ maxLength: 150 }}
-                onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })}
-              />
-            </Box>
-          </Box>
-          <Box mt={2}>
-            <Typography fontWeight="bold">Department</Typography>
-            <TextField
-              select
-              fullWidth
-              value={newCourse.department}
-              onChange={(e) => setNewCourse({ ...newCourse, department: e.target.value })}
-            >
-              {departments.map((dept) => (
-                <MenuItem key={dept.id} value={dept.id}>
-                  {dept.name.long}
-                </MenuItem>
-              ))}
-            </TextField>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenCreate(false)}>Close</Button>
-          <Button variant="contained" onClick={handleCreate}>
-            Save
-          </Button>
-        </DialogActions>
-      </Dialog>
+      <CreateCourseDialog
+  open={openCreate}
+  onClose={() => setOpenCreate(false)}
+  onSave={handleCreate}
+  course={newCourse}
+  setCourse={setNewCourse}
+  departments={departments}
+/>
 
       {/* ================= EDIT COURSE DIALOG ================= */}
-      <Dialog open={openEdit} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Course</DialogTitle>
-        <DialogContent dividers>
-          {selectedCourse && (
-            <>
-              <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
-                <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
-                  <Typography fontWeight="bold">Code</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedCourse.code}
-                    onChange={(e) => setSelectedCourse({ ...selectedCourse, code: e.target.value.toUpperCase() })}
-                  />
-                </Box>
-                <Box flex="1">
-                  <Typography fontWeight="bold">Course Name</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedCourse.name}
-                    onChange={(e) => setSelectedCourse({ ...selectedCourse, name: e.target.value })}
-                  />
-                </Box>
-              </Box>
-              <Box mt={2}>
-                <Typography fontWeight="bold">Department</Typography>
-                <TextField
-                  select
-                  fullWidth
-                  value={selectedCourse.department?._id || ''}
-                  onChange={(e) =>
-                    setSelectedCourse({
-                      ...selectedCourse,
-                      department: { ...selectedCourse.department, _id: e.target.value }
-                    })
-                  }
-                >
-                  {departments.map((dept) => (
-                    <MenuItem key={dept.id} value={dept.id}>
-                      {dept.name.long}
-                    </MenuItem>
-                  ))}
-                </TextField>
-              </Box>
-              <Box mt={2}>
-                <Typography fontWeight="bold">Active</Typography>
-                <TextField
-                  select
-                  fullWidth
-                  value={selectedCourse.isActive}
-                  onChange={(e) => setSelectedCourse({ ...selectedCourse, isActive: e.target.value === 'true' })}
-                >
-                  <MenuItem value={true}>Active</MenuItem>
-                  <MenuItem value={false}>Inactive</MenuItem>
-                </TextField>
-              </Box>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
-            Delete
-          </Button>
-          <Button variant="contained" onClick={handleUpdate}>
-            Save
-          </Button>
-          <Button onClick={() => setOpenEdit(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+
+      <EditCourseDialog
+  open={openEdit}
+  onClose={() => setOpenEdit(false)}
+  onSave={handleUpdate}
+  onDelete={() => setOpenConfirmDelete(true)}
+  course={selectedCourse}
+  setCourse={setSelectedCourse}
+  departments={departments}
+/>
+
+
       <ConfirmDeleteDialog
         open={openConfirmDelete}
         onClose={() => setOpenConfirmDelete(false)}

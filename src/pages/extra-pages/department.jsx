@@ -37,6 +37,7 @@ import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
 import UniversalActionBar from '../../components/UniversalActionBar';
+import EditDepartmentDialog from '../../components/EditDepartmentDialog';
 export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000
@@ -244,64 +245,15 @@ export default function DepartmentPage() {
       />
 
       {/* ====================== EDIT DIALOG ====================== */}
-      <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Department</DialogTitle>
-        <DialogContent dividers>
-          {selectedDept && (
-            <>
-              <Grid container spacing={2} mt={1}>
-                <Grid item xs={8}>
-                  <Typography fontWeight="bold">Short Name</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedDept.name.short}
-                    inputProps={{ maxLength: 30 }}
-                    onChange={(e) => setSelectedDept({ ...selectedDept, name: { ...selectedDept.name, short: e.target.value } })}
-                  />
-                </Grid>
-                <Grid item xs={4}>
-                  <Typography fontWeight="bold" align="right">
-                    Key
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedDept.name.key}
-                    inputProps={{ maxLength: 10 }}
-                    onChange={(e) => setSelectedDept({ ...selectedDept, name: { ...selectedDept.name, key: e.target.value } })}
-                  />
-                </Grid>
-              </Grid>
-              <Box mt={3}>
-                <Typography fontWeight="bold">Full Name</Typography>
-                <TextField
-                  fullWidth
-                  value={selectedDept.name.long}
-                  onChange={(e) => setSelectedDept({ ...selectedDept, name: { ...selectedDept.name, long: e.target.value } })}
-                />
-              </Box>
-              <Box mt={3}>
-                <Typography fontWeight="bold">Description</Typography>
-                <TextField
-                  fullWidth
-                  multiline
-                  rows={4}
-                  value={selectedDept.description || ''}
-                  onChange={(e) => setSelectedDept({ ...selectedDept, description: e.target.value })}
-                />
-              </Box>
-            </>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
-            Delete
-          </Button>
-          <Button variant="contained" onClick={handleSaveEdit}>
-            Save
-          </Button>
-          <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+
+      <EditDepartmentDialog
+  open={openEditDialog}
+  onClose={() => setOpenEditDialog(false)}
+  onSave={handleSaveEdit}
+  onDelete={() => setOpenConfirmDelete(true)}
+  department={selectedDept}
+  setDepartment={setSelectedDept}
+/>
 
       <ConfirmDeleteDialog
         open={openConfirmDelete}
