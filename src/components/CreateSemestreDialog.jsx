@@ -31,13 +31,7 @@ const CreateSemesterDialog = ({
   onDepartmentChange
 }) => {
   return (
-    <Dialog
-      open={open}
-      onClose={onClose}
-      maxWidth="sm"
-      fullWidth
-      sx={{ position: 'center' }}
-    >
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth sx={{ position: 'center' }}>
       <DialogTitle>Create New Semester</DialogTitle>
 
       {/* ================= DIALOG CONTENT ================= */}
@@ -57,9 +51,7 @@ const CreateSemesterDialog = ({
               fullWidth
               placeholder="SEM2522"
               value={semester.code}
-              onChange={(e) =>
-                setSemester({ ...semester, code: e.target.value })
-              }
+              onChange={(e) => setSemester({ ...semester, code: e.target.value })}
             />
           </Box>
 
@@ -69,9 +61,7 @@ const CreateSemesterDialog = ({
               fullWidth
               placeholder="Second Semester"
               value={semester.name}
-              onChange={(e) =>
-                setSemester({ ...semester, name: e.target.value })
-              }
+              onChange={(e) => setSemester({ ...semester, name: e.target.value })}
             />
           </Box>
         </Box>
@@ -114,10 +104,8 @@ const CreateSemesterDialog = ({
               <Select
                 label="Course"
                 value={semester.course}
-                disabled={!semester.department || isLoadingCourses || courses.length==0}
-                onChange={(e) =>
-                  setSemester({ ...semester, course: e.target.value })
-                }
+                disabled={!semester.department || isLoadingCourses || courses.length == 0}
+                onChange={(e) => setSemester({ ...semester, course: e.target.value })}
               >
                 {courses.map((c) => (
                   <MenuItem key={c.id} value={c.id}>
@@ -136,9 +124,7 @@ const CreateSemesterDialog = ({
                 label="Batch"
                 value={semester.batch}
                 disabled={isLoadingBatches}
-                onChange={(e) =>
-                  setSemester({ ...semester, batch: e.target.value })
-                }
+                onChange={(e) => setSemester({ ...semester, batch: e.target.value })}
               >
                 {batches.map((b) => (
                   <MenuItem key={b.id} value={b.id}>
@@ -156,11 +142,7 @@ const CreateSemesterDialog = ({
         <Button onClick={onClose} disabled={isLoadingCourses}>
           Cancel
         </Button>
-        <Button
-          variant="contained"
-          onClick={onSubmit}
-          disabled={isLoadingCourses||isLoadingBatches || isLoadingDepartments}
-        >
+        <Button variant="contained" onClick={onSubmit} disabled={isLoadingCourses || isLoadingBatches || isLoadingDepartments}>
           Save
         </Button>
       </DialogActions>

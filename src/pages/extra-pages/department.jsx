@@ -29,7 +29,7 @@ import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
-import {departmentHelp} from '../../utils/helpDrawerContents';
+import { departmentHelp } from '../../utils/helpDrawerContents';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
 import CreateDepartmentDialog from '../../components/CreateDepartmentDialog';
@@ -128,8 +128,8 @@ export default function DepartmentPage() {
   const [selectedDeptDetails, setSelectedDeptDetails] = useState(null);
 
   // ---------------- HELP DRAWER ----------------
-    const [openHelp, setOpenHelp] = useState(false);
-    const toggleHelp = () => setOpenHelp(prev => !prev);
+  const [openHelp, setOpenHelp] = useState(false);
+  const toggleHelp = () => setOpenHelp((prev) => !prev);
 
   // ---------- Pagination ----------
   const paginatedDepartments = departments.slice((page - 1) * rowsPerPage, page * rowsPerPage);
@@ -137,7 +137,9 @@ export default function DepartmentPage() {
 
   // ---------- Department Counts ----------
   const { totalActive, totalInactive, totalDeleted } = useMemo(() => {
-    let active = 0, inactive = 0, deleted = 0;
+    let active = 0,
+      inactive = 0,
+      deleted = 0;
     departments.forEach((d) => {
       if (d.isDeleted) deleted++;
       else if (d.isActive) active++;
@@ -146,19 +148,17 @@ export default function DepartmentPage() {
     return { totalActive: active, totalInactive: inactive, totalDeleted: deleted };
   }, [departments]);
 
-   const [logs, setLogs] = useState([
+  const [logs, setLogs] = useState([
     '[12:00:00] Department IT created successfully.',
     '[12:05:12] Department CS updated.',
     '[12:15:33] Error: Failed to delete department.'
   ]);
 
-  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />
-  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
- 
+  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
+
   return (
     <MainCard title="Departments">
-     
-
       {/* ----------------- Action Buttons ----------------- */}
 
       <UniversalActionBar
@@ -170,83 +170,78 @@ export default function DepartmentPage() {
         helpDrawer={{
           sections: departmentHelp,
           title: 'Department Guidelines'
-          }}
-        />
+        }}
+      />
 
       {/* ====================== TABLE ====================== */}
-<UniversalTable
-  data={departments}
-  columns={[
-    { label: 'Key', key: 'name.key', align: 'left' },
-    { label: 'Short Name', key: 'name.short', align: 'left' },
-    { label: 'Full Name', key: 'name.long', align: 'left' },
-  
-  ]}
-  page={page}
-  rowsPerPage={5}
-  totalPages={totalPages}
-  onPageChange={setPage}
-  onRowClick={(dept) => setSelectedDeptDetails(dept)}
-  renderActions={(dept) => (
-    <Button
-      size="small"
-      variant="contained"
-      onClick={(e) => {
-        e.stopPropagation();
-        handleOpenEditDialog(dept);
-      }}
-      sx={{
-        backgroundColor: '#fbc02d',
-        color: '#000',
-        '&:hover': { backgroundColor: '#f9a825' },
-      }}
-    >
-      Manage
-    </Button>
-  )}
-/>
-
-
-
+      <UniversalTable
+        data={departments}
+        columns={[
+          { label: 'Key', key: 'name.key', align: 'left' },
+          { label: 'Short Name', key: 'name.short', align: 'left' },
+          { label: 'Full Name', key: 'name.long', align: 'left' }
+        ]}
+        page={page}
+        rowsPerPage={5}
+        totalPages={totalPages}
+        onPageChange={setPage}
+        onRowClick={(dept) => setSelectedDeptDetails(dept)}
+        renderActions={(dept) => (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenEditDialog(dept);
+            }}
+            sx={{
+              backgroundColor: '#fbc02d',
+              color: '#000',
+              '&:hover': { backgroundColor: '#f9a825' }
+            }}
+          >
+            Manage
+          </Button>
+        )}
+      />
 
       {/* ====================== SELECTED DEPARTMENT DETAILS ====================== */}
-      {selectedDeptDetails &&  
-      <DetailsViewBox
-      title="Department Details"
-      data={{
-        "Key": selectedDeptDetails.name.key,
-        'Short Name': selectedDeptDetails.name.short,
-        'Full Name': selectedDeptDetails.name.long,
-        Description: selectedDeptDetails.description 
-      }}
-      createdAt={selectedDeptDetails.createdAt_timestamp}
-      updatedAt={selectedDeptDetails.updatedAt_timestamp}
-    />}
-
-         
+      {selectedDeptDetails && (
+        <DetailsViewBox
+          title="Department Details"
+          data={{
+            Key: selectedDeptDetails.name.key,
+            'Short Name': selectedDeptDetails.name.short,
+            'Full Name': selectedDeptDetails.name.long,
+            Description: selectedDeptDetails.description
+          }}
+          createdAt={selectedDeptDetails.createdAt_timestamp}
+          updatedAt={selectedDeptDetails.updatedAt_timestamp}
+        />
+      )}
 
       {/* ====================== CREATE DIALOG ====================== */}
 
       <CreateDepartmentDialog
-  open={openCreateDialog}
-  onClose={() => setOpenCreateDialog(false)}
-  department={newDept}
-  setDepartment={setNewDept}
-  onSave={handleSubmitCreate}
-/>
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
+        department={newDept}
+        setDepartment={setNewDept}
+        onSave={handleSubmitCreate}
+      />
 
       {/* ====================== CONFIRM CREATE ====================== */}
-    
+
       <ConfirmCreateDialog
-      open={openConfirmCreateDialog}
-      onClose={() => setOpenConfirmCreateDialog(false)}
-      onConfirm={handleFinalCreate}
-      confirmText={newDept.fullName}
-      inputValue={confirmText}
-      onInputChange={setConfirmText}
-      title="Confirm Create Department"
-      confirmLabel="Create Department"
-    />
+        open={openConfirmCreateDialog}
+        onClose={() => setOpenConfirmCreateDialog(false)}
+        onConfirm={handleFinalCreate}
+        confirmText={newDept.fullName}
+        inputValue={confirmText}
+        onInputChange={setConfirmText}
+        title="Confirm Create Department"
+        confirmLabel="Create Department"
+      />
 
       {/* ====================== EDIT DIALOG ====================== */}
       <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
@@ -265,7 +260,9 @@ export default function DepartmentPage() {
                   />
                 </Grid>
                 <Grid item xs={4}>
-                  <Typography fontWeight="bold" align="right">Key</Typography>
+                  <Typography fontWeight="bold" align="right">
+                    Key
+                  </Typography>
                   <TextField
                     fullWidth
                     value={selectedDept.name.key}
@@ -296,24 +293,26 @@ export default function DepartmentPage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>Delete</Button>
-          <Button variant="contained" onClick={handleSaveEdit}>Save</Button>
+          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
+            Delete
+          </Button>
+          <Button variant="contained" onClick={handleSaveEdit}>
+            Save
+          </Button>
           <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
         </DialogActions>
       </Dialog>
 
-
-
-         <ConfirmDeleteDialog
-              open={openConfirmDelete}
-              onClose={() => setOpenConfirmDelete(false)}
-              onConfirm={handleFinalDelete}
-              confirmText={selectedDept?.name.long}
-              inputValue={deleteText}
-              onInputChange={setDeleteText}
-              title="Confirm Delete Department"
-              confirmLabel="Delete Department"
-            />
+      <ConfirmDeleteDialog
+        open={openConfirmDelete}
+        onClose={() => setOpenConfirmDelete(false)}
+        onConfirm={handleFinalDelete}
+        confirmText={selectedDept?.name.long}
+        inputValue={deleteText}
+        onInputChange={setDeleteText}
+        title="Confirm Delete Department"
+        confirmLabel="Delete Department"
+      />
 
       <LogBox logs={logs} />
     </MainCard>

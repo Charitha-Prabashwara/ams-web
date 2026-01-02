@@ -32,7 +32,7 @@ import axiosClient from '../../api/axiosClient';
 import CreateSemesterDialog from '../../components/CreateSemestreDialog';
 import ConfirmCreateDialog from '../../components/ConfirmCreateDialog';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
-import {semesterHelp} from '../../utils/helpDrawerContents';
+import { semesterHelp } from '../../utils/helpDrawerContents';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
@@ -40,7 +40,6 @@ import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
 import UniversalActionBar from '../../components/UniversalActionBar';
 export default function SemesterPage() {
-  
   const DEPARTMENTS = [
     { id: 'CSE', name: 'Computer Science & Engineering' },
     { id: 'IT', name: 'Information Technology' },
@@ -59,25 +58,27 @@ export default function SemesterPage() {
     { id: '2025', name: 'Batch 2025' }
   ];
 
-const { data: semester, error: semError, isLoading: semLoading, mutate: mutateSemesters } =
-  useSWR('/semester/find/', fetcher, { refreshInterval: 10000 });
+  const {
+    data: semester,
+    error: semError,
+    isLoading: semLoading,
+    mutate: mutateSemesters
+  } = useSWR('/semester/find/', fetcher, { refreshInterval: 10000 });
 
-const { data: department, error: deptError, isLoading: deptLoading , mutate: mutateDepartments} =
-  useSWR('/department/find/', fetcher);
+  const { data: department, error: deptError, isLoading: deptLoading, mutate: mutateDepartments } = useSWR('/department/find/', fetcher);
 
-const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutateBatch} =
-  useSWR('/batch/find', fetcher);
+  const { data: batch, error: batchError, isLoading: batchLoading, mutate: mutateBatch } = useSWR('/batch/find', fetcher);
 
   const semesters = semester?.semesters || [];
   const departments = department?.departments || [];
-  const batches = batch?.batches ||[]
+  const batches = batch?.batches || [];
 
-  const [courses, setCourses] = useState()
+  const [courses, setCourses] = useState();
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(5);
 
-  const [isLoadingCourses, setIsLoadingCourses] = useState()
- 
+  const [isLoadingCourses, setIsLoadingCourses] = useState();
+
   // ---------------- CREATE ----------------
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
   const [newSemester, setNewSemester] = useState({ code: '', name: '', department: '', course: '', batch: '' });
@@ -95,9 +96,9 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
     }
     try {
       await axiosClient.post('/semester/', newSemester);
-            mutateSemesters();
-          mutateDepartments();
-          mutateBatch();
+      mutateSemesters();
+      mutateDepartments();
+      mutateBatch();
       setOpenConfirmCreateDialog(false);
       setOpenCreateDialog(false);
       setConfirmText('');
@@ -120,15 +121,15 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
     setOpenEditDialog(true);
   };
 
-      const [openHelp, setOpenHelp] = useState(false);
-    const toggleHelp = () => setOpenHelp(prev => !prev)
+  const [openHelp, setOpenHelp] = useState(false);
+  const toggleHelp = () => setOpenHelp((prev) => !prev);
   const handleSaveEdit = async () => {
     try {
       delete selectedSemester.updatedAt_timestamp;
       await axiosClient.put('/semester/id/', selectedSemester);
-            mutateSemesters();
-          mutateDepartments();
-          mutateBatch();
+      mutateSemesters();
+      mutateDepartments();
+      mutateBatch();
       setOpenEditDialog(false);
     } catch (err) {
       console.error(err);
@@ -143,9 +144,9 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
     }
     try {
       await axiosClient.delete('/semester/id/', { data: { id: selectedSemester.id } });
-            mutateSemesters();
-          mutateDepartments();
-          mutateBatch();
+      mutateSemesters();
+      mutateDepartments();
+      mutateBatch();
       setOpenConfirmDelete(false);
       setOpenEditDialog(false);
     } catch (err) {
@@ -158,136 +159,131 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
   const paginatedSemesters = semesters.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(semesters.length / rowsPerPage);
 
-   const [logs, setLogs] = useState([
-      '[12:00:00] Department IT created successfully.',
-      '[12:05:12] Department CS updated.',
-      '[12:15:33] Error: Failed to delete department.'
-    ]);
+  const [logs, setLogs] = useState([
+    '[12:00:00] Department IT created successfully.',
+    '[12:05:12] Department CS updated.',
+    '[12:15:33] Error: Failed to delete department.'
+  ]);
 
+  const loadCourses = (id) => {
+    setIsLoadingCourses(true);
+    axiosClient
+      .post('/course/find/', { department: id })
+      .then((courses) => {
+        console.log(courses?.data.courses);
+        setCourses(courses?.data.courses);
+        setIsLoadingCourses(false);
+      })
+      .finally(() => {
+        setIsLoadingCourses(false);
+      });
+  };
 
-  const loadCourses = (id)=>{
-      setIsLoadingCourses(true)
-       axiosClient.post('/course/find/',{department: id})
-      .then((courses)=>{
-        console.log(courses?.data.courses)
-      setCourses(courses?.data.courses)
-      setIsLoadingCourses(false)
-    }).finally(()=>{
-      setIsLoadingCourses(false)
-    });
-    
-  }
-
-  useEffect(() => {
-
-  
-}, [newSemester]);
+  useEffect(() => {}, [newSemester]);
 
   // if (semError || deptError) return <div>Error loading semesters</div>;
   // if (semLoading || deptLoading) return <div>Loading...</div>;
 
-  if (semError || deptError) return <LoadingErrorWrapper isLoading={false} isError={true} />
-  if (semLoading || deptLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
-
-
-  
+  if (semError || deptError) return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if (semLoading || deptLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
 
   return (
     <MainCard title="Semesters">
-
       <UniversalActionBar
-  buttons={[
-    { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
-    { label: 'New Semester', color: 'success', onClick: ()=>{
-          mutateSemesters();
-          mutateDepartments();
-          mutateBatch(); // ← function call
-          handleOpenCreateDialog()
-        }} ,
-    { label: 'Open Help', type: 'help' } // automatically handles drawer
-  ]}
-  helpDrawer={{
-    sections: semesterHelp,
-    title: 'Semester Guidelines'
-  }}
-/>
-
+        buttons={[
+          { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
+          {
+            label: 'New Semester',
+            color: 'success',
+            onClick: () => {
+              mutateSemesters();
+              mutateDepartments();
+              mutateBatch(); // ← function call
+              handleOpenCreateDialog();
+            }
+          },
+          { label: 'Open Help', type: 'help' } // automatically handles drawer
+        ]}
+        helpDrawer={{
+          sections: semesterHelp,
+          title: 'Semester Guidelines'
+        }}
+      />
 
       {/* ====================== TABLE ===================== */}
-<UniversalTable
-  data={paginatedSemesters}
-  page={page}
-  rowsPerPage={rowsPerPage}
-  onPageChange={setPage}
-  onRowClick={(sem) => setSelectedSemester(sem)}
-  columns={[
-    { label: 'Code', key: 'code', align: 'left' },
-    { label: 'Name', key: 'name', align: 'left' },
-    {
-      label: 'Department',
-      key: 'department',
-      align: 'left',
-      render: (row) => row.department?.name?.short || '-'
-    },
-    {
-      label: 'Course',
-      key: 'course',
-      align: 'left',
-      render: (row) => row.course?.name || '-'
-    },
-    {
-      label: 'Batch',
-      key: 'batch',
-      align: 'left',
-      render: (row) => row.batch?.name || '-'
-    }
-  ]}
-   renderActions={(semester) => (
-    <Button
-      size="small"
-      variant="contained"
-      onClick={(e) => {
-        e.stopPropagation(); // prevent row click
-          handleOpenEditDialog(semester);
-      }}
-      sx={{
-        backgroundColor: '#fbc02d',
-        color: '#000',
-        '&:hover': { backgroundColor: '#f9a825' },
-      }}
-    >
-      Manage
-    </Button>
-  )}
-/>
+      <UniversalTable
+        data={paginatedSemesters}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={setPage}
+        onRowClick={(sem) => setSelectedSemester(sem)}
+        columns={[
+          { label: 'Code', key: 'code', align: 'left' },
+          { label: 'Name', key: 'name', align: 'left' },
+          {
+            label: 'Department',
+            key: 'department',
+            align: 'left',
+            render: (row) => row.department?.name?.short || '-'
+          },
+          {
+            label: 'Course',
+            key: 'course',
+            align: 'left',
+            render: (row) => row.course?.name || '-'
+          },
+          {
+            label: 'Batch',
+            key: 'batch',
+            align: 'left',
+            render: (row) => row.batch?.name || '-'
+          }
+        ]}
+        renderActions={(semester) => (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation(); // prevent row click
+              handleOpenEditDialog(semester);
+            }}
+            sx={{
+              backgroundColor: '#fbc02d',
+              color: '#000',
+              '&:hover': { backgroundColor: '#f9a825' }
+            }}
+          >
+            Manage
+          </Button>
+        )}
+      />
 
-  
       <CreateSemesterDialog
-  open={openCreateDialog}
-  onClose={() => setOpenCreateDialog(false)}
-  onSubmit={handleSubmitCreate}
-  semester={newSemester}
-  setSemester={setNewSemester}
-  departments={departments}
-  courses={courses}
-  batches={batches}
-  isLoadingDepartments={deptLoading}
-  isLoadingCourses={isLoadingCourses}
-  isLoadingBatches={batchLoading}
-  onDepartmentChange={loadCourses}
-/>
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
+        onSubmit={handleSubmitCreate}
+        semester={newSemester}
+        setSemester={setNewSemester}
+        departments={departments}
+        courses={courses}
+        batches={batches}
+        isLoadingDepartments={deptLoading}
+        isLoadingCourses={isLoadingCourses}
+        isLoadingBatches={batchLoading}
+        onDepartmentChange={loadCourses}
+      />
 
       {/* ====================== CONFIRM CREATE ====================== */}
-           <ConfirmCreateDialog
-            open={openConfirmCreateDialog}
-            onClose={() => setOpenConfirmCreateDialog(false)}
-            onConfirm={handleFinalCreate}
-            confirmText={newSemester.name}
-            inputValue={confirmText}
-            onInputChange={setConfirmText}
-            title="Confirm Create Semester"
-            confirmLabel="Create Semester"
-          />
+      <ConfirmCreateDialog
+        open={openConfirmCreateDialog}
+        onClose={() => setOpenConfirmCreateDialog(false)}
+        onConfirm={handleFinalCreate}
+        confirmText={newSemester.name}
+        inputValue={confirmText}
+        onInputChange={setConfirmText}
+        title="Confirm Create Semester"
+        confirmLabel="Create Semester"
+      />
 
       {/* ====================== EDIT DIALOG ====================== */}
       <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
@@ -392,7 +388,7 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
 
       {/* ====================== CONFIRM DELETE ====================== */}
 
-       <ConfirmDeleteDialog
+      <ConfirmDeleteDialog
         open={openConfirmDelete}
         onClose={() => setOpenConfirmDelete(false)}
         onConfirm={handleFinalDelete}
@@ -402,28 +398,24 @@ const { data: batch, error: batchError, isLoading: batchLoading , mutate: mutate
         title="Confirm Delete Semester"
         confirmLabel="Delete Semester"
       />
-     
 
-       {/* ====================== SELECTED Semester DETAILS ====================== */}
-                    {selectedSemester &&  
-                        <DetailsViewBox
-                        title="Semester Details"
-                        data={{
-                          "Code": selectedSemester.code,
-                          'Name': selectedSemester.name,
-                          'Department': selectedSemester.department?.name?.short || "N/A",
-                          'Course': selectedSemester.course?.name || "N/A",
-                          'Batch': selectedSemester.batch?.name || "N/A"
-                        }}
-                        createdAt={new Date(selectedSemester.createdAt_timestamp).toLocaleString()}
-                        updatedAt={new Date(selectedSemester.updatedAt_timestamp).toLocaleString()}
-                      />}
-            
+      {/* ====================== SELECTED Semester DETAILS ====================== */}
+      {selectedSemester && (
+        <DetailsViewBox
+          title="Semester Details"
+          data={{
+            Code: selectedSemester.code,
+            Name: selectedSemester.name,
+            Department: selectedSemester.department?.name?.short || 'N/A',
+            Course: selectedSemester.course?.name || 'N/A',
+            Batch: selectedSemester.batch?.name || 'N/A'
+          }}
+          createdAt={new Date(selectedSemester.createdAt_timestamp).toLocaleString()}
+          updatedAt={new Date(selectedSemester.updatedAt_timestamp).toLocaleString()}
+        />
+      )}
 
-             <LogBox logs={logs} />
+      <LogBox logs={logs} />
     </MainCard>
-
-           
-
   );
 }

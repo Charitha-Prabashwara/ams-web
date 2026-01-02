@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableContainer,
-  Paper,
-  Pagination,
-  Box,
-  Button,
-} from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, TableContainer, Paper, Pagination, Box, Button } from '@mui/material';
 
 const getNestedValue = (obj, path) => {
   return path.split('.').reduce((acc, key) => acc?.[key], obj);
@@ -24,14 +13,12 @@ export default function UniversalTable({
   totalPages = 1,
   onPageChange = () => {},
   onRowClick = () => {},
-  renderActions = null,
+  renderActions = null
 }) {
   const paginatedData = data.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
   const renderCellValue = (row, col) => {
-    const val = col.render
-      ? col.render(row)
-      : getNestedValue(row, col.key);
+    const val = col.render ? col.render(row) : getNestedValue(row, col.key);
 
     if (val === null || val === undefined) return '-';
     if (typeof val === 'object') return JSON.stringify(val); // fallback for objects

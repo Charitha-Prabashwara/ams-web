@@ -1,10 +1,6 @@
 import Toastify from 'toastify-js';
 
-export const showToast = ({
-  text,
-  type = 'info',
-  duration = 3000,
-}) => {
+export const showToast = ({ text, type = 'info', duration = 3000 }) => {
   let background = '#2196f3';
 
   if (type === 'success') background = '#4caf50';
@@ -18,6 +14,6 @@ export const showToast = ({
     position: 'right',
     close: true,
     stopOnFocus: true,
-    backgroundColor: background,
+    backgroundColor: background
   }).showToast();
 };

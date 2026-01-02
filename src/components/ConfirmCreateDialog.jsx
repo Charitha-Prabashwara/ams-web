@@ -1,19 +1,11 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography,
-  TextField,
-  Button
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Typography, TextField, Button } from '@mui/material';
 
 const ConfirmCreateDialog = ({
   open,
   onClose,
   onConfirm,
-  confirmText,        // text user must type (eg: full name)
+  confirmText, // text user must type (eg: full name)
   inputValue,
   onInputChange,
   title = 'Confirm Create',
@@ -28,12 +20,7 @@ const ConfirmCreateDialog = ({
       <DialogContent dividers>
         <Typography>Please type the following to confirm:</Typography>
 
-        <Typography
-          fontWeight="bold"
-          mt={1}
-          color="primary"
-          sx={{ userSelect: 'none' }}
-        >
+        <Typography fontWeight="bold" mt={1} color="primary" sx={{ userSelect: 'none' }}>
           {confirmText}
         </Typography>
 
@@ -56,12 +43,7 @@ const ConfirmCreateDialog = ({
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button
-          color="success"
-          variant="contained"
-          disabled={!isMatch}
-          onClick={onConfirm}
-        >
+        <Button color="success" variant="contained" disabled={!isMatch} onClick={onConfirm}>
           {confirmLabel}
         </Button>
       </DialogActions>

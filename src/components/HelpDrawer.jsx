@@ -1,12 +1,7 @@
 import React from 'react';
-import {
-  Drawer,
-  Box,
-  Typography,
-  IconButton
-} from '@mui/material';
+import { Drawer, Box, Typography, IconButton } from '@mui/material';
 
-const HelpDrawer = ({ open, onClose, sections = [], title = "Help" }) => {
+const HelpDrawer = ({ open, onClose, sections = [], title = 'Help' }) => {
   return (
     <Drawer
       anchor="right"

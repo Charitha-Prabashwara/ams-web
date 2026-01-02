@@ -1,11 +1,7 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 
-const LogBox = ({
-  title = 'Log / Debug Data',
-  logs = [],
-  height = 200
-}) => {
+const LogBox = ({ title = 'Log / Debug Data', logs = [], height = 200 }) => {
   return (
     <Box
       mt={3}
@@ -26,15 +22,9 @@ const LogBox = ({
       </Typography>
 
       {logs.length === 0 ? (
-        <Typography color="text.secondary">
-          No logs available.
-        </Typography>
+        <Typography color="text.secondary">No logs available.</Typography>
       ) : (
-        logs.map((log, index) => (
-          <Typography key={index}>
-            {log}
-          </Typography>
-        ))
+        logs.map((log, index) => <Typography key={index}>{log}</Typography>)
       )}
     </Box>
   );

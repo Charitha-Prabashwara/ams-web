@@ -1,23 +1,7 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  Grid,
-  Box
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Grid, Box } from '@mui/material';
 
-const CreateDepartmentDialog = ({
-  open,
-  onClose,
-  department,
-  setDepartment,
-  onSave
-}) => {
+const CreateDepartmentDialog = ({ open, onClose, department, setDepartment, onSave }) => {
   return (
     <Dialog open={open} maxWidth="sm" fullWidth onClose={onClose}>
       <DialogTitle>Create New Department</DialogTitle>
@@ -31,9 +15,7 @@ const CreateDepartmentDialog = ({
               value={department.shortName}
               inputProps={{ maxLength: 30 }}
               placeholder="Ex: IT"
-              onChange={(e) =>
-                setDepartment({ ...department, shortName: e.target.value })
-              }
+              onChange={(e) => setDepartment({ ...department, shortName: e.target.value })}
             />
           </Grid>
 
@@ -46,9 +28,7 @@ const CreateDepartmentDialog = ({
               value={department.keyName}
               inputProps={{ maxLength: 10 }}
               placeholder="Ex: INF"
-              onChange={(e) =>
-                setDepartment({ ...department, keyName: e.target.value })
-              }
+              onChange={(e) => setDepartment({ ...department, keyName: e.target.value })}
             />
           </Grid>
         </Grid>
@@ -60,9 +40,7 @@ const CreateDepartmentDialog = ({
             value={department.fullName}
             inputProps={{ maxLength: 100 }}
             placeholder="Ex: Information Technology"
-            onChange={(e) =>
-              setDepartment({ ...department, fullName: e.target.value })
-            }
+            onChange={(e) => setDepartment({ ...department, fullName: e.target.value })}
           />
         </Box>
 
@@ -75,9 +53,7 @@ const CreateDepartmentDialog = ({
             value={department.description}
             inputProps={{ maxLength: 2000 }}
             placeholder="Enter department description..."
-            onChange={(e) =>
-              setDepartment({ ...department, description: e.target.value })
-            }
+            onChange={(e) => setDepartment({ ...department, description: e.target.value })}
           />
         </Box>
       </DialogContent>

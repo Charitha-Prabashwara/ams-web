@@ -1,23 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  Grid
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Grid } from '@mui/material';
 
-const EditBatchDialog = ({
-  open,
-  batch,
-  onChange,
-  onSave,
-  onDelete,
-  onClose
-}) => {
+const EditBatchDialog = ({ open, batch, onChange, onSave, onDelete, onClose }) => {
   const [localBatch, setLocalBatch] = useState(null);
 
   useEffect(() => {
@@ -52,31 +36,17 @@ const EditBatchDialog = ({
 
       <DialogContent dividers>
         <Typography fontWeight="bold">Batch Name</Typography>
-        <TextField
-          fullWidth
-          value={localBatch.name || ''}
-          onChange={handleFieldChange('name')}
-        />
+        <TextField fullWidth value={localBatch.name || ''} onChange={handleFieldChange('name')} />
 
         <Grid container spacing={2} mt={2}>
           <Grid item xs={6}>
             <Typography fontWeight="bold">Lower Bound</Typography>
-            <TextField
-              type="number"
-              fullWidth
-              value={localBatch.academic?.lb || ''}
-              onChange={handleAcademicChange('lb')}
-            />
+            <TextField type="number" fullWidth value={localBatch.academic?.lb || ''} onChange={handleAcademicChange('lb')} />
           </Grid>
 
           <Grid item xs={6}>
             <Typography fontWeight="bold">Upper Bound</Typography>
-            <TextField
-              type="number"
-              fullWidth
-              value={localBatch.academic?.ub || ''}
-              onChange={handleAcademicChange('ub')}
-            />
+            <TextField type="number" fullWidth value={localBatch.academic?.ub || ''} onChange={handleAcademicChange('ub')} />
           </Grid>
         </Grid>
       </DialogContent>

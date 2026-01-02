@@ -28,7 +28,7 @@ import axiosClient from '../../api/axiosClient';
 import { showToast } from '../../utils/toast';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
-import {courseHelp} from '../../utils/helpDrawerContents';
+import { courseHelp } from '../../utils/helpDrawerContents';
 import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
@@ -47,7 +47,7 @@ export default function CoursePage() {
 
   // ---------------- CREATE ----------------
   const [openCreate, setOpenCreate] = useState(false);
-  const [newCourse, setNewCourse] = useState({code: '',name: '',department: ''});
+  const [newCourse, setNewCourse] = useState({ code: '', name: '', department: '' });
 
   // ---------------- EDIT & DELETE ----------------
   const [openEdit, setOpenEdit] = useState(false);
@@ -68,19 +68,19 @@ export default function CoursePage() {
       setNewCourse({ code: '', name: '', department: '' });
       showToast({
         text: response.data.message || 'Course created successfully',
-        type: 'success',
+        type: 'success'
       });
     } catch (e) {
       showToast({
         text: e.response?.data?.message || 'Error creating course',
-        type: 'error',
+        type: 'error'
       });
     }
   };
 
-    // ---------------- HELP DRAWER ----------------
-    const [openHelp, setOpenHelp] = useState(false);
-    const toggleHelp = () => setOpenHelp(prev => !prev);
+  // ---------------- HELP DRAWER ----------------
+  const [openHelp, setOpenHelp] = useState(false);
+  const toggleHelp = () => setOpenHelp((prev) => !prev);
 
   const handleUpdate = async () => {
     try {
@@ -95,12 +95,12 @@ export default function CoursePage() {
       setOpenEdit(false);
       showToast({
         text: response.data.message || 'Course updated successfully',
-        type: 'success',
+        type: 'success'
       });
     } catch {
-     showToast({
+      showToast({
         text: e.response?.data?.message || 'Error creating course',
-        type: 'error',
+        type: 'error'
       });
     }
   };
@@ -123,7 +123,7 @@ export default function CoursePage() {
     }
   };
 
- const [logs, setLogs] = useState([
+  const [logs, setLogs] = useState([
     '[12:00:00] Department IT created successfully.',
     '[12:05:12] Department CS updated.',
     '[12:15:33] Error: Failed to delete department.'
@@ -133,72 +133,70 @@ export default function CoursePage() {
   const paginated = courses.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(courses.length / rowsPerPage);
 
-  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />
-  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
+  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
 
   return (
     <MainCard title="Courses">
-      
       <UniversalActionBar
-    buttons={[
-      { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
-      { label: 'New Course', color: 'success', onClick: setOpenCreate },
-      { label: 'Open Help', type: 'help' } // automatically handles drawer
-    ]}
-    helpDrawer={{
-      sections: courseHelp,
-      title: 'Course Guidelines'
-    }}
-  />
+        buttons={[
+          { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
+          { label: 'New Course', color: 'success', onClick: setOpenCreate },
+          { label: 'Open Help', type: 'help' } // automatically handles drawer
+        ]}
+        helpDrawer={{
+          sections: courseHelp,
+          title: 'Course Guidelines'
+        }}
+      />
       {/* ================= TABLE ================= */}
-<UniversalTable
-  data={paginated}
-  page={page}
-  rowsPerPage={rowsPerPage}
-  onPageChange={setPage}
-  onRowClick={(course) => setSelectedCourseDetails(course)}
-  columns={[
-    { label: 'Code', key: 'code', align: 'left' },
-    { label: 'Name', key: 'name', align: 'left' },
-    {label: 'Department',key: 'department',align: 'left',render: (row) => row.department?.name?.short || 'N/A'},
-    {label: 'Active',key: 'isActive',align: 'left',render: (row) => (row.isActive ? 'Yes' : 'No')}
-  ]}
-  renderActions={(course) => (
-    <Button
-      size="small"
-      variant="contained"
-      onClick={(e) => {
-        e.stopPropagation(); // prevent row click
-          setSelectedCourse(course);
-          setOpenEdit(true);
-      }}
-      sx={{
-        backgroundColor: '#fbc02d',
-        color: '#000',
-        '&:hover': { backgroundColor: '#f9a825' },
-      }}
-    >
-      Manage
-    </Button>
-  )
-  }
-/>
-  
+      <UniversalTable
+        data={paginated}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={setPage}
+        onRowClick={(course) => setSelectedCourseDetails(course)}
+        columns={[
+          { label: 'Code', key: 'code', align: 'left' },
+          { label: 'Name', key: 'name', align: 'left' },
+          { label: 'Department', key: 'department', align: 'left', render: (row) => row.department?.name?.short || 'N/A' },
+          { label: 'Active', key: 'isActive', align: 'left', render: (row) => (row.isActive ? 'Yes' : 'No') }
+        ]}
+        renderActions={(course) => (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation(); // prevent row click
+              setSelectedCourse(course);
+              setOpenEdit(true);
+            }}
+            sx={{
+              backgroundColor: '#fbc02d',
+              color: '#000',
+              '&:hover': { backgroundColor: '#f9a825' }
+            }}
+          >
+            Manage
+          </Button>
+        )}
+      />
+
       {/* ================= COURSE DETAILS BOX ================= */}
 
-
-            {selectedCourseDetails &&  
-            <DetailsViewBox
-            title="Course Details"
-            data={{
-              "Code": selectedCourseDetails.code,
-              'Name': selectedCourseDetails.name,
-              'Department': selectedCourseDetails.department?.name?.long || 'N/A',
-              'Active': selectedCourseDetails.isActive ? 'Yes' : 'No' 
-            }}
-            createdAt={new Date(selectedCourseDetails.createdAt_timestamp).toLocaleString()}
-            updatedAt={new Date(selectedCourseDetails.updatedAt_timestamp).toLocaleString()}
-          />}
+      {selectedCourseDetails && (
+        <DetailsViewBox
+          title="Course Details"
+          data={{
+            Code: selectedCourseDetails.code,
+            Name: selectedCourseDetails.name,
+            Department: selectedCourseDetails.department?.name?.long || 'N/A',
+            Active: selectedCourseDetails.isActive ? 'Yes' : 'No'
+          }}
+          createdAt={new Date(selectedCourseDetails.createdAt_timestamp).toLocaleString()}
+          updatedAt={new Date(selectedCourseDetails.updatedAt_timestamp).toLocaleString()}
+        />
+      )}
 
       {/* ================= CREATE COURSE DIALOG ================= */}
       <Dialog open={openCreate} maxWidth="sm" fullWidth>
@@ -310,12 +308,16 @@ export default function CoursePage() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>Delete</Button>
-          <Button variant="contained" onClick={handleUpdate}>Save</Button>
+          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
+            Delete
+          </Button>
+          <Button variant="contained" onClick={handleUpdate}>
+            Save
+          </Button>
           <Button onClick={() => setOpenEdit(false)}>Close</Button>
         </DialogActions>
       </Dialog>
-           <ConfirmDeleteDialog
+      <ConfirmDeleteDialog
         open={openConfirmDelete}
         onClose={() => setOpenConfirmDelete(false)}
         onConfirm={handleDelete}
@@ -325,12 +327,8 @@ export default function CoursePage() {
         title="Confirm Delete Course"
         confirmLabel="Delete Course"
       />
-      
 
-       <LogBox logs={logs} />
-
+      <LogBox logs={logs} />
     </MainCard>
-
-    
   );
 }

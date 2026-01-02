@@ -26,7 +26,7 @@ import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
 import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
-import {courseHelp} from '../../utils/helpDrawerContents';
+import { courseHelp } from '../../utils/helpDrawerContents';
 import { showToast } from '../../utils/toast';
 import HelpDrawer from '../../components/HelpDrawer';
 import LogBox from '../../components/LogBox';
@@ -65,7 +65,7 @@ export default function BatchPage() {
     }
 
     try {
-     const response =  await axiosClient.post('/batch/', {
+      const response = await axiosClient.post('/batch/', {
         name: newBatch.name,
         lb: Number(newBatch.lb),
         ub: Number(newBatch.ub)
@@ -77,16 +77,15 @@ export default function BatchPage() {
       setNewBatch({ name: '', lb: '', ub: '' });
 
       showToast({
-              text: response?.data?.message || "New batch created successfully",
-              type: 'success',
+        text: response?.data?.message || 'New batch created successfully',
+        type: 'success'
       });
     } catch (err) {
-        console.error(err);
-        showToast({
-              text: err.response?.data?.message,
-              type: 'error',
-            });
-      
+      console.error(err);
+      showToast({
+        text: err.response?.data?.message,
+        type: 'error'
+      });
     }
   };
 
@@ -107,17 +106,16 @@ export default function BatchPage() {
       });
       mutate();
       setOpenEditDialog(false);
-       showToast({
-              text: response?.data?.message || "Batch updated successfully",
-              type: 'success',
+      showToast({
+        text: response?.data?.message || 'Batch updated successfully',
+        type: 'success'
       });
     } catch (err) {
       console.error(err);
       showToast({
-              text: err.response?.data?.message,
-              type: 'error',
+        text: err.response?.data?.message,
+        type: 'error'
       });
-      
     }
   };
 
@@ -135,28 +133,28 @@ export default function BatchPage() {
       setOpenConfirmDelete(false);
       setOpenEditDialog(false);
 
-       showToast({
-              text: response?.data?.message || "Batch Deleted successfully",
-              type: 'success',
+      showToast({
+        text: response?.data?.message || 'Batch Deleted successfully',
+        type: 'success'
       });
     } catch (err) {
       console.error(err);
       showToast({
-              text: err.response?.data?.message,
-              type: 'error',
+        text: err.response?.data?.message,
+        type: 'error'
       });
     }
   };
-      // ---------------- HELP DRAWER ----------------
-    const [openHelp, setOpenHelp] = useState(false);
-    const toggleHelp = () => setOpenHelp(prev => !prev);
+  // ---------------- HELP DRAWER ----------------
+  const [openHelp, setOpenHelp] = useState(false);
+  const toggleHelp = () => setOpenHelp((prev) => !prev);
 
   // ================= Pagination =================
   const paginatedBatches = batches.slice((page - 1) * rowsPerPage, page * rowsPerPage);
   const totalPages = Math.ceil(batches.length / rowsPerPage);
 
-    // ---------------- SELECTED DEPARTMENT DETAILS ----------------
-    const [selectedBatchDetails, setSelectedBatchDetails] = useState(null);
+  // ---------------- SELECTED DEPARTMENT DETAILS ----------------
+  const [selectedBatchDetails, setSelectedBatchDetails] = useState(null);
 
   const [logs, setLogs] = useState([
     '[12:00:00] Department IT created successfully.',
@@ -164,120 +162,118 @@ export default function BatchPage() {
     '[12:15:33] Error: Failed to delete department.'
   ]);
 
-  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />
-  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />
+  if (error) return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if (isLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
 
   return (
     <MainCard title="Batches">
-
-
       <UniversalActionBar
-  buttons={[
-    { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
-    { label: 'New Batch', color: 'success', onClick: setOpenCreateDialog },
-    { label: 'Open Help', type: 'help' } // automatically handles drawer
-  ]}
-  helpDrawer={{
-    sections: courseHelp,
-    title: 'Batch Guidelines'
-  }}
-/>
-
+        buttons={[
+          { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
+          { label: 'New Batch', color: 'success', onClick: setOpenCreateDialog },
+          { label: 'Open Help', type: 'help' } // automatically handles drawer
+        ]}
+        helpDrawer={{
+          sections: courseHelp,
+          title: 'Batch Guidelines'
+        }}
+      />
 
       {/* ================= TABLE ================= */}
-     <UniversalTable
-  data={paginatedBatches}
-  page={page}
-  rowsPerPage={rowsPerPage}
-  onPageChange={setPage}
-  onRowClick={(batch) => setSelectedBatchDetails(batch)}
-  columns={[
-    { label: 'Batch Name', key: 'name', align: 'left' },
-    {label: 'Academic Years',key: 'academic',align: 'left',render: (row) => `${row.academic?.lb || 'N/A'} - ${row.academic?.ub || 'N/A'}`}
-  ]}
-   renderActions={(batch) => (
-    <Button
-      size="small"
-      variant="contained"
-      onClick={(e) => {
-         e.stopPropagation();
-          setSelectedBatch(batch);
-          setOpenEditDialog(true);
-      }}
-      sx={{
-        backgroundColor: '#fbc02d',
-        color: '#000',
-        '&:hover': { backgroundColor: '#f9a825' },
-      }}
-    >
-      Manage
-    </Button>
-  )}
-/>
+      <UniversalTable
+        data={paginatedBatches}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={setPage}
+        onRowClick={(batch) => setSelectedBatchDetails(batch)}
+        columns={[
+          { label: 'Batch Name', key: 'name', align: 'left' },
+          {
+            label: 'Academic Years',
+            key: 'academic',
+            align: 'left',
+            render: (row) => `${row.academic?.lb || 'N/A'} - ${row.academic?.ub || 'N/A'}`
+          }
+        ]}
+        renderActions={(batch) => (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedBatch(batch);
+              setOpenEditDialog(true);
+            }}
+            sx={{
+              backgroundColor: '#fbc02d',
+              color: '#000',
+              '&:hover': { backgroundColor: '#f9a825' }
+            }}
+          >
+            Manage
+          </Button>
+        )}
+      />
 
       {/* ================= CREATE DIALOG ================= */}
 
-<CreateBatchDialog
-  open={openCreateDialog}
-  onClose={() => setOpenCreateDialog(false)}
-  batch={newBatch}
-  setBatch={setNewBatch}
-  onSave={() => setOpenConfirmCreate(true)}
-/>
-
+      <CreateBatchDialog
+        open={openCreateDialog}
+        onClose={() => setOpenCreateDialog(false)}
+        batch={newBatch}
+        setBatch={setNewBatch}
+        onSave={() => setOpenConfirmCreate(true)}
+      />
 
       {/* ================= CONFIRM CREATE ================= */}
- 
-                 <ConfirmCreateDialog
-                  open={openConfirmCreate}
-                  onClose={() => setOpenConfirmCreate(false)}
-                  onConfirm={handleFinalCreate}
-                  confirmText={newBatch.name}
-                  inputValue={confirmText}
-                  onInputChange={setConfirmText}
-                  title="Confirm Create Batch"
-                  confirmLabel="Create Batch"
-                />
+
+      <ConfirmCreateDialog
+        open={openConfirmCreate}
+        onClose={() => setOpenConfirmCreate(false)}
+        onConfirm={handleFinalCreate}
+        confirmText={newBatch.name}
+        inputValue={confirmText}
+        onInputChange={setConfirmText}
+        title="Confirm Create Batch"
+        confirmLabel="Create Batch"
+      />
 
       {/* ================= EDIT DIALOG ================= */}
- 
-      <EditBatchDialog
-  open={openEditDialog}
-  batch={selectedBatch}
-  onChange={setSelectedBatch}
-  onSave={handleSaveEdit}
-  onDelete={() => setOpenConfirmDelete(true)}
-  onClose={() => setOpenEditDialog(false)}
-/>
 
-      
+      <EditBatchDialog
+        open={openEditDialog}
+        batch={selectedBatch}
+        onChange={setSelectedBatch}
+        onSave={handleSaveEdit}
+        onDelete={() => setOpenConfirmDelete(true)}
+        onClose={() => setOpenEditDialog(false)}
+      />
 
       {/* ================= CONFIRM DELETE ================= */}
-        <ConfirmDeleteDialog
-              open={openConfirmDelete}
-              onClose={() => setOpenConfirmDelete(false)}
-              onConfirm={handleFinalDelete}
-              confirmText={selectedBatch?.name}
-              inputValue={deleteText}
-              onInputChange={setDeleteText}
-              title="Confirm Delete Batch"
-              confirmLabel="Delete Batch"
-            />
-        
-    {selectedBatchDetails &&  
-      <DetailsViewBox
-      title="Batch Details"
-      data={{
+      <ConfirmDeleteDialog
+        open={openConfirmDelete}
+        onClose={() => setOpenConfirmDelete(false)}
+        onConfirm={handleFinalDelete}
+        confirmText={selectedBatch?.name}
+        inputValue={deleteText}
+        onInputChange={setDeleteText}
+        title="Confirm Delete Batch"
+        confirmLabel="Delete Batch"
+      />
 
-        "Name": selectedBatchDetails.name,
-        'Academic Years': selectedBatchDetails.academic?.lb +"-"+ selectedBatchDetails.academic?.ub,
-      }}
-      createdAt={selectedBatchDetails.createdAt_timestamp}
-      updatedAt={selectedBatchDetails.updatedAt_timestamp}
-    />}    
+      {selectedBatchDetails && (
+        <DetailsViewBox
+          title="Batch Details"
+          data={{
+            Name: selectedBatchDetails.name,
+            'Academic Years': selectedBatchDetails.academic?.lb + '-' + selectedBatchDetails.academic?.ub
+          }}
+          createdAt={selectedBatchDetails.createdAt_timestamp}
+          updatedAt={selectedBatchDetails.updatedAt_timestamp}
+        />
+      )}
 
-             <LogBox logs={logs} />
-      
+      <LogBox logs={logs} />
     </MainCard>
   );
 }

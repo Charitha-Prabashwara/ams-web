@@ -5,7 +5,7 @@ import HelpDrawer from './HelpDrawer';
 
 const UniversalActionBar = ({ buttons = [], helpDrawer = null }) => {
   const [openHelp, setOpenHelp] = useState(false);
-  const toggleHelp = () => setOpenHelp(prev => !prev);
+  const toggleHelp = () => setOpenHelp((prev) => !prev);
 
   return (
     <>
@@ -41,14 +41,7 @@ const UniversalActionBar = ({ buttons = [], helpDrawer = null }) => {
       </Box>
 
       {/* Render HelpDrawer if provided */}
-      {helpDrawer && (
-        <HelpDrawer
-          open={openHelp}
-          onClose={toggleHelp}
-          sections={helpDrawer.sections}
-          title={helpDrawer.title}
-        />
-      )}
+      {helpDrawer && <HelpDrawer open={openHelp} onClose={toggleHelp} sections={helpDrawer.sections} title={helpDrawer.title} />}
     </>
   );
 };

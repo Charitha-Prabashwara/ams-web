@@ -8,7 +8,7 @@ const LoadingErrorWrapper = ({ isLoading, isError }) => {
     let timer;
     if (isError) {
       timer = setInterval(() => {
-        setCountdown(prev => {
+        setCountdown((prev) => {
           if (prev <= 1) {
             window.location.reload();
             return 0;
@@ -25,12 +25,7 @@ const LoadingErrorWrapper = ({ isLoading, isError }) => {
 
   if (isLoading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="50vh"
-      >
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="50vh">
         <CircularProgress size={60} />
       </Box>
     );
@@ -56,12 +51,7 @@ const LoadingErrorWrapper = ({ isLoading, isError }) => {
           Reloading in {countdown} second{countdown !== 1 ? 's' : ''}
         </Typography>
 
-        <Button
-          variant="contained"
-          color="error"
-          size="large"
-          onClick={() => window.location.reload()}
-        >
+        <Button variant="contained" color="error" size="large" onClick={() => window.location.reload()}>
           Reload Now
         </Button>
       </Box>
