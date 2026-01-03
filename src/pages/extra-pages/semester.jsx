@@ -39,6 +39,7 @@ import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
 import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
 import UniversalActionBar from '../../components/UniversalActionBar';
+import SemesterEditDialog from '../../components/SemesterEditDialog';
 export default function SemesterPage() {
   const DEPARTMENTS = [
     { id: 'CSE', name: 'Computer Science & Engineering' },
@@ -117,7 +118,14 @@ export default function SemesterPage() {
   const [deleteText, setDeleteText] = useState('');
 
   const handleOpenEditDialog = (semester) => {
-    setSelectedSemester(semester);
+    
+    setSelectedSemester(
+      {
+      ...semester,
+    department: semester.department?.id ?? semester.department,
+    course: semester.course?.id ?? semester.course,
+    batch: semester.batch?.id ?? semester.batch
+  });
     setOpenEditDialog(true);
   };
 
@@ -172,7 +180,7 @@ export default function SemesterPage() {
       .then((courses) => {
         console.log(courses?.data.courses);
         setCourses(courses?.data.courses);
-        setIsLoadingCourses(false);
+        setIsLoadingCourses(true);
       })
       .finally(() => {
         setIsLoadingCourses(false);
@@ -245,6 +253,9 @@ export default function SemesterPage() {
             variant="contained"
             onClick={(e) => {
               e.stopPropagation(); // prevent row click
+              mutateDepartments();
+              mutateBatch();
+              loadCourses(semester.course.id);
               handleOpenEditDialog(semester);
             }}
             sx={{
@@ -286,105 +297,19 @@ export default function SemesterPage() {
       />
 
       {/* ====================== EDIT DIALOG ====================== */}
-      <Dialog open={openEditDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Semester</DialogTitle>
-
-        <DialogContent dividers>
-          {selectedSemester && (
-            <>
-              {/* ================= ROW 1: CODE + NAME ================= */}
-              <Box display="flex" flexWrap="wrap" gap={2} mb={2}>
-                {/* CODE */}
-                <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
-                  <Typography fontWeight="bold">Code</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedSemester.code}
-                    onChange={(e) => setSelectedSemester({ ...selectedSemester, code: e.target.value })}
-                  />
-                </Box>
-
-                {/* NAME */}
-                <Box flex={{ xs: '1 1 100%', sm: '1' }}>
-                  <Typography fontWeight="bold">Name</Typography>
-                  <TextField
-                    fullWidth
-                    value={selectedSemester.name}
-                    onChange={(e) => setSelectedSemester({ ...selectedSemester, name: e.target.value })}
-                  />
-                </Box>
-              </Box>
-
-              {/* ================= ROW 2: DEPARTMENT / COURSE / BATCH ================= */}
-              <Box display="flex" flexWrap="wrap" gap={2}>
-                {/* DEPARTMENT */}
-                <Box flex={{ xs: '1 1 100%', sm: '1' }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Department</InputLabel>
-                    <Select
-                      value={selectedSemester.department}
-                      label="Department"
-                      onChange={(e) => setSelectedSemester({ ...selectedSemester, department: e.target.value })}
-                    >
-                      {DEPARTMENTS.map((d) => (
-                        <MenuItem key={d.id} value={d.id}>
-                          {d.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                {/* COURSE */}
-                <Box flex={{ xs: '1 1 100%', sm: '1' }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Course</InputLabel>
-                    <Select
-                      value={selectedSemester.course}
-                      label="Course"
-                      onChange={(e) => setSelectedSemester({ ...selectedSemester, course: e.target.value })}
-                    >
-                      {COURSES.map((c) => (
-                        <MenuItem key={c.id} value={c.id}>
-                          {c.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-
-                {/* BATCH */}
-                <Box flex={{ xs: '1 1 100%', sm: '1' }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Batch</InputLabel>
-                    <Select
-                      value={selectedSemester.batch}
-                      label="Batch"
-                      onChange={(e) => setSelectedSemester({ ...selectedSemester, batch: e.target.value })}
-                    >
-                      {BATCHES.map((b) => (
-                        <MenuItem key={b.id} value={b.id}>
-                          {b.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Box>
-            </>
-          )}
-        </DialogContent>
-
-        <DialogActions>
-          <Button color="error" onClick={() => setOpenConfirmDelete(true)}>
-            Delete
-          </Button>
-          <Button variant="contained" onClick={handleSaveEdit}>
-            Save
-          </Button>
-          <Button onClick={() => setOpenEditDialog(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      <SemesterEditDialog
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        semester={selectedSemester}
+        setSemester={setSelectedSemester}
+        onSave={handleSaveEdit}
+        onDelete={() => setOpenConfirmDelete(true)}
+        departments={departments}
+        courses={courses}
+        batches={batches}
+        loading={deptLoading || batchLoading || isLoadingCourses}
+        onDepartmentChange={loadCourses}
+      />
 
       {/* ====================== CONFIRM DELETE ====================== */}
 

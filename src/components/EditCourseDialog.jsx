@@ -92,7 +92,7 @@ const EditCourseDialog = ({
                 onChange={(e) =>
                   setCourse({
                     ...course,
-                    isActive: e.target.value === 'true'
+                    isActive: e.target.value == true
                   })
                 }
               >
