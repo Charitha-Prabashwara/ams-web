@@ -40,24 +40,9 @@ import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
 import UniversalActionBar from '../../components/UniversalActionBar';
 import SemesterEditDialog from '../../components/SemesterEditDialog';
+import { showToast } from '../../utils/toast';
 export default function SemesterPage() {
-  const DEPARTMENTS = [
-    { id: 'CSE', name: 'Computer Science & Engineering' },
-    { id: 'IT', name: 'Information Technology' },
-    { id: 'ECE', name: 'Electronics Engineering' }
-  ];
 
-  const COURSES = [
-    { id: 'SE', name: 'Software Engineering' },
-    { id: 'CS', name: 'Computer Science' },
-    { id: 'AI', name: 'Artificial Intelligence' }
-  ];
-
-  const BATCHES = [
-    { id: '2023', name: 'Batch 2023' },
-    { id: '2024', name: 'Batch 2024' },
-    { id: '2025', name: 'Batch 2025' }
-  ];
 
   const {
     data: semester,
@@ -134,14 +119,33 @@ export default function SemesterPage() {
   const handleSaveEdit = async () => {
     try {
       delete selectedSemester.updatedAt_timestamp;
-      await axiosClient.put('/semester/id/', selectedSemester);
+      delete selectedSemester.createdAt_timestamp;
+     
+
+      const updateSemObj = {
+        id:selectedSemester.id,
+        code: selectedSemester.code,
+        name:selectedSemester.code,
+        department:selectedSemester.department._id,
+        course:selectedSemester.course._id,
+        batch:selectedSemester.batch._id
+      }
+     const response =  await axiosClient.put('/semester/id/', updateSemObj);
       mutateSemesters();
       mutateDepartments();
       mutateBatch();
       setOpenEditDialog(false);
+        showToast({
+              text: response.data.message || 'Semester updated successfully',
+              type: 'success'
+            });
     } catch (err) {
-      console.error(err);
-      alert('Failed to update semester');
+     
+         showToast({
+              text: err.response?.data?.message || 'Error Update Semester',
+              type: 'error'
+            });
+      
     }
   };
 
@@ -178,7 +182,7 @@ export default function SemesterPage() {
     axiosClient
       .post('/course/find/', { department: id })
       .then((courses) => {
-        console.log(courses?.data.courses);
+      
         setCourses(courses?.data.courses);
         setIsLoadingCourses(true);
       })
@@ -192,8 +196,8 @@ export default function SemesterPage() {
   // if (semError || deptError) return <div>Error loading semesters</div>;
   // if (semLoading || deptLoading) return <div>Loading...</div>;
 
-  if (semError || deptError) return <LoadingErrorWrapper isLoading={false} isError={true} />;
-  if (semLoading || deptLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
+  if (semError || deptError || batchError) return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if (semLoading || deptLoading || batchLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
 
   return (
     <MainCard title="Semesters">
@@ -255,7 +259,8 @@ export default function SemesterPage() {
               e.stopPropagation(); // prevent row click
               mutateDepartments();
               mutateBatch();
-              loadCourses(semester.course.id);
+              //console.log(typeof(semester.course?._id))
+              loadCourses(semester.course?.id);
               handleOpenEditDialog(semester);
             }}
             sx={{

@@ -29,9 +29,7 @@ const SemesterEditDialog = ({
   onDepartmentChange
 }) => {
   if (!semester) return null;
-  console.log(semester);
-  //console.log(departments);
-  console.log(courses)
+
   
   
   return (
