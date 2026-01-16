@@ -18,7 +18,9 @@ export default function App() {
           console.error('SWR global error:', err);
         },
         revalidateOnFocus: true, // auto refresh on window focus
-        shouldRetryOnError: false
+        shouldRetryOnError: false,
+         dedupingInterval: 5 * 60 * 1000, // 5 minutes
+    shouldRetryOnError: false
       }}
     >
       <ThemeCustomization>

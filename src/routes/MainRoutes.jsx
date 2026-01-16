@@ -20,6 +20,9 @@ const Department = Loadable(lazy(() => import('pages/extra-pages/department')));
 const Courses = Loadable(lazy(() => import('pages/extra-pages/courses.jsx')));
 const Bathes = Loadable(lazy(() => import('pages/extra-pages/batches.jsx')));
 const Semester = Loadable(lazy(() => import('pages/extra-pages/semester.jsx')));
+const Subjects = Loadable(lazy(() => import('pages/extra-pages/subject.jsx')));
+const LecturerSubjectRegistration = Loadable(lazy(() => import('pages/extra-pages/LecturerSubjectRegistrationPage.jsx')));
+
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -78,6 +81,15 @@ const MainRoutes = {
     {
       path: 'semester',
       element: <Semester />
+    },
+    {
+      path: 'subject',
+      element: <Subjects/>
+    },
+    {
+      path:'lecturerSubjectRegistration',
+      element:<LecturerSubjectRegistration/>
+
     }
   ]
 };

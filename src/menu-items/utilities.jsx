@@ -8,7 +8,8 @@ import {
   LoadingOutlined,
   BookOutlined,
   PartitionOutlined,
-  ScheduleOutlined
+  ScheduleOutlined,
+  FileTextOutlined  
 } from '@ant-design/icons';
 import { PiBuilding } from 'react-icons/pi';
 
@@ -23,7 +24,8 @@ const icons = {
   PiBuilding,
   BookOutlined,
   PartitionOutlined,
-  ScheduleOutlined
+  ScheduleOutlined,
+  FileTextOutlined 
 };
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
@@ -34,11 +36,11 @@ const utilities = {
   type: 'group',
   children: [
     {
-      id: 'util-typography',
-      title: 'Typography',
+      id: 'util-color',
+      title: 'Subject',
       type: 'item',
-      url: '/typography',
-      icon: icons.FontSizeOutlined
+      url: '/subject',
+      icon: icons.FileTextOutlined 
     },
     {
       id: 'util-color',

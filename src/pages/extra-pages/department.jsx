@@ -38,6 +38,7 @@ import DetailsViewBox from '../../components/DetailsViewBox';
 import UniversalTable from '../../components/UniversalTable';
 import UniversalActionBar from '../../components/UniversalActionBar';
 import EditDepartmentDialog from '../../components/EditDepartmentDialog';
+import { showToast } from '../../utils/toast';
 export default function DepartmentPage() {
   const { data, error, isLoading, mutate } = useSWR('/department/find/', fetcher, {
     refreshInterval: 10000
@@ -62,7 +63,7 @@ export default function DepartmentPage() {
       return;
     }
     try {
-      await axiosClient.post('/department/', {
+      const response = await axiosClient.post('/department/', {
         longName: newDept.fullName,
         shortName: newDept.shortName,
         keyName: newDept.keyName,
@@ -73,9 +74,17 @@ export default function DepartmentPage() {
       setOpenCreateDialog(false);
       setConfirmText('');
       setNewDept({ shortName: '', keyName: '', fullName: '', description: '' });
+        showToast({
+              text: response.data.message || 'Department created successfully',
+              type: 'success'
+            });
     } catch (err) {
       console.error(err);
-      alert('Failed to create department');
+           showToast({
+              text: err.response?.data?.message || 'Error Create Semester',
+              type: 'error'
+            })
+      
     }
   };
 
@@ -92,7 +101,7 @@ export default function DepartmentPage() {
 
   const handleSaveEdit = async () => {
     try {
-      await axiosClient.put('/department/id/', {
+     const response =  await axiosClient.put('/department/id/', {
         id: selectedDept.id,
         shortName: selectedDept.name.short,
         keyName: selectedDept.name.key,
@@ -101,9 +110,16 @@ export default function DepartmentPage() {
       });
       mutate();
       setOpenEditDialog(false);
+        showToast({
+              text: response.data.message || 'Department update successfully',
+              type: 'success'
+            });
     } catch (err) {
       console.error(err);
-      alert('Failed to update department');
+       showToast({
+              text: err.response?.data?.message || 'Error Update Department',
+              type: 'error'
+            })
     }
   };
 
@@ -113,15 +129,22 @@ export default function DepartmentPage() {
       return;
     }
     try {
-      await axiosClient.delete('/department/id/', {
-        data: { id: selectedDept.id, safe: true }
+      const response = await axiosClient.delete('/department/id/', {
+        data: { id: selectedDept.id, safe: false }
       });
       mutate();
       setOpenConfirmDelete(false);
       setOpenEditDialog(false);
+           showToast({
+              text: response.data.message || 'Department delete successfully',
+              type: 'success'
+            });
     } catch (err) {
       console.error(err);
-      alert('Failed to delete department');
+       showToast({
+              text: err.response?.data?.message || 'Error delete Department',
+              type: 'error'
+            })
     }
   };
 
