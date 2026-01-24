@@ -41,6 +41,13 @@ const academicRegistrations = {
       url: '/lecturerSubjectRegistration',
       icon: icons.PartitionOutlined
     },
+     {
+      id: 'semester-subject-registrations',
+      title: 'Semester Subject Registration',
+      type: 'item',
+      url: '/SemesterSubjectRegistration',
+      icon: icons.PartitionOutlined
+    },
   
   ]
 };

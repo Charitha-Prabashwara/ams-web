@@ -38,7 +38,7 @@ export default function LecturerSubjectRegistrationPage() {
   
   
   const lecturers = lecturersData?.data?.users || [];
-
+ 
   const subjects = subjectsData?.subjects || [];
   const registrations = registrationsData?.registrations || [];
  
@@ -65,11 +65,11 @@ export default function LecturerSubjectRegistrationPage() {
       setNewRegistration({ lecturer: '', subject: '' });
       setConfirmText('');
 
-      console.log(response);
+    
       
       showToast({ text: 'Lecturer registered successfully!', type: 'success' });
     } catch (err) {
-      console.error(err);
+     
       showToast({ text: err.response?.data?.message || 'Failed to register', type: 'error' });
     }
   };
@@ -82,30 +82,31 @@ export default function LecturerSubjectRegistrationPage() {
 
   const handleSaveEdit = async () => {
     try {
-      await axiosClient.put('/lectSubReg/id/', selectedRegistration);
+      delete selectedRegistration.updatedAt_timestamp;
+      delete selectedRegistration.createdAt_timestamp;
+      console.log({id: selectedRegistration.id, lecturer: selectedRegistration?.lecturer?._id, subject: selectedRegistration?.subject?._id})
+
+     
+      await axiosClient.put('/lecturer-subject-registration/id/', {id: selectedRegistration.id, lecturer: selectedRegistration?.lecturer?._id, subject: selectedRegistration?.subject});
       mutateRegistrations();
       setOpenEdit(false);
       showToast({ text: 'Registration updated successfully!', type: 'success' });
     } catch (err) {
-      console.error(err);
+     
       showToast({ text: err.response?.data?.message || 'Failed to update', type: 'error' });
     }
   };
 
   const handleFinalDelete = async () => {
-    const lecturerName = lecturers.find(l => l.id === selectedRegistration?.lecturer)?.name || '';
-    if (deleteText !== lecturerName) {
-      alert('Type correct lecturer name to delete!');
-      return;
-    }
+   
     try {
-      await axiosClient.delete('/lectSubReg/id/', { data: { id: selectedRegistration.id } });
+      await axiosClient.delete('lecturer-subject-registration/id/', { data: { id: selectedRegistration.id } });
       mutateRegistrations();
       setOpenEdit(false);
       setOpenConfirmDelete(false);
       showToast({ text: 'Registration deleted successfully!', type: 'success' });
     } catch (err) {
-      console.error(err);
+      console.log(err)
       showToast({ text: err.response?.data?.message || 'Failed to delete', type: 'error' });
     }
   };
@@ -253,7 +254,7 @@ export default function LecturerSubjectRegistrationPage() {
         open={openConfirmDelete}
         onClose={() => setOpenConfirmDelete(false)}
         onConfirm={handleFinalDelete}
-        confirmText={lecturers.find(l => l.id === selectedRegistration?.lecturer)?.name || ''}
+        confirmText={lecturers.find(l => l.id === selectedRegistration?.lecturer._id)?.name?.full_name || ''}
         inputValue={deleteText}
         onInputChange={setDeleteText}
         title="Confirm Delete Registration"
@@ -265,7 +266,7 @@ export default function LecturerSubjectRegistrationPage() {
         <DetailsViewBox
           title="Registration Details"
           data={{
-            Lecturer: lecturers.find(l => l.id === selectedRegistration.lecturer._id)?.name?.full_name || '-',
+            Lecturer: lecturers.find(l => l.id === selectedRegistration?.lecturer._id)?.name?.full_name || '-',
             Subject: subjects.find(s => s.id === selectedRegistration.subject._id)?.name || '-'
           }}
           createdAt={selectedRegistration.createdAt_timestamp}

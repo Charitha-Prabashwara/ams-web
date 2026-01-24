@@ -12,32 +12,47 @@ export default function EditLecturerSubjectRegistration({
   onSave,
   onDelete
 }) {
+  
+  setRegistration.lecturer = registration?.lecturer?._id
+ 
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Edit Registration</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={2} mt={1}>
-          <TextField
+          {/* <TextField
             select
             label="Lecturer"
-            value={registration.lecturer}
-            onChange={e => setRegistration({ ...registration, lecturer: e.target.value })}
-            SelectProps={{ native: true }}
+            value={registration?.lecturer?._id}
+            onChange={(e) => {
+              setRegistration({ ...registration, lecturer: e.target.value })
+          }}
+            
+            
           >
-            <option value="">Select Lecturer</option>
+            
             {lecturers.map(l => (
               <option key={l.id} value={l.id}>{l?.name?.full_name}</option>
             ))}
-          </TextField>
+          </TextField> */}
+
+
+{/* Lecturer - Textbox (Auto Loaded) */}
+<TextField
+label="Lecturer"
+value={registration?.lecturer?.name?.full_name || ''}
+disabled
+fullWidth
+/>
 
           <TextField
             select
             label="Subject"
-            value={registration.subject}
+            value={registration.subject._id}
             onChange={e => setRegistration({ ...registration, subject: e.target.value })}
             SelectProps={{ native: true }}
           >
-            <option value="">Select Subject</option>
+           
             {subjects.map(s => (
               <option key={s.id} value={s.id}>{s.name}</option>
             ))}
