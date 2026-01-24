@@ -73,6 +73,10 @@ export default function SubjectRegistrationPage() {
 
   const handleSaveEdit = async () => {
     try {
+      console.log(selectedRegistration);
+      
+      delete selectedRegistration.createdAt
+      delete selectedRegistration.updatedAt
       await axiosClient.put('/subject-registration/id/', selectedRegistration);
       mutateRegistrations();
       setOpenEdit(false);
@@ -84,13 +88,18 @@ export default function SubjectRegistrationPage() {
 
   const handleFinalDelete = async () => {
     try {
-      await axiosClient.delete('/subject-registration/id/', {
+      const response = await axiosClient.delete('/subject-registration/id', {
         data: { id: selectedRegistration.id }
       });
+      mutateStudents();
+      mutateSubjects();
+      mutateSemesters()
       mutateRegistrations();
       setOpenEdit(false);
       setOpenConfirmDelete(false);
+
       showToast({ text: 'Registration deleted successfully!', type: 'success' });
+      console.log(response)
     } catch (err) {
       showToast({ text: err.response?.data?.message || 'Delete failed', type: 'error' });
     }
@@ -136,7 +145,7 @@ export default function SubjectRegistrationPage() {
             label: 'Student',
             key: 'student',
             render: (row) => {
-              const s = students.find(st => st.id === row.student._id);
+              const s = students.find(st => st.id === row?.student?._id);
               return s ? `${s.registration_id} | ${s.name?.full_name}` : '-';
             }
           },
@@ -144,7 +153,7 @@ export default function SubjectRegistrationPage() {
             label: 'Subject',
             key: 'subject',
             render: (row) => {
-              const sub = subjects.find(s => s.id === row.subject._id);
+              const sub = subjects.find(s => s.id === row?.subject?._id);
               return sub ? `${sub.code} | ${sub.name}` : '-';
             }
           },
@@ -152,7 +161,7 @@ export default function SubjectRegistrationPage() {
             label: 'Semester',
             key: 'semester',
             render: (row) => {
-              const sem = semesters.find(s => s.id === row.semester._id);
+              const sem = semesters.find(s => s.id === row?.semester?._id);
               return sem?.name || '-';
             }
           }
