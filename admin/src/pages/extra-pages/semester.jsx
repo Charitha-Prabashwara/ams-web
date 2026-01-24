@@ -345,7 +345,7 @@ export default function SemesterPage() {
         />
       )}
 
-      <LogBox logs={logs} />
+      {/* <LogBox logs={logs} /> */}
     </MainCard>
   );
 }

@@ -310,7 +310,7 @@ export default function SubjectPage() {
         />
       )}
 
-      <LogBox logs={logs} />
+      {/* <LogBox logs={logs} /> */}
     </MainCard>
   );
 }

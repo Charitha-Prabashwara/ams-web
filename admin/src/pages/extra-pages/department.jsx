@@ -289,7 +289,7 @@ export default function DepartmentPage() {
         confirmLabel="Delete Department"
       />
 
-      <LogBox logs={logs} />
+      {/* <LogBox logs={logs} /> */}
     </MainCard>
   );
 }

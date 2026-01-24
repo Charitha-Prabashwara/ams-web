@@ -143,6 +143,7 @@ export default function LecturerSubjectRegistrationPage() {
     <MainCard title="Lecturer Subject Registrations">
       <UniversalActionBar
         buttons={[
+          { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
           { label: 'New Registration', color: 'success', onClick: () => setOpenCreate(true) },
           { label: 'Open Help', type: 'help' }
         ]}
@@ -275,7 +276,7 @@ export default function LecturerSubjectRegistrationPage() {
       )}
 
       {/* LOGS */}
-      <LogBox logs={logs} />
+      {/* <LogBox logs={logs} /> */}
 
       {/* HELP */}
       <HelpDrawer open={openHelp} onClose={toggleHelp} sections={courseHelp} title="Lecturer Subject Registration Help" />

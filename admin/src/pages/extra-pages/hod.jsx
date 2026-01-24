@@ -25,6 +25,7 @@ import {
 // project imports
 import MainCard from 'components/MainCard';
 import { useState } from 'react';
+import CreateHODDialog from '../../components/CreateHODDialog';
 
 export default function HeadOfDepartmentPage() {
   const initialDepartments = ['Computer Science', 'Mathematics', 'Physics', 'Chemistry', 'Biology', 'History', 'Geography'];
@@ -315,7 +316,7 @@ export default function HeadOfDepartmentPage() {
         <Pagination count={totalPages} page={page} onChange={handleChangePage} color="primary" />
       </Box>
 
-      {/* ---------- CREATE HOD DIALOG ---------- */}
+      {/* ---------- CREATE HOD DIALOG ----------
       <Dialog open={openCreateDialog} onClose={handleCloseCreateDialog} maxWidth="sm" fullWidth>
         <DialogTitle>Create New Department Head</DialogTitle>
         <DialogContent>
@@ -388,6 +389,16 @@ export default function HeadOfDepartmentPage() {
           <Button onClick={handleCloseCreateDialog}>Cancel</Button>
         </DialogActions>
       </Dialog>
+     */}
+
+      <CreateHODDialog
+        open={openCreateDialog}
+        onClose={handleCloseCreateDialog}
+        onCreate={handleCreateHOD}
+        newHOD={newHOD}
+        setNewHOD={setNewHOD}
+        departments={initialDepartments}
+      />
 
       {/* ---------- EDIT / VIEW HOD DIALOG ---------- */}
       <Dialog open={openEditDialog} onClose={handleCloseEditDialog} maxWidth="sm" fullWidth>

@@ -234,7 +234,7 @@ export default function CoursePage() {
         confirmLabel="Delete Course"
       />
 
-      <LogBox logs={logs} />
+      {/* <LogBox logs={logs} /> */}
     </MainCard>
   );
 }

@@ -30,9 +30,9 @@ const icons = {
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
 
-const utilities = {
+const academic = {
   id: 'academic-uni',
-  title: 'Academic Unit',
+  title: 'Academic',
   type: 'group',
   children: [
     {
@@ -73,4 +73,4 @@ const utilities = {
   ]
 };
 
-export default utilities;
+export default academic;

@@ -273,7 +273,7 @@ export default function BatchPage() {
         />
       )}
 
-      <LogBox logs={logs} />
+      {/* <LogBox logs={logs} /> */}
     </MainCard>
   );
 }

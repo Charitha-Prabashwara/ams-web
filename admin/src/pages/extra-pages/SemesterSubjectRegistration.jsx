@@ -128,6 +128,7 @@ export default function SubjectRegistrationPage() {
 
       <UniversalActionBar
         buttons={[
+          { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
           { label: 'New Registration', color: 'success', onClick: () => setOpenCreate(true) },
           { label: 'Open Help', type: 'help' }
         ]}
@@ -244,7 +245,7 @@ export default function SubjectRegistrationPage() {
         />
       )}
 
-      <LogBox logs={[]} />
+      {/* <LogBox logs={[]} /> */}
       <HelpDrawer open={false} />
 
     </MainCard>

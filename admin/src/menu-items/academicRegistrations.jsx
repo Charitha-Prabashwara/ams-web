@@ -26,29 +26,27 @@ const icons = {
   ScheduleOutlined
 };
 
-// ==============================|| MENU ITEMS - UTILITIES ||============================== //
+// ==============================|| MENU ITEMS - ACADEMIC REGISTRATIONS ||============================== //
 
 const academicRegistrations = {
   id: 'academic-reg',
   title: 'Academic Registrations',
   type: 'group',
   children: [
-   
     {
-      id: 'util-color',
+      id: 'lecturer-subject-assignment',
       title: 'Subject Instructor Assignment',
       type: 'item',
       url: '/lecturerSubjectRegistration',
-      icon: icons.PartitionOutlined
+      icon: icons.AppstoreAddOutlined
     },
-     {
-      id: 'semester-subject-registrations',
+    {
+      id: 'semester-subject-registration',
       title: 'Semester Subject Registration',
       type: 'item',
       url: '/SemesterSubjectRegistration',
-      icon: icons.PartitionOutlined
-    },
-  
+      icon: icons.BookOutlined
+    }
   ]
 };
 
