@@ -17,12 +17,13 @@ const support = {
   title: 'Academic User',
   type: 'group',
   children: [
-    {
-      id: 'hod',
-      title: 'Department Executive',
+   
+     {
+      id: 'student',
+      title: 'Student',
       type: 'item',
-      url: '/hod',
-      icon: icons.FaUserShield
+      url: '/student',
+      icon: icons.FaUserGraduate
     },
     {
       id: 'lecturer',
@@ -31,23 +32,15 @@ const support = {
       url: '/lecturer',
       icon: icons.FaChalkboardTeacher
     },
-
-    {
-      id: 'student',
-      title: 'Student',
+     {
+      id: 'hod',
+      title: 'Department Executive',
       type: 'item',
-      url: '/student',
-      icon: icons.FaUserGraduate
-    },
-    {
-      id: 'documentation',
-      title: 'Documentation',
-      type: 'item',
-      url: 'https://codedthemes.gitbook.io/mantis/',
-      icon: icons.QuestionOutlined,
-      external: true,
-      target: true
+      url: '/hod',
+      icon: icons.FaUserShield
     }
+
+   
   ]
 };
 

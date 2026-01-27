@@ -94,6 +94,10 @@ const MainRoutes = {
     {
       path:'SemesterSubjectRegistration',
       element:<SemesterSubjectRegistration/>
+    },
+    {
+      path:'lecturer',
+      element:<Lecturer/>
     }
   ]
 };

@@ -1,194 +1,36 @@
 // material-ui
-import {
-  Typography,
-  Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Paper,
-  Box,
-  Pagination,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel
-} from '@mui/material';
-
-// project imports
+import { Button } from '@mui/material';
 import MainCard from 'components/MainCard';
 import { useState } from 'react';
+import useSWR from 'swr';
+import { fetcher } from 'api/fetcher';
+import axiosClient from '../../api/axiosClient';
+import { showToast } from '../../utils/toast';
+import ConfirmDeleteDialog from '../../components/ConfirmDeleteDialog';
+import LoadingErrorWrapper from '../../components/LoadingErrorWrapper';
+import DetailsViewBox from '../../components/DetailsViewBox';
+import UniversalTable from '../../components/UniversalTable';
+import UniversalActionBar from '../../components/UniversalActionBar';
+import CreateUserDialog from '../../components/CreateUserDialog';
+import EditUserDialog from '../../components/EditUserDialog';
 
-export default function HeadOfDepartmentPage() {
-  const initialDepartments = ['Computer Science', 'Mathematics', 'Physics', 'Chemistry', 'Biology', 'History', 'Geography'];
+export default function LecturerPage() {
+  // ---------- FETCH DEPARTMENTS ----------
+  const { data: deptData, error: deptError } = useSWR('/department/find/', fetcher);
+  const departments = deptData?.departments || [];
+ 
+  
+  // ---------- FETCH USERS ----------
+  const { data: usersData, error: usersError, mutate } =
+    useSWR(['/admin/find/', { type: 'lecturer' }], fetcher);
+   
+  // ---------- MAP HODS ----------
+  const hods =
+    usersData?.data?.users|| [];
 
-  // ---------- Dummy HOD Data ----------
-  const [departmentHeads, setDepartmentHeads] = useState([
-    {
-      id: 1,
-      name: 'DR. CHARITHA PERERA',
-      fullName: 'DR. CHARITHA PERERA',
-      nameWithInitial: 'D. PERERA',
-      email: 'charitha.perera@uni.edu',
-      department: 'Computer Science',
-      departmentId: 'Computer Science',
-      phone: '+94 77 1234567',
-      status: 'active'
-    },
-    {
-      id: 2,
-      name: 'DR. SANDUNI RATHNAYAKE',
-      fullName: 'DR. SANDUNI RATHNAYAKE',
-      nameWithInitial: 'S. RATHNAYAKE',
-      email: 'sanduni.rathnayake@uni.edu',
-      department: 'Mathematics',
-      departmentId: 'Mathematics',
-      phone: '+94 77 2345678',
-      status: 'active'
-    },
-    {
-      id: 3,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 4,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 5,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 6,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 7,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 8,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 9,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 10,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 11,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    },
-    {
-      id: 12,
-      name: 'DR. THARINDU GUNAWARDENA',
-      fullName: 'DR. THARINDU GUNAWARDENA',
-      nameWithInitial: 'T. GUNAWARDENA',
-      email: 'tharindu.gunawardena@uni.edu',
-      department: 'Physics',
-      departmentId: 'Physics',
-      phone: '+94 77 3456789',
-      status: 'active'
-    }
-  ]);
+        const [openCreate, setOpenCreate] = useState(false);
 
-  const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  // ---------- CREATE NEW HOD ----------
-  const [openCreateDialog, setOpenCreateDialog] = useState(false);
-  const [newHOD, setNewHOD] = useState({
-    registrationId: '',
-    firstName: '',
-    lastName: '',
-    fullName: '',
-    nameWithInitial: '',
-    email: '',
-    addressLine1: '',
-    addressZip: '',
-    type: 'admin',
-    departmentId: '',
-    password: '',
-    confirmPassword: ''
-  });
-
-  const handleOpenCreateDialog = () => setOpenCreateDialog(true);
-  const handleCloseCreateDialog = () => {
-    setOpenCreateDialog(false);
-    setNewHOD({
+    const [newHOD, setNewHOD] = useState({
       registrationId: '',
       firstName: '',
       lastName: '',
@@ -197,238 +39,186 @@ export default function HeadOfDepartmentPage() {
       email: '',
       addressLine1: '',
       addressZip: '',
-      type: 'admin',
       departmentId: '',
       password: '',
       confirmPassword: ''
     });
-  };
-  const handleCreateInputChange = (field, value) => {
-    setNewHOD({ ...newHOD, [field]: value });
-    if (field === 'firstName' || field === 'lastName') {
-      const firstName = field === 'firstName' ? value : newHOD.firstName;
-      const lastName = field === 'lastName' ? value : newHOD.lastName;
-      setNewHOD((prev) => ({
-        ...prev,
-        fullName: `${firstName} ${lastName}`.toUpperCase(),
-        nameWithInitial: `${firstName[0].toUpperCase()}. ${lastName.toUpperCase()}`
-      }));
+
+  // ---------- PAGINATION ----------
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+  const paginated = hods.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+
+  // ---------- EDIT ----------
+  const [openEdit, setOpenEdit] = useState(false);
+  const [selectedHOD, setSelectedHOD] = useState(null);
+
+  // ---------- DELETE ----------
+  const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
+  const [deleteText, setDeleteText] = useState('');
+
+  const handleUpdate = async () => {
+    try {
+     
+      
+      const data = {
+        id: selectedHOD.id,
+        registrationId: selectedHOD.registration_id,
+        firstName: selectedHOD.name.first_name,
+        lastName: selectedHOD.name.last_name,
+        fullName: selectedHOD.name.full_name,
+        nameWithInitial: selectedHOD.name.with_initial_name,
+        addressLine1: selectedHOD.address.line1,
+        email: selectedHOD.email,
+        addressZip: selectedHOD.address.zip,
+        departmentId:selectedHOD.departmentId,
+        status: selectedHOD.enable_state,
+
+
+        type:'department'
+      }
+      
+      await axiosClient.put('/admin/id/', data);
+      showToast({ text: 'HOD updated successfully', type: 'success' });
+      mutate();
+      setOpenEdit(false);
+    } catch (err) {
+      console.log(err)
+      showToast({ text: 'Failed to update HOD', type: 'error' });
     }
   };
-  const handleCreateHOD = () => {
-    setDepartmentHeads((prev) => [...prev, { ...newHOD, id: Date.now(), status: 'active', department: newHOD.departmentId }]);
-    handleCloseCreateDialog();
+
+  const handleDelete = async () => {
+    const delete_data = { id: selectedHOD.id, type:"lecturer"}
+    console.log(delete_data);
+    
+    try {
+      await axiosClient.delete('/admin/id/', delete_data);
+      mutate();
+      setOpenConfirmDelete(false);
+      setOpenEdit(false);
+    } catch (err) {
+      console.log(err)
+      showToast({ text: err.message, type: 'error' });
+    }
   };
 
-  // ---------- EDIT / VIEW HOD ----------
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [selectedHOD, setSelectedHOD] = useState(null);
-  const [editData, setEditData] = useState({});
+   const handleCreate = async () => {
+  try {
+  const payload = {
+  registrationId: newHOD.registrationId,
+  firstName: newHOD.firstName,
+  lastName: newHOD.lastName,
+  fullName: newHOD.fullName,
+  nameWithInitial: newHOD.nameWithInitial,
+  email: newHOD.email,
+  addressLine1: newHOD.addressLine1,
+  addressZip: newHOD.addressZip,
+  departmentId: newHOD.departmentId,
+  password: newHOD.password,
+  confirmPassword: newHOD.confirmPassword,
+  type: 'lecturer'
+  };
+  
+  
+  await axiosClient.post('/admin/', payload);
+  
+  
+  showToast({ text: 'HOD created successfully', type: 'success' });
+  mutate(); // refresh table
+  
+  
+  setOpenCreate(false);
+  setNewHOD({
+      registrationId: '',
+      firstName: '',
+      lastName: '',
+      fullName: '',
+      nameWithInitial: '',
+      email: '',
+      addressLine1: '',
+      addressZip: '',
+      departmentId: '',
+      password: '',
+      confirmPassword: ''
+  });
+  } catch (err) {
+  console.error(err);
+  showToast({ text: err.response.data.message || err.message, type: 'error' });
+  }
+  };
 
-  const handleOpenEditDialog = (hod) => {
-    setSelectedHOD(hod);
-    setEditData(hod);
-    setOpenEditDialog(true);
-  };
-  const handleCloseEditDialog = () => {
-    setOpenEditDialog(false);
-    setSelectedHOD(null);
-  };
-  const handleEditInputChange = (field, value) => setEditData({ ...editData, [field]: value });
-  const handleSaveEdit = () => {
-    setDepartmentHeads((prev) => prev.map((hod) => (hod.id === editData.id ? editData : hod)));
-    handleCloseEditDialog();
-  };
-  const handleSuspend = () => setEditData({ ...editData, status: editData.status === 'active' ? 'suspended' : 'active' });
-  const handleDelete = () => {
-    setDepartmentHeads((prev) => prev.filter((hod) => hod.id !== editData.id));
-    handleCloseEditDialog();
-  };
+  if (deptError || usersError)
+    return <LoadingErrorWrapper isLoading={false} isError />;
 
-  // ---------- Pagination ----------
-  const handleChangePage = (event, value) => setPage(value);
-  const handleChangeRowsPerPage = (event) => {
-    const value = Number(event.target.value);
-    if (value > 0) setRowsPerPage(value);
-  };
-
-  const paginatedHeads = departmentHeads.slice((page - 1) * rowsPerPage, page * rowsPerPage);
-  const totalPages = Math.ceil(departmentHeads.length / rowsPerPage);
+  if (!deptData || !usersData)
+    return <LoadingErrorWrapper isLoading isError={false} />;
 
   return (
     <MainCard title="Head of Departments">
-      {/* Top Controls */}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-        <Button variant="contained" color="success" onClick={handleOpenCreateDialog}>
-          Create HOD
-        </Button>
-        <TextField
-          label="Items per page"
-          type="number"
-          size="small"
-          value={rowsPerPage}
-          onChange={handleChangeRowsPerPage}
-          inputProps={{ min: 1 }}
-        />
-      </Box>
+      <UniversalActionBar
+        buttons={[
+          { label: 'New HOD', color: 'success', onClick: () => {} }
+        ]}
+      />
 
-      {/* Department Table */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          maxHeight: 330, // Adjust height as needed
-          overflowY: 'auto'
-        }}
-      >
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#60d2195b', color: '#fff' }}>
-              <TableCell align="center">#</TableCell>
-              <TableCell align="center">Full Name</TableCell>
-              <TableCell align="center">Email</TableCell>
-              <TableCell align="center">Department</TableCell>
-              <TableCell align="center">Status</TableCell>
-              <TableCell align="center">Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {paginatedHeads.map((head, index) => (
-              <TableRow key={head.id}>
-                <TableCell>{(page - 1) * rowsPerPage + index + 1}</TableCell>
-                <TableCell>{head.fullName}</TableCell>
-                <TableCell>{head.email}</TableCell>
-                <TableCell>{head.departmentId}</TableCell>
-                <TableCell>{head.status}</TableCell>
-                <TableCell>
-                  <Button variant="outlined" size="small" onClick={() => handleOpenEditDialog(head)}>
-                    View / Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <UniversalTable
+        data={paginated}
+        page={page}
+        rowsPerPage={rowsPerPage}
+        onPageChange={setPage}
+        columns={[
+          { label: 'Reg ID', render: r => r.registration_id },
+          { label: 'Full Name', render: r => r?.name?.full_name },
+          { label: 'Email', render: r => r.email },
+          { label: 'Department', render: r => departments.find(d=>d.id === r.department[0])?.name?.long || 'none' }
+        ]}
+        renderActions={(hod) => (
+          <Button
+            size="small"
+            variant="contained"
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedHOD({
+                ...hod,
+                departmentId: hod.departmentId || ''
+              });
+              setOpenEdit(true);
+            }}
+          >
+            Manage
+          </Button>
+        )}
+      />
 
-      {/* Pagination */}
-      <Box display="flex" justifyContent="center" mt={2}>
-        <Pagination count={totalPages} page={page} onChange={handleChangePage} color="primary" />
-      </Box>
+       <CreateUserDialog
+            open={openCreate}
+            onClose={() => setOpenCreate(false)}
+            onCreate={handleCreate}
+            newHOD={newHOD}
+            setNewHOD={setNewHOD}
+            departments={departments}
+            />
 
-      {/* ---------- CREATE HOD DIALOG ---------- */}
-      <Dialog open={openCreateDialog} onClose={handleCloseCreateDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Create New Department Head</DialogTitle>
-        <DialogContent>
-          <Box display="flex" flexDirection="column" gap={2} mt={1}>
-            <TextField
-              label="Registration ID"
-              value={newHOD.registrationId}
-              onChange={(e) => handleCreateInputChange('registrationId', e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="First Name"
-              value={newHOD.firstName}
-              onChange={(e) => handleCreateInputChange('firstName', e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Last Name"
-              value={newHOD.lastName}
-              onChange={(e) => handleCreateInputChange('lastName', e.target.value)}
-              fullWidth
-            />
-            <TextField label="Email" value={newHOD.email} onChange={(e) => handleCreateInputChange('email', e.target.value)} fullWidth />
-            <TextField
-              label="Address Line 1"
-              value={newHOD.addressLine1}
-              onChange={(e) => handleCreateInputChange('addressLine1', e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="ZIP Code"
-              value={newHOD.addressZip}
-              onChange={(e) => handleCreateInputChange('addressZip', e.target.value)}
-              fullWidth
-            />
-            <FormControl fullWidth>
-              <InputLabel>Department</InputLabel>
-              <Select
-                value={newHOD.departmentId}
-                label="Department"
-                onChange={(e) => handleCreateInputChange('departmentId', e.target.value)}
-              >
-                {initialDepartments.map((dept, idx) => (
-                  <MenuItem key={idx} value={dept}>
-                    {dept}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              label="Password"
-              type="password"
-              value={newHOD.password}
-              onChange={(e) => handleCreateInputChange('password', e.target.value)}
-              fullWidth
-            />
-            <TextField
-              label="Confirm Password"
-              type="password"
-              value={newHOD.confirmPassword}
-              onChange={(e) => handleCreateInputChange('confirmPassword', e.target.value)}
-              fullWidth
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCreateHOD} variant="contained" color="primary">
-            Create
-          </Button>
-          <Button onClick={handleCloseCreateDialog}>Cancel</Button>
-        </DialogActions>
-      </Dialog>
+      <EditUserDialog
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        onSave={handleUpdate}
+        onDelete={() => setOpenConfirmDelete(true)}
+        hod={selectedHOD}
+        setHOD={setSelectedHOD}
+        departments={departments}
+      />
 
-      {/* ---------- EDIT / VIEW HOD DIALOG ---------- */}
-      <Dialog open={openEditDialog} onClose={handleCloseEditDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit / View HOD</DialogTitle>
-        <DialogContent>
-          {selectedHOD && (
-            <Box display="flex" flexDirection="column" gap={2} mt={1}>
-              <TextField label="Name" value={editData.name} onChange={(e) => handleEditInputChange('name', e.target.value)} fullWidth />
-              <FormControl fullWidth>
-                <InputLabel>Department</InputLabel>
-                <Select
-                  value={editData.department}
-                  label="Department"
-                  onChange={(e) => handleEditInputChange('department', e.target.value)}
-                >
-                  {initialDepartments.map((dept, idx) => (
-                    <MenuItem key={idx} value={dept}>
-                      {dept}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField label="Email" value={editData.email} onChange={(e) => handleEditInputChange('email', e.target.value)} fullWidth />
-              <TextField label="Phone" value={editData.phone} onChange={(e) => handleEditInputChange('phone', e.target.value)} fullWidth />
-              <Typography>Status: {editData.status}</Typography>
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleSuspend} color={editData?.status === 'active' ? 'warning' : 'success'}>
-            {editData?.status === 'active' ? 'Suspend' : 'Activate'}
-          </Button>
-          <Button onClick={handleDelete} color="error">
-            Delete
-          </Button>
-          <Button onClick={handleSaveEdit} variant="contained" color="primary">
-            Save
-          </Button>
-          <Button onClick={handleCloseEditDialog}>Close</Button>
-        </DialogActions>
-      </Dialog>
+      <ConfirmDeleteDialog
+        open={openConfirmDelete}
+        onClose={() => setOpenConfirmDelete(false)}
+        onConfirm={handleDelete}
+        confirmText={selectedHOD?.registration_id}
+        inputValue={deleteText}
+        onInputChange={setDeleteText}
+        title="Confirm Delete HOD"
+      />
     </MainCard>
   );
 }
