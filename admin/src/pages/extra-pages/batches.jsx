@@ -96,6 +96,8 @@ export default function BatchPage() {
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
   const [deleteText, setDeleteText] = useState('');
 
+
+
   const handleSaveEdit = async () => {
     try {
       const response = await axiosClient.put('/batch/id/', {
@@ -231,7 +233,7 @@ export default function BatchPage() {
         open={openConfirmCreate}
         onClose={() => setOpenConfirmCreate(false)}
         onConfirm={handleFinalCreate}
-        confirmText={newBatch.name}
+        confirmText={newBatch?.name}
         inputValue={confirmText}
         onInputChange={setConfirmText}
         title="Confirm Create Batch"

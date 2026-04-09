@@ -158,7 +158,7 @@ export default function LecturerPage() {
     <MainCard title="Head of Departments">
       <UniversalActionBar
         buttons={[
-          { label: 'New HOD', color: 'success', onClick: () => {} }
+          { label: 'New HOD',color: 'success',onClick: () => setOpenCreate(true) }
         ]}
       />
 

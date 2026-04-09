@@ -9,6 +9,8 @@ import {
   TextField
 } from '@mui/material';
 
+import { react, useEffect } from "react";
+
 export default function CreateSubjectRegistration({
   open,
   onClose,
@@ -19,6 +21,16 @@ export default function CreateSubjectRegistration({
   setRegistration,
   onRegisterClick
 }) {
+
+  useEffect(() => {
+    if (open && students.length && semesters.length && subjects.length) {
+    setRegistration({
+    student: students[0].id,
+    semester: semesters[0].id,
+    subject: subjects[0].id
+    });
+    }
+}, [open, students, semesters, subjects]);
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>New Subject Registration</DialogTitle>
@@ -46,20 +58,20 @@ export default function CreateSubjectRegistration({
           </TextField>
 
           {/* SEMESTER */}
-          <TextField
+                      <TextField
             select
             label="Semester"
             value={registration.semester}
             onChange={(e) =>
-              setRegistration({ ...registration, semester: e.target.value })
+            setRegistration({ ...registration, semester: e.target.value })
             }
             SelectProps={{ native: true }}
             fullWidth
-          >
+            >
             
             {semesters.map((sem) => (
               <option key={sem.id} value={sem.id}>
-                {sem.name}
+                {sem.code + " - "+ sem.name}
               </option>
             ))}
           </TextField>
