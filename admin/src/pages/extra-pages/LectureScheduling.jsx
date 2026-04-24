@@ -77,6 +77,8 @@ semestersResponse?.semester || semestersResponse?.data?.semesters || semestersRe
   const [editLecture, setEditLecture] = useState(null);
 const [semesterSubjects, setSemesterSubjects] = useState([]);
 const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
+const [subjectLecturers, setSubjectLecturers] = useState([]);
+const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
 
   // ---------- DELETE ----------
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
@@ -106,6 +108,14 @@ const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
           ? (selectedLecture.semester._id || selectedLecture.semester.id)
           : selectedLecture.semester;
         handleSemesterSelected(semesterId);
+      }
+
+      // Load lecturers for the selected lecture's subject
+      if (selectedLecture.subject) {
+        const subjectId = typeof selectedLecture.subject === 'object' 
+          ? (selectedLecture.subject._id || selectedLecture.subject.id)
+          : selectedLecture.subject;
+        handleSubjectSelected(subjectId);
       }
     }
   }, [selectedLecture]);
@@ -216,6 +226,43 @@ const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
       showToast({ text: 'Failed to load subjects for selected semester', type: 'error' });
     } finally {
       setLoadingSemesterSubjects(false);
+    }
+  };
+
+  const handleSubjectSelected = async (subjectId) => {
+    setLoadingSubjectLecturers(true);
+    setSubjectLecturers([]);
+    
+    if (!subjectId) {
+      setLoadingSubjectLecturers(false);
+      return;
+    }
+
+    try {
+      const response = await axiosClient.post('/lecturer-subject-registration/find/', { subject: subjectId });
+      const registrations = response.data.registrations || [];
+      const lecturerMap = new Map();
+      
+      registrations.forEach(reg => {
+        const lecturer = reg.lecturer;
+        if (lecturer && typeof lecturer === 'object' && lecturer._id) {
+          if (!lecturerMap.has(lecturer._id)) {
+            lecturerMap.set(lecturer._id, lecturer);
+          }
+        } else if (lecturer && typeof lecturer === 'string') {
+          const fullLecturer = lecturers.find(l => l.id === lecturer || l._id === lecturer);
+          if (fullLecturer && !lecturerMap.has(fullLecturer.id)) {
+            lecturerMap.set(fullLecturer.id, fullLecturer);
+          }
+        }
+      });
+
+      setSubjectLecturers(Array.from(lecturerMap.values()));
+    } catch (err) {
+      console.error('Failed to fetch lecturers for subject:', err);
+      showToast({ text: 'Failed to load lecturers for selected subject', type: 'error' });
+    } finally {
+      setLoadingSubjectLecturers(false);
     }
   };
 
@@ -399,6 +446,7 @@ const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
          onClose={() => {
            setOpenCreate(false);
            setSemesterSubjects([]);
+           setSubjectLecturers([]);
            setNewLecture({
              topic: '',
              lecturer: '',
@@ -410,31 +458,36 @@ const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
          onSave={handleCreate}
          lecture={newLecture}
          setLecture={setNewLecture}
-         lecturers={lecturers}
+         lecturers={newLecture.subject ? subjectLecturers : []}
          subjects={semesterSubjects}
          semesters={semesters}
          onSemesterSelected={handleSemesterSelected}
+         onSubjectSelected={handleSubjectSelected}
          subjectLoading={loadingSemesterSubjects}
+         lecturerLoading={loadingSubjectLecturers}
        />
 
 {/* Edit Dialog */}
-       <EditLectureDialog
-         open={openEdit}
-         onClose={() => {
-           setOpenEdit(false);
-           setSelectedLecture(null);
-           setSemesterSubjects([]);
-         }}
-         onSave={handleUpdate}
-         onDelete={() => setOpenConfirmDelete(true)}
-         lecture={editLecture}
-         setLecture={setEditLecture}
-         lecturers={lecturers}
-         subjects={editLecture?.semester ? semesterSubjects : subjects}
-         semesters={semesters}
-         onSemesterSelected={handleSemesterSelected}
-         subjectLoading={loadingSemesterSubjects}
-       />
+        <EditLectureDialog
+          open={openEdit}
+          onClose={() => {
+            setOpenEdit(false);
+            setSelectedLecture(null);
+            setSemesterSubjects([]);
+            setSubjectLecturers([]);
+          }}
+          onSave={handleUpdate}
+          onDelete={() => setOpenConfirmDelete(true)}
+          lecture={editLecture}
+          setLecture={setEditLecture}
+          lecturers={editLecture?.subject ? subjectLecturers : []}
+          subjects={editLecture?.semester ? semesterSubjects : subjects}
+          semesters={semesters}
+          onSemesterSelected={handleSemesterSelected}
+          onSubjectSelected={handleSubjectSelected}
+          subjectLoading={loadingSemesterSubjects}
+          lecturerLoading={loadingSubjectLecturers}
+        />
 
       {/* Delete Confirmation */}
       <ConfirmDeleteDialog

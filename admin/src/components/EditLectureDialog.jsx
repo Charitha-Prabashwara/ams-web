@@ -12,7 +12,9 @@ import {
   FormControl,
   InputLabel,
   Select,
-  Alert
+  Alert,
+  Backdrop,
+  CircularProgress
 } from '@mui/material';
 
 const EditLectureDialog = ({
@@ -26,7 +28,9 @@ const EditLectureDialog = ({
   subjects = [],
   semesters = [],
   onSemesterSelected,
-  subjectLoading = false
+  onSubjectSelected,
+  subjectLoading = false,
+  lecturerLoading = false
 }) => {
   console.log('EditLectureDialog render — semesters count:', semesters.length);
   // State options for status
@@ -59,7 +63,15 @@ const EditLectureDialog = ({
       setLecture({
         ...lecture,
         semester: value,
-        subject: ''
+        subject: '',
+        lecturer: ''
+      });
+    } else if (field === 'subject') {
+      onSubjectSelected?.(value);
+      setLecture({
+        ...lecture,
+        subject: value,
+        lecturer: ''
       });
     } else {
       setLecture({
@@ -99,7 +111,14 @@ const EditLectureDialog = ({
     <Dialog open={open} maxWidth="md" fullWidth>
       <DialogTitle>Edit Lecture</DialogTitle>
 
-      <DialogContent dividers>
+      <DialogContent 
+        dividers
+        sx={{
+          filter: (subjectLoading || lecturerLoading) ? 'blur(3px)' : 'none',
+          pointerEvents: (subjectLoading || lecturerLoading) ? 'none' : 'auto',
+          transition: 'filter 0.2s ease'
+        }}
+      >
         {lecture && (
           <Box display="flex" flexDirection="column" gap={3} mt={1}>
             {/* Topic */}
@@ -123,13 +142,17 @@ const EditLectureDialog = ({
                 <Typography fontWeight="bold" mb={1}>
                   Lecturer <span style={{ color: 'red' }}>*</span>
                 </Typography>
-                <FormControl fullWidth>
+                <FormControl fullWidth disabled={!lecture?.subject || lecturerLoading}>
                   <Select
                     value={lecture.lecturer || ''}
                     onChange={handleChange('lecturer')}
+                    displayEmpty
                   >
+                    <MenuItem value="" disabled>
+                      {lecturerLoading ? 'Loading lecturers...' : !lecture?.subject ? 'Select a subject first' : 'Select Lecturer'}
+                    </MenuItem>
                     {lecturers.map((lecturer) => (
-                      <MenuItem key={lecturer.id} value={lecturer.id}>
+                      <MenuItem key={lecturer.id || lecturer._id} value={lecturer.id || lecturer._id}>
                         {lecturer.name?.full_name || lecturer.registration_id || 'Unknown'}
                       </MenuItem>
                     ))}
@@ -241,14 +264,26 @@ const EditLectureDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button color="error" onClick={onDelete}>
+        <Button color="error" onClick={onDelete} disabled={subjectLoading || lecturerLoading}>
           Delete
         </Button>
-        <Button variant="contained" onClick={onSave} disabled={!isValid}>
+        <Button variant="contained" onClick={onSave} disabled={!isValid || subjectLoading || lecturerLoading}>
           Save Changes
         </Button>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose} disabled={subjectLoading || lecturerLoading}>Close</Button>
       </DialogActions>
+
+      {/* ================= LOADER OVERLAY ================= */}
+      <Backdrop
+        open={subjectLoading || lecturerLoading}
+        sx={{
+          position: 'absolute',
+          zIndex: (theme) => theme.zIndex.dialog + 1,
+          color: '#fff'
+        }}
+      >
+        <CircularProgress />
+      </Backdrop>
     </Dialog>
   );
 };
