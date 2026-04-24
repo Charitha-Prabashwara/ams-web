@@ -9,7 +9,8 @@ import {
   BookOutlined,
   PartitionOutlined,
   ScheduleOutlined,
-  FileTextOutlined  
+  FileTextOutlined,
+  CalendarOutlined
 } from '@ant-design/icons';
 import { PiBuilding } from 'react-icons/pi';
 
@@ -25,7 +26,8 @@ const icons = {
   BookOutlined,
   PartitionOutlined,
   ScheduleOutlined,
-  FileTextOutlined 
+  FileTextOutlined,
+  CalendarOutlined
 };
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
@@ -41,6 +43,13 @@ const academic = {
       type: 'item',
       url: '/subject',
       icon: icons.FileTextOutlined 
+    },
+    {
+      id: 'lecture-scheduling',
+      title: 'Lecture Scheduling',
+      type: 'item',
+      url: '/lecture-scheduling',
+      icon: icons.CalendarOutlined
     },
     {
       id: 'util-color',

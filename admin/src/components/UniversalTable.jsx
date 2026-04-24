@@ -21,7 +21,11 @@ export default function UniversalTable({
     const val = col.render ? col.render(row) : getNestedValue(row, col.key);
 
     if (val === null || val === undefined) return '-';
-    if (typeof val === 'object') return JSON.stringify(val); // fallback for objects
+    // React elements (objects with $$typeof) should be returned as-is
+    if (typeof val === 'object' && val !== null && val.$$typeof) {
+      return val;
+    }
+    if (typeof val === 'object') return JSON.stringify(val); // fallback for plain objects
     return val;
   };
 
