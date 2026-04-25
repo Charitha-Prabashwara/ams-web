@@ -35,10 +35,12 @@ const EditLectureDialog = ({
   console.log('EditLectureDialog render — semesters count:', semesters.length);
   // State options for status
   const stateOptions = [
-    { value: 'SCHEDULED', label: 'Scheduled' },
-    { value: 'IN_PROGRESS', label: 'In Progress' },
-    { value: 'COMPLETED', label: 'Completed' },
-    { value: 'CANCELLED', label: 'Cancelled' }
+    { value: 'scheduled', label: 'scheduled' },
+    { value: 'completed', label: 'completed' },
+    { value: 'postponed', label: 'postponed' },
+    { value: 'canceled', label: 'canceled' },
+    {value: 'rescheduled', label: 'rescheduled' }
+    
   ];
 
   // Helper to extract ID from object, array, or string
@@ -175,7 +177,7 @@ const EditLectureDialog = ({
                   <Select value={getId(lecture.semester) || ''} onChange={handleChange('semester')}>
                     {semesters.map((semester) => (
                       <MenuItem key={semester.id || semester._id} value={semester.id || semester._id}>
-                        {semester.name?.medium || semester.name?.long || 'Semester'}
+                        {semester?.name || semester?.id}
                       </MenuItem>
                     ))}
                   </Select>
@@ -257,7 +259,7 @@ const EditLectureDialog = ({
                 Status
               </Typography>
               <FormControl fullWidth>
-                <Select value={lecture.state || 'SCHEDULED'} onChange={handleChange('state')}>
+                <Select value={lecture.state} onChange={handleChange('state')}>
                   {stateOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
