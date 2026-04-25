@@ -52,6 +52,10 @@ export default function LectureScheduling() {
     semester: '',
     scheduledTime: ''
   });
+  const [createSemesterSubjects, setCreateSemesterSubjects] = useState([]);
+  const [createSemesterSubjectsError, setCreateSemesterSubjectsError] = useState(null);
+  const [createSubjectLecturers, setCreateSubjectLecturers] = useState([]);
+  const [createSubjectLecturersError, setCreateSubjectLecturersError] = useState(null);
 
   // ---------- EDIT ----------
   const [openEdit, setOpenEdit] = useState(false);
@@ -59,8 +63,10 @@ export default function LectureScheduling() {
   const [editLecture, setEditLecture] = useState(null);
   const [semesterSubjects, setSemesterSubjects] = useState([]);
   const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
+  const [semesterSubjectsError, setSemesterSubjectsError] = useState(null);
   const [subjectLecturers, setSubjectLecturers] = useState([]);
   const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
+  const [subjectLecturersError, setSubjectLecturersError] = useState(null);
 
   // ---------- DELETE ----------
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
@@ -168,9 +174,16 @@ export default function LectureScheduling() {
     }
   };
 
-  const handleSemesterSelected = async (semesterId) => {
-    setLoadingSemesterSubjects(true);
-    setSemesterSubjects([]);
+  const handleSemesterSelected = async (semesterId, isEditMode = true) => {
+    if (isEditMode) {
+      setLoadingSemesterSubjects(true);
+      setSemesterSubjects([]);
+      setSemesterSubjectsError(null);
+    } else {
+      setLoadingSemesterSubjects(true);
+      setCreateSemesterSubjects([]);
+      setCreateSemesterSubjectsError(null);
+    }
 
     if (!semesterId) {
       setLoadingSemesterSubjects(false);
@@ -196,18 +209,35 @@ export default function LectureScheduling() {
         }
       });
 
-      setSemesterSubjects(Array.from(subjectMap.values()));
+      const results = Array.from(subjectMap.values());
+      if (isEditMode) {
+        setSemesterSubjects(results);
+      } else {
+        setCreateSemesterSubjects(results);
+      }
     } catch (err) {
       console.error('Failed to fetch subjects for semester:', err);
+      if (isEditMode) {
+        setSemesterSubjectsError(err);
+      } else {
+        setCreateSemesterSubjectsError(err);
+      }
       showToast({ text: 'Failed to load subjects for selected semester', type: 'error' });
     } finally {
       setLoadingSemesterSubjects(false);
     }
   };
 
-  const handleSubjectSelected = async (subjectId) => {
-    setLoadingSubjectLecturers(true);
-    setSubjectLecturers([]);
+  const handleSubjectSelected = async (subjectId, isEditMode = true) => {
+    if (isEditMode) {
+      setLoadingSubjectLecturers(true);
+      setSubjectLecturers([]);
+      setSubjectLecturersError(null);
+    } else {
+      setLoadingSubjectLecturers(true);
+      setCreateSubjectLecturers([]);
+      setCreateSubjectLecturersError(null);
+    }
 
     if (!subjectId) {
       setLoadingSubjectLecturers(false);
@@ -233,12 +263,38 @@ export default function LectureScheduling() {
         }
       });
 
-      setSubjectLecturers(Array.from(lecturerMap.values()));
+      const results = Array.from(lecturerMap.values());
+      if (isEditMode) {
+        setSubjectLecturers(results);
+      } else {
+        setCreateSubjectLecturers(results);
+      }
     } catch (err) {
       console.error('Failed to fetch lecturers for subject:', err);
+      if (isEditMode) {
+        setSubjectLecturersError(err);
+      } else {
+        setCreateSubjectLecturersError(err);
+      }
       showToast({ text: 'Failed to load lecturers for selected subject', type: 'error' });
     } finally {
       setLoadingSubjectLecturers(false);
+    }
+  };
+
+  const handleSemesterReload = (isEditMode = true) => {
+    const targetLecture = isEditMode ? editLecture : newLecture;
+    if (targetLecture?.semester) {
+      const semId = typeof targetLecture.semester === 'string' ? targetLecture.semester : targetLecture.semester._id || targetLecture.semester.id;
+      handleSemesterSelected(semId, isEditMode);
+    }
+  };
+
+  const handleSubjectReload = (isEditMode = true) => {
+    const targetLecture = isEditMode ? editLecture : newLecture;
+    if (targetLecture?.subject) {
+      const subjId = typeof targetLecture.subject === 'string' ? targetLecture.subject : targetLecture.subject._id || targetLecture.subject.id;
+      handleSubjectSelected(subjId, isEditMode);
     }
   };
 
@@ -401,54 +457,70 @@ export default function LectureScheduling() {
         )}
       />
 
-      {/* Create Dialog */}
-      <CreateLectureDialog
-        open={openCreate}
-        onClose={() => {
-          setOpenCreate(false);
-          setSemesterSubjects([]);
-          setSubjectLecturers([]);
-          setNewLecture({
-            topic: '',
-            lecturer: '',
-            subject: '',
-            semester: '',
-            scheduledTime: ''
-          });
-        }}
-        onSave={handleCreate}
-        lecture={newLecture}
-        setLecture={setNewLecture}
-        lecturers={newLecture.subject ? subjectLecturers : []}
-        subjects={semesterSubjects}
-        semesters={semesters}
-        onSemesterSelected={handleSemesterSelected}
-        onSubjectSelected={handleSubjectSelected}
-        subjectLoading={loadingSemesterSubjects}
-        lecturerLoading={loadingSubjectLecturers}
-      />
+       {/* Create Dialog */}
+       <CreateLectureDialog
+         open={openCreate}
+         onClose={() => {
+           setOpenCreate(false);
+           setCreateSemesterSubjects([]);
+           setCreateSubjectLecturers([]);
+           setCreateSemesterSubjectsError(null);
+           setCreateSubjectLecturersError(null);
+           setNewLecture({
+             topic: '',
+             lecturer: '',
+             subject: '',
+             semester: '',
+             scheduledTime: ''
+           });
+         }}
+         onSave={handleCreate}
+         lecture={newLecture}
+         setLecture={setNewLecture}
+         lecturers={newLecture.subject ? createSubjectLecturers : []}
+         subjects={createSemesterSubjects}
+         semesters={semesters}
+         onSemesterSelected={(semId) => handleSemesterSelected(semId, false)}
+         onSubjectSelected={(subjId) => handleSubjectSelected(subjId, false)}
+         subjectLoading={loadingSemesterSubjects}
+         lecturerLoading={loadingSubjectLecturers}
+         semesterError={createSemesterSubjectsError}
+         subjectError={createSubjectLecturersError}
+         onReload={() => {
+           handleSemesterReload(false);
+           handleSubjectReload(false);
+         }}
+       />
 
-      {/* Edit Dialog */}
-      <EditLectureDialog
-        open={openEdit}
-        onClose={() => {
-          setOpenEdit(false);
-          setSelectedLecture(null);
-          setSemesterSubjects([]);
-          setSubjectLecturers([]);
-        }}
-        onSave={handleUpdate}
-        onDelete={() => setOpenConfirmDelete(true)}
-        lecture={editLecture}
-        setLecture={setEditLecture}
-        lecturers={editLecture?.subject ? subjectLecturers : []}
-        subjects={editLecture?.semester ? semesterSubjects : subjects}
-        semesters={semesters}
-        onSemesterSelected={handleSemesterSelected}
-        onSubjectSelected={handleSubjectSelected}
-        subjectLoading={loadingSemesterSubjects}
-        lecturerLoading={loadingSubjectLecturers}
-      />
+       {/* Edit Dialog */}
+       <EditLectureDialog
+         open={openEdit}
+         onClose={() => {
+           setOpenEdit(false);
+           setSelectedLecture(null);
+           setSemesterSubjects([]);
+           setSubjectLecturers([]);
+           setSemesterSubjectsError(null);
+           setSubjectLecturersError(null);
+         }}
+         onSave={handleUpdate}
+         onDelete={() => setOpenConfirmDelete(true)}
+         lecture={editLecture}
+         setLecture={setEditLecture}
+         lecturers={editLecture?.subject ? subjectLecturers : []}
+         subjects={editLecture?.semester ? semesterSubjects : subjects}
+         semesters={semesters}
+         onSemesterSelected={(semId) => handleSemesterSelected(semId, true)}
+         onSubjectSelected={(subjId) => handleSubjectSelected(subjId, true)}
+         subjectLoading={loadingSemesterSubjects}
+         lecturerLoading={loadingSubjectLecturers}
+         semesterError={semesterSubjectsError}
+         subjectError={subjectLecturersError}
+         onReload={() => {
+           handleSemesterReload(true);
+           handleSubjectReload(true);
+         }}
+       />
 
       {/* Delete Confirmation */}
       <ConfirmDeleteDialog
