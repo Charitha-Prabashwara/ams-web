@@ -35,12 +35,10 @@ const EditLectureDialog = ({
   console.log('EditLectureDialog render — semesters count:', semesters.length);
   // State options for status
   const stateOptions = [
-    { value: 'scheduled', label: 'scheduled' },
-    { value: 'completed', label: 'completed' },
-    { value: 'postponed', label: 'postponed' },
-    { value: 'canceled', label: 'canceled' },
-    {value: 'rescheduled', label: 'rescheduled' }
-    
+    { value: 'SCHEDULED', label: 'Scheduled' },
+    { value: 'IN_PROGRESS', label: 'In Progress' },
+    { value: 'COMPLETED', label: 'Completed' },
+    { value: 'CANCELLED', label: 'Cancelled' }
   ];
 
   // Helper to extract ID from object, array, or string
@@ -55,21 +53,6 @@ const EditLectureDialog = ({
     if (typeof field === 'object') return field._id || field.id || '';
     return '';
   };
-
-  // Populate form when lecture changes
-  React.useEffect(() => {
-    if (lecture && open) {
-      setLecture({
-        ...lecture,
-        semester: getId(lecture.semester),
-        subject: getId(lecture.subject),
-        lecturer: getId(lecture.lecturer),
-        state: lecture.state || 'SCHEDULED',
-        scheduledTimeDisplay: lecture.scheduledTime ? new Date(lecture.scheduledTime).toISOString().slice(0, 16) : '',
-        endTimeDisplay: lecture.endTime ? new Date(lecture.endTime).toISOString().slice(0, 16) : ''
-      });
-    }
-  }, [lecture, open, setLecture]);
 
   // Auto-load subjects and lecturers when editing existing lecture
   const prevLectureIdRef = React.useRef(null);
@@ -174,10 +157,13 @@ const EditLectureDialog = ({
                   Semester <span style={{ color: 'red' }}>*</span>
                 </Typography>
                 <FormControl fullWidth>
-                  <Select value={getId(lecture.semester) || ''} onChange={handleChange('semester')}>
+                  <Select value={getId(lecture.semester) || ''} onChange={handleChange('semester')} displayEmpty>
+                    <MenuItem value="" disabled>
+                      Select Semester
+                    </MenuItem>
                     {semesters.map((semester) => (
-                      <MenuItem key={semester.id || semester._id} value={semester.id || semester._id}>
-                        {semester?.name || semester?.id}
+                      <MenuItem key={semester._id || semester.id} value={semester._id || semester.id}>
+                        {semester.name?.medium || semester.name?.long || 'Semester'}
                       </MenuItem>
                     ))}
                   </Select>
@@ -193,7 +179,7 @@ const EditLectureDialog = ({
                       {subjectLoading ? 'Loading subjects...' : !lecture?.semester ? 'Select a semester first' : 'Select Subject'}
                     </MenuItem>
                     {subjects.map((subject) => (
-                      <MenuItem key={subject.id || subject._id} value={subject.id || subject._id}>
+                      <MenuItem key={subject._id || subject.id} value={subject._id || subject.id}>
                         {subject.name?.long || subject.code || 'Unknown'}
                       </MenuItem>
                     ))}
@@ -211,7 +197,7 @@ const EditLectureDialog = ({
                       {lecturerLoading ? 'Loading lecturers...' : !lecture?.subject ? 'Select a subject first' : 'Select Lecturer'}
                     </MenuItem>
                     {lecturers.map((lecturer) => (
-                      <MenuItem key={lecturer.id || lecturer._id} value={lecturer.id || lecturer._id}>
+                      <MenuItem key={lecturer._id || lecturer.id} value={lecturer._id || lecturer.id}>
                         {lecturer.name?.full_name || lecturer.registration_id || 'Unknown'}
                       </MenuItem>
                     ))}
@@ -259,7 +245,7 @@ const EditLectureDialog = ({
                 Status
               </Typography>
               <FormControl fullWidth>
-                <Select value={lecture.state} onChange={handleChange('state')}>
+                <Select value={lecture.state || 'SCHEDULED'} onChange={handleChange('state')}>
                   {stateOptions.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}

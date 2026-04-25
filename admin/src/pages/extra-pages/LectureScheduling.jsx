@@ -74,8 +74,25 @@ export default function LectureScheduling() {
   // Initialize edit form when selected lecture changes
   useEffect(() => {
     if (selectedLecture) {
+      // Helper to extract ID from object, array, or string
+      const getId = (field) => {
+        if (!field) return '';
+        if (Array.isArray(field)) {
+          const first = field[0];
+          if (typeof first === 'object') return first._id || first.id || '';
+          return first || '';
+        }
+        if (typeof field === 'string') return field;
+        if (typeof field === 'object') return field._id || field.id || '';
+        return '';
+      };
+      
       setEditLecture({
         ...selectedLecture,
+        semester: getId(selectedLecture.semester),
+        subject: getId(selectedLecture.subject),
+        lecturer: getId(selectedLecture.lecturer),
+        state: selectedLecture.state || 'SCHEDULED',
         scheduledTimeDisplay: selectedLecture.scheduledTime ? new Date(selectedLecture.scheduledTime).toISOString().slice(0, 16) : '',
         endTimeDisplay: selectedLecture.endTime ? new Date(selectedLecture.endTime).toISOString().slice(0, 16) : ''
       });
