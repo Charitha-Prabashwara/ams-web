@@ -1,15 +1,7 @@
 // CreateSubjectRegistration.jsx
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  TextField
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, TextField } from '@mui/material';
 
-import { react, useEffect } from "react";
+import { react, useEffect } from 'react';
 
 export default function CreateSubjectRegistration({
   open,
@@ -21,35 +13,30 @@ export default function CreateSubjectRegistration({
   setRegistration,
   onRegisterClick
 }) {
-
   useEffect(() => {
     if (open && students.length && semesters.length && subjects.length) {
-    setRegistration({
-    student: students[0].id,
-    semester: semesters[0].id,
-    subject: subjects[0].id
-    });
+      setRegistration({
+        student: students[0].id,
+        semester: semesters[0].id,
+        subject: subjects[0].id
+      });
     }
-}, [open, students, semesters, subjects]);
+  }, [open, students, semesters, subjects]);
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>New Subject Registration</DialogTitle>
 
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={2} mt={1}>
-
           {/* STUDENT */}
           <TextField
             select
             label="Student"
             value={registration.student}
-            onChange={(e) =>
-              setRegistration({ ...registration, student: e.target.value })
-            }
+            onChange={(e) => setRegistration({ ...registration, student: e.target.value })}
             SelectProps={{ native: true }}
             fullWidth
           >
-            
             {students.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.registration_id} | {s.name?.full_name}
@@ -58,20 +45,17 @@ export default function CreateSubjectRegistration({
           </TextField>
 
           {/* SEMESTER */}
-                      <TextField
+          <TextField
             select
             label="Semester"
             value={registration.semester}
-            onChange={(e) =>
-            setRegistration({ ...registration, semester: e.target.value })
-            }
+            onChange={(e) => setRegistration({ ...registration, semester: e.target.value })}
             SelectProps={{ native: true }}
             fullWidth
-            >
-            
+          >
             {semesters.map((sem) => (
               <option key={sem.id} value={sem.id}>
-                {sem.code + " - "+ sem.name}
+                {sem.code + ' - ' + sem.name}
               </option>
             ))}
           </TextField>
@@ -81,20 +65,16 @@ export default function CreateSubjectRegistration({
             select
             label="Subject"
             value={registration.subject}
-            onChange={(e) =>
-              setRegistration({ ...registration, subject: e.target.value })
-            }
+            onChange={(e) => setRegistration({ ...registration, subject: e.target.value })}
             SelectProps={{ native: true }}
             fullWidth
           >
-            
             {subjects.map((sub) => (
               <option key={sub.id} value={sub.id}>
                 {sub.code} | {sub.name}
               </option>
             ))}
           </TextField>
-
         </Box>
       </DialogContent>
 
@@ -104,11 +84,7 @@ export default function CreateSubjectRegistration({
           variant="contained"
           color="success"
           onClick={onRegisterClick}
-          disabled={
-            !registration.student ||
-            !registration.subject ||
-            !registration.semester
-          }
+          disabled={!registration.student || !registration.subject || !registration.semester}
         >
           Register
         </Button>

@@ -1,25 +1,7 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  Box,
-  MenuItem
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Box, MenuItem } from '@mui/material';
 
-const EditCourseDialog = ({
-  open,
-  onClose,
-  onSave,
-  onDelete,
-  course,
-  setCourse,
-  departments
-}) => {
+const EditCourseDialog = ({ open, onClose, onSave, onDelete, course, setCourse, departments }) => {
   return (
     <Dialog open={open} maxWidth="sm" fullWidth>
       <DialogTitle>Edit Course</DialogTitle>
@@ -28,32 +10,15 @@ const EditCourseDialog = ({
         {course && (
           <>
             {/* Code & Name */}
-            <Box
-              display="flex"
-              flexDirection={{ xs: 'column', sm: 'row' }}
-              gap={2}
-              mb={2}
-            >
+            <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
               <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
                 <Typography fontWeight="bold">Code</Typography>
-                <TextField
-                  fullWidth
-                  value={course.code}
-                  onChange={(e) =>
-                    setCourse({ ...course, code: e.target.value.toUpperCase() })
-                  }
-                />
+                <TextField fullWidth value={course.code} onChange={(e) => setCourse({ ...course, code: e.target.value.toUpperCase() })} />
               </Box>
 
               <Box flex="1">
                 <Typography fontWeight="bold">Course Name</Typography>
-                <TextField
-                  fullWidth
-                  value={course.name}
-                  onChange={(e) =>
-                    setCourse({ ...course, name: e.target.value })
-                  }
-                />
+                <TextField fullWidth value={course.name} onChange={(e) => setCourse({ ...course, name: e.target.value })} />
               </Box>
             </Box>
 

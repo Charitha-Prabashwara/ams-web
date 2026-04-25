@@ -85,24 +85,23 @@ const MainRoutes = {
     },
     {
       path: 'subject',
-      element: <Subjects/>
+      element: <Subjects />
     },
     {
       path: 'lecture-scheduling',
-      element: <LectureScheduling/>
+      element: <LectureScheduling />
     },
     {
-      path:'lecturerSubjectRegistration',
-      element:<LecturerSubjectRegistration/>
-
+      path: 'lecturerSubjectRegistration',
+      element: <LecturerSubjectRegistration />
     },
     {
-      path:'SemesterSubjectRegistration',
-      element:<SemesterSubjectRegistration/>
+      path: 'SemesterSubjectRegistration',
+      element: <SemesterSubjectRegistration />
     },
     {
-      path:'lecturer',
-      element:<Lecturer/>
+      path: 'lecturer',
+      element: <Lecturer />
     }
   ]
 };

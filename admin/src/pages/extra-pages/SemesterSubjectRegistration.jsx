@@ -1,7 +1,5 @@
 // SubjectRegistrationPage.jsx
-import {
-  Button
-} from '@mui/material';
+import { Button } from '@mui/material';
 
 import MainCard from 'components/MainCard';
 import { useState, useEffect } from 'react';
@@ -22,19 +20,34 @@ import CreateSubjectRegistration from '../../components/CreateSubjectRegistratio
 import EditSubjectRegistration from '../../components/EditSubjectRegistration';
 
 export default function SubjectRegistrationPage() {
-
   // ---------- SWR DATA ----------
-  const { data: studentsData, error: studentsError, isLoading: studentsLoading, mutate: mutateStudents } =
-    useSWR(['/admin/find/', { type: 'student' }], fetcher, {refreshInterval: 1000});
+  const {
+    data: studentsData,
+    error: studentsError,
+    isLoading: studentsLoading,
+    mutate: mutateStudents
+  } = useSWR(['/admin/find/', { type: 'student' }], fetcher, { refreshInterval: 1000 });
 
-  const { data: subjectsData, error: subjectsError, isLoading: subjectsLoading, mutate: mutateSubjects } =
-    useSWR(['/subject/find/',{}], fetcher);
+  const {
+    data: subjectsData,
+    error: subjectsError,
+    isLoading: subjectsLoading,
+    mutate: mutateSubjects
+  } = useSWR(['/subject/find/', {}], fetcher);
 
-  const { data: semestersData, error: semestersError, isLoading: semestersLoading, mutate: mutateSemesters } =
-    useSWR(['/semester/find/',{}], fetcher);
+  const {
+    data: semestersData,
+    error: semestersError,
+    isLoading: semestersLoading,
+    mutate: mutateSemesters
+  } = useSWR(['/semester/find/', {}], fetcher);
 
-  const { data: registrationsData, error: regError, isLoading: regLoading, mutate: mutateRegistrations } =
-    useSWR(['/subject-registration/find/',{}], fetcher, { refreshInterval: 1000 });
+  const {
+    data: registrationsData,
+    error: regError,
+    isLoading: regLoading,
+    mutate: mutateRegistrations
+  } = useSWR(['/subject-registration/find/', {}], fetcher, { refreshInterval: 1000 });
 
   const students = studentsData?.data?.users || [];
   const subjects = subjectsData?.subjects || [];
@@ -74,9 +87,9 @@ export default function SubjectRegistrationPage() {
   const handleSaveEdit = async () => {
     try {
       console.log(selectedRegistration);
-      
-      delete selectedRegistration.createdAt
-      delete selectedRegistration.updatedAt
+
+      delete selectedRegistration.createdAt;
+      delete selectedRegistration.updatedAt;
       await axiosClient.put('/subject-registration/id/', selectedRegistration);
       mutateRegistrations();
       setOpenEdit(false);
@@ -93,13 +106,13 @@ export default function SubjectRegistrationPage() {
       });
       mutateStudents();
       mutateSubjects();
-      mutateSemesters()
+      mutateSemesters();
       mutateRegistrations();
       setOpenEdit(false);
       setOpenConfirmDelete(false);
 
       showToast({ text: 'Registration deleted successfully!', type: 'success' });
-      console.log(response)
+      console.log(response);
     } catch (err) {
       showToast({ text: err.response?.data?.message || 'Delete failed', type: 'error' });
     }
@@ -117,15 +130,12 @@ export default function SubjectRegistrationPage() {
     mutateRegistrations();
   }, []);
 
-  if (studentsError || subjectsError || semestersError || regError)
-    return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if (studentsError || subjectsError || semestersError || regError) return <LoadingErrorWrapper isLoading={false} isError={true} />;
 
-  if (studentsLoading || subjectsLoading || semestersLoading || regLoading)
-    return <LoadingErrorWrapper isLoading={true} isError={false} />;
+  if (studentsLoading || subjectsLoading || semestersLoading || regLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
 
   return (
     <MainCard title="Student Subject Registrations">
-
       <UniversalActionBar
         buttons={[
           { label: 'Recover', color: 'error', onClick: () => console.log('Recover clicked') },
@@ -146,7 +156,7 @@ export default function SubjectRegistrationPage() {
             label: 'Student',
             key: 'student',
             render: (row) => {
-              const s = students.find(st => st.id === row?.student?._id);
+              const s = students.find((st) => st.id === row?.student?._id);
               return s ? `${s.registration_id} | ${s.name?.full_name}` : '-';
             }
           },
@@ -154,7 +164,7 @@ export default function SubjectRegistrationPage() {
             label: 'Subject',
             key: 'subject',
             render: (row) => {
-              const sub = subjects.find(s => s.id === row?.subject?._id);
+              const sub = subjects.find((s) => s.id === row?.subject?._id);
               return sub ? `${sub.code} | ${sub.name}` : '-';
             }
           },
@@ -162,7 +172,7 @@ export default function SubjectRegistrationPage() {
             label: 'Semester',
             key: 'semester',
             render: (row) => {
-              const sem = semesters.find(s => s.id === row?.semester?._id);
+              const sem = semesters.find((s) => s.id === row?.semester?._id);
               return sem?.name || '-';
             }
           }
@@ -172,7 +182,7 @@ export default function SubjectRegistrationPage() {
             size="small"
             variant="contained"
             sx={{ backgroundColor: '#fbc02d', color: '#000' }}
-            onClick={e => {
+            onClick={(e) => {
               e.stopPropagation();
               setSelectedRegistration(reg);
               setOpenEdit(true);
@@ -198,9 +208,7 @@ export default function SubjectRegistrationPage() {
         open={openConfirmCreate}
         onClose={() => setOpenConfirmCreate(false)}
         onConfirm={handleFinalCreate}
-        confirmText={
-          students.find(s => s.id === newRegistration.student)?.name?.full_name || ''
-        }
+        confirmText={students.find((s) => s.id === newRegistration.student)?.name?.full_name || ''}
         inputValue={confirmText}
         onInputChange={setConfirmText}
         title="Confirm Registration"
@@ -223,9 +231,7 @@ export default function SubjectRegistrationPage() {
         open={openConfirmDelete}
         onClose={() => setOpenConfirmDelete(false)}
         onConfirm={handleFinalDelete}
-        confirmText={
-          students.find(s => s.id === selectedRegistration?.student?._id)?.name?.full_name || ''
-        }
+        confirmText={students.find((s) => s.id === selectedRegistration?.student?._id)?.name?.full_name || ''}
         inputValue={deleteText}
         onInputChange={setDeleteText}
         title="Confirm Delete"
@@ -236,9 +242,9 @@ export default function SubjectRegistrationPage() {
         <DetailsViewBox
           title="Registration Details"
           data={{
-            Student: students.find(s => s.id === selectedRegistration.student._id)?.name?.full_name,
-            Subject: subjects.find(s => s.id === selectedRegistration.subject._id)?.name,
-            Semester: semesters.find(s => s.id === selectedRegistration.semester._id)?.name
+            Student: students.find((s) => s.id === selectedRegistration.student._id)?.name?.full_name,
+            Subject: subjects.find((s) => s.id === selectedRegistration.subject._id)?.name,
+            Semester: semesters.find((s) => s.id === selectedRegistration.semester._id)?.name
           }}
           createdAt={selectedRegistration.createdAt_timestamp}
           updatedAt={selectedRegistration.updatedAt_timestamp}
@@ -247,7 +253,6 @@ export default function SubjectRegistrationPage() {
 
       {/* <LogBox logs={[]} /> */}
       <HelpDrawer open={false} />
-
     </MainCard>
   );
 }

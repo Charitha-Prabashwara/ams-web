@@ -1,36 +1,14 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  Box,
-  MenuItem
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Box, MenuItem } from '@mui/material';
 
-const CreateCourseDialog = ({
-  open,
-  onClose,
-  onSave,
-  course,
-  setCourse,
-  departments
-}) => {
+const CreateCourseDialog = ({ open, onClose, onSave, course, setCourse, departments }) => {
   return (
     <Dialog open={open} maxWidth="sm" fullWidth>
       <DialogTitle>Create New Course</DialogTitle>
 
       <DialogContent dividers>
         {/* Code & Name */}
-        <Box
-          display="flex"
-          flexDirection={{ xs: 'column', sm: 'row' }}
-          gap={2}
-          mb={2}
-        >
+        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} gap={2} mb={2}>
           <Box flex={{ xs: '1 1 100%', sm: '0 0 120px' }}>
             <Typography fontWeight="bold">Course Code</Typography>
             <TextField

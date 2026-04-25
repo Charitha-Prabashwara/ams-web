@@ -30,8 +30,6 @@ const SemesterEditDialog = ({
 }) => {
   if (!semester) return null;
 
-  
-  
   return (
     <Dialog open={open} maxWidth="sm" fullWidth>
       <DialogTitle>Edit Semester</DialogTitle>
@@ -61,17 +59,13 @@ const SemesterEditDialog = ({
             fullWidth
             label="Code"
             value={semester.code || ''}
-            onChange={(e) =>
-              setSemester({ ...semester, code: e.target.value })
-            }
+            onChange={(e) => setSemester({ ...semester, code: e.target.value })}
           />
           <TextField
             fullWidth
             label="Name"
             value={semester.name || ''}
-            onChange={(e) =>
-              setSemester({ ...semester, name: e.target.value })
-            }
+            onChange={(e) => setSemester({ ...semester, name: e.target.value })}
           />
         </Box>
 
@@ -83,10 +77,9 @@ const SemesterEditDialog = ({
             <Select
               label="Department"
               value={semester.department?.id || semester.department?._id}
-              onChange={(e) =>{
-                setSemester({...semester,department: {...semester.department,id: e.target.value}});
+              onChange={(e) => {
+                setSemester({ ...semester, department: { ...semester.department, id: e.target.value } });
                 onDepartmentChange?.(e.target.value);
-                
               }}
             >
               {departments.map((d) => (
@@ -148,8 +141,12 @@ const SemesterEditDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button color="error" onClick={onDelete}>Delete</Button>
-        <Button variant="contained" onClick={onSave}>Save</Button>
+        <Button color="error" onClick={onDelete}>
+          Delete
+        </Button>
+        <Button variant="contained" onClick={onSave}>
+          Save
+        </Button>
         <Button onClick={onClose}>Close</Button>
       </DialogActions>
     </Dialog>

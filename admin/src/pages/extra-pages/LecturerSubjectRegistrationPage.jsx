@@ -1,14 +1,5 @@
 // LecturerSubjectRegistrationPage.jsx
-import {
-  Button,
-  Box,
-  TextField,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Typography
-} from '@mui/material';
+import { Button, Box, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Typography } from '@mui/material';
 
 import MainCard from 'components/MainCard';
 import { useState, useEffect } from 'react';
@@ -30,19 +21,32 @@ import EditLecturerSubjectRegistration from '../../components/EditLecturerSubjec
 
 export default function LecturerSubjectRegistrationPage() {
   // ---------- SWR DATA ----------
-  const body = { type: 'lecturer'};
+  const body = { type: 'lecturer' };
 
-  const { data: lecturersData, error: lecturersError, isLoading: lecturersLoading, mutate: mutateLecturers } = useSWR(['admin/find/', body], fetcher);
-  const { data: subjectsData, error: subjectsError, isLoading: subjectsLoading, mutate: mutateSubjects } = useSWR(['/subject/find/'], fetcher);
-  const { data: registrationsData, error: regError, isLoading: regLoading, mutate: mutateRegistrations } = useSWR(['/lecturer-subject-registration/find/'], fetcher, { refreshInterval: 1000 });
-  
-  
+  const {
+    data: lecturersData,
+    error: lecturersError,
+    isLoading: lecturersLoading,
+    mutate: mutateLecturers
+  } = useSWR(['admin/find/', body], fetcher);
+  const {
+    data: subjectsData,
+    error: subjectsError,
+    isLoading: subjectsLoading,
+    mutate: mutateSubjects
+  } = useSWR(['/subject/find/'], fetcher);
+  const {
+    data: registrationsData,
+    error: regError,
+    isLoading: regLoading,
+    mutate: mutateRegistrations
+  } = useSWR(['/lecturer-subject-registration/find/'], fetcher, { refreshInterval: 1000 });
+
   const lecturers = lecturersData?.data?.users || [];
- 
+
   const subjects = subjectsData?.subjects || [];
   const registrations = registrationsData?.registrations || [];
- 
-  
+
   // ---------- CREATE ----------
   const [openCreate, setOpenCreate] = useState(false);
   const [newRegistration, setNewRegistration] = useState({ lecturer: '', subject: '' });
@@ -65,11 +69,8 @@ export default function LecturerSubjectRegistrationPage() {
       setNewRegistration({ lecturer: '', subject: '' });
       setConfirmText('');
 
-    
-      
       showToast({ text: 'Lecturer registered successfully!', type: 'success' });
     } catch (err) {
-     
       showToast({ text: err.response?.data?.message || 'Failed to register', type: 'error' });
     }
   };
@@ -84,21 +85,26 @@ export default function LecturerSubjectRegistrationPage() {
     try {
       delete selectedRegistration.updatedAt_timestamp;
       delete selectedRegistration.createdAt_timestamp;
-      console.log({id: selectedRegistration.id, lecturer: selectedRegistration?.lecturer?._id, subject: selectedRegistration?.subject?._id})
+      console.log({
+        id: selectedRegistration.id,
+        lecturer: selectedRegistration?.lecturer?._id,
+        subject: selectedRegistration?.subject?._id
+      });
 
-     
-      await axiosClient.put('/lecturer-subject-registration/id/', {id: selectedRegistration.id, lecturer: selectedRegistration?.lecturer?._id, subject: selectedRegistration?.subject});
+      await axiosClient.put('/lecturer-subject-registration/id/', {
+        id: selectedRegistration.id,
+        lecturer: selectedRegistration?.lecturer?._id,
+        subject: selectedRegistration?.subject
+      });
       mutateRegistrations();
       setOpenEdit(false);
       showToast({ text: 'Registration updated successfully!', type: 'success' });
     } catch (err) {
-     
       showToast({ text: err.response?.data?.message || 'Failed to update', type: 'error' });
     }
   };
 
   const handleFinalDelete = async () => {
-   
     try {
       await axiosClient.delete('lecturer-subject-registration/id/', { data: { id: selectedRegistration.id } });
       mutateRegistrations();
@@ -106,14 +112,14 @@ export default function LecturerSubjectRegistrationPage() {
       setOpenConfirmDelete(false);
       showToast({ text: 'Registration deleted successfully!', type: 'success' });
     } catch (err) {
-      console.log(err)
+      console.log(err);
       showToast({ text: err.response?.data?.message || 'Failed to delete', type: 'error' });
     }
   };
 
   // ---------- HELP ----------
   const [openHelp, setOpenHelp] = useState(false);
-  const toggleHelp = () => setOpenHelp(prev => !prev);
+  const toggleHelp = () => setOpenHelp((prev) => !prev);
 
   // ---------- PAGINATION ----------
   const [page, setPage] = useState(1);
@@ -127,17 +133,14 @@ export default function LecturerSubjectRegistrationPage() {
     '[12:20:45] Error: Duplicate registration'
   ]);
 
-  useEffect(()=>{
+  useEffect(() => {
     mutateLecturers();
     mutateRegistrations();
     mutateSubjects();
-  },[])
+  }, []);
 
-  if ( subjectsError || regError || lecturersError) return <LoadingErrorWrapper isLoading={false} isError={true} />;
-  if ( subjectsLoading || regLoading || lecturersLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
-
-
-
+  if (subjectsError || regError || lecturersError) return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if (subjectsLoading || regLoading || lecturersLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
 
   return (
     <MainCard title="Lecturer Subject Registrations">
@@ -157,25 +160,37 @@ export default function LecturerSubjectRegistrationPage() {
         onPageChange={setPage}
         onRowClick={setSelectedRegistration}
         columns={[
-          { label: 'Lecturer', key: 'lecturer', render: (row)=>{ 
-            const lecturer = lecturers.find(l => l.id === row.lecturer._id)
-            const full_name =  lecturer?.name?.full_name
-            const registration_id = lecturer?.registration_id
-            return (registration_id + " | " + full_name) || '-'
-          }},
-          { label: 'Subject', key: 'subject', render: (row) =>{
-            const subject =  subjects.find(s => s.id === row.subject._id);
-            const code = subject?.code;
-            const name = subject?.name;
-            return (code + " | " + name) || '-'
-          } }
+          {
+            label: 'Lecturer',
+            key: 'lecturer',
+            render: (row) => {
+              const lecturer = lecturers.find((l) => l.id === row.lecturer._id);
+              const full_name = lecturer?.name?.full_name;
+              const registration_id = lecturer?.registration_id;
+              return registration_id + ' | ' + full_name || '-';
+            }
+          },
+          {
+            label: 'Subject',
+            key: 'subject',
+            render: (row) => {
+              const subject = subjects.find((s) => s.id === row.subject._id);
+              const code = subject?.code;
+              const name = subject?.name;
+              return code + ' | ' + name || '-';
+            }
+          }
         ]}
         renderActions={(reg) => (
           <Button
             size="small"
             variant="contained"
             sx={{ backgroundColor: '#fbc02d', color: '#000', '&:hover': { backgroundColor: '#f9a825' } }}
-            onClick={e => { e.stopPropagation(); setSelectedRegistration(reg); setOpenEdit(true); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelectedRegistration(reg);
+              setOpenEdit(true);
+            }}
           >
             Manage
           </Button>
@@ -197,7 +212,7 @@ export default function LecturerSubjectRegistrationPage() {
         open={openConfirmCreate}
         onClose={() => setOpenConfirmCreate(false)}
         onConfirm={handleFinalCreate}
-        confirmText={lecturers.find(l => l.id === newRegistration.lecturer)?.name?.full_name || ''}
+        confirmText={lecturers.find((l) => l.id === newRegistration.lecturer)?.name?.full_name || ''}
         inputValue={confirmText}
         onInputChange={setConfirmText}
         title="Confirm Registration"
@@ -240,14 +255,14 @@ export default function LecturerSubjectRegistrationPage() {
       </Dialog> */}
 
       <EditLecturerSubjectRegistration
-          open={openEdit}
-          onClose={() => setOpenEdit(false)}
-          lecturers={lecturers}
-          subjects={subjects}
-          registration={selectedRegistration || { lecturer: '', subject: '' }}
-          setRegistration={setSelectedRegistration}
-          onSave={handleSaveEdit}          // API call + toast stays in parent
-          onDelete={() => setOpenConfirmDelete(true)} // triggers confirm delete dialog
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        lecturers={lecturers}
+        subjects={subjects}
+        registration={selectedRegistration || { lecturer: '', subject: '' }}
+        setRegistration={setSelectedRegistration}
+        onSave={handleSaveEdit} // API call + toast stays in parent
+        onDelete={() => setOpenConfirmDelete(true)} // triggers confirm delete dialog
       />
 
       {/* CONFIRM DELETE */}
@@ -255,7 +270,7 @@ export default function LecturerSubjectRegistrationPage() {
         open={openConfirmDelete}
         onClose={() => setOpenConfirmDelete(false)}
         onConfirm={handleFinalDelete}
-        confirmText={lecturers.find(l => l.id === selectedRegistration?.lecturer._id)?.name?.full_name || ''}
+        confirmText={lecturers.find((l) => l.id === selectedRegistration?.lecturer._id)?.name?.full_name || ''}
         inputValue={deleteText}
         onInputChange={setDeleteText}
         title="Confirm Delete Registration"
@@ -267,8 +282,8 @@ export default function LecturerSubjectRegistrationPage() {
         <DetailsViewBox
           title="Registration Details"
           data={{
-            Lecturer: lecturers.find(l => l.id === selectedRegistration?.lecturer._id)?.name?.full_name || '-',
-            Subject: subjects.find(s => s.id === selectedRegistration.subject._id)?.name || '-'
+            Lecturer: lecturers.find((l) => l.id === selectedRegistration?.lecturer._id)?.name?.full_name || '-',
+            Subject: subjects.find((s) => s.id === selectedRegistration.subject._id)?.name || '-'
           }}
           createdAt={selectedRegistration.createdAt_timestamp}
           updatedAt={selectedRegistration.updatedAt_timestamp}

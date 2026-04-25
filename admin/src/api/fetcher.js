@@ -13,9 +13,9 @@ export const fetcher = (url, body = {}) => {
 
   // Only POST if body has keys
   if (body) {
-    return axiosClient.post(url, body).then(res => res.data);
+    return axiosClient.post(url, body).then((res) => res.data);
   }
 
   // fallback to GET if no body
-  return axiosClient.get(url).then(res => res.data);
+  return axiosClient.get(url).then((res) => res.data);
 };

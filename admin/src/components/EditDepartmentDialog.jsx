@@ -1,24 +1,7 @@
 import React from 'react';
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Typography,
-  Grid,
-  Box
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Typography, Grid, Box } from '@mui/material';
 
-const EditDepartmentDialog = ({
-  open,
-  onClose,
-  onSave,
-  onDelete,
-  department,
-  setDepartment
-}) => {
+const EditDepartmentDialog = ({ open, onClose, onSave, onDelete, department, setDepartment }) => {
   return (
     <Dialog open={open} maxWidth="sm" fullWidth>
       <DialogTitle>Edit Department</DialogTitle>

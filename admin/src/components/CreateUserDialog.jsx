@@ -1,4 +1,4 @@
-import {React, useState} from 'react';
+import { React, useState } from 'react';
 
 import {
   Dialog,
@@ -16,23 +16,13 @@ import {
 } from '@mui/material';
 import AlphaUpperTextField from './AlphaUpperTextField';
 
-export default function CreateUserDialog({
-  open,
-  onClose,
-  onCreate,
-  newHOD,
-  setNewHOD,
-  departments = []
-}) {
-
-
+export default function CreateUserDialog({ open, onClose, onCreate, newHOD, setNewHOD, departments = [] }) {
   const handleChange = (field, value) => {
-    setNewHOD(prev => {
+    setNewHOD((prev) => {
       const updated = { ...prev, [field]: value };
 
       // Auto-generate full name & initials
 
-      
       return updated;
     });
   };
@@ -83,16 +73,16 @@ export default function CreateUserDialog({
               value={newHOD.fullName}
               onChange={(val) => handleChange('fullName', val)}
               forceUppercase={true}
-              allowedRegex ={/[^a-zA-Z ]/g}
+              allowedRegex={/[^a-zA-Z ]/g}
               fullWidth
             />
 
             <AlphaUpperTextField
               label="Initials"
               value={newHOD.nameWithInitial}
-             onChange={(val) => handleChange('nameWithInitial', val)}
+              onChange={(val) => handleChange('nameWithInitial', val)}
               forceUppercase={true}
-              allowedRegex = {/[^a-zA-Z .]/g}
+              allowedRegex={/[^a-zA-Z .]/g}
               fullWidth
             />
           </Box>
@@ -121,7 +111,7 @@ export default function CreateUserDialog({
             <AlphaUpperTextField
               label="ZIP Code"
               value={newHOD.addressZip}
-             onChange={(val) => handleChange('addressZip', val)}
+              onChange={(val) => handleChange('addressZip', val)}
               forceUppercase={false}
               allowedRegex={/[^0-9]/g}
               fullWidth
@@ -135,12 +125,8 @@ export default function CreateUserDialog({
 
           <FormControl fullWidth>
             <InputLabel>Department</InputLabel>
-            <Select
-              label="Department"
-              value={newHOD.departmentId || ''}
-              onChange={(e) => handleChange('departmentId', e.target.value)}
-            >
-              {departments.map(dept => (
+            <Select label="Department" value={newHOD.departmentId || ''} onChange={(e) => handleChange('departmentId', e.target.value)}>
+              {departments.map((dept) => (
                 <MenuItem key={dept.id || dept._id} value={dept.id || dept._id}>
                   {dept.name?.long || dept.name?.short}
                 </MenuItem>

@@ -35,7 +35,7 @@ export const lectureAPI = {
    * Find lectures with optional filters
    * POST /lecture/find/
    */
-  find: (filters = {}) => axiosClient.post('/lecture/find/', filters),
+  find: (filters = {}) => axiosClient.post('/lecture/find/', filters)
 };
 
 export default lectureAPI;

@@ -74,17 +74,16 @@ export default function DepartmentPage() {
       setOpenCreateDialog(false);
       setConfirmText('');
       setNewDept({ shortName: '', keyName: '', fullName: '', description: '' });
-        showToast({
-              text: response.data.message || 'Department created successfully',
-              type: 'success'
-            });
+      showToast({
+        text: response.data.message || 'Department created successfully',
+        type: 'success'
+      });
     } catch (err) {
       console.error(err);
-           showToast({
-              text: err.response?.data?.message || 'Error Create Semester',
-              type: 'error'
-            })
-      
+      showToast({
+        text: err.response?.data?.message || 'Error Create Semester',
+        type: 'error'
+      });
     }
   };
 
@@ -101,7 +100,7 @@ export default function DepartmentPage() {
 
   const handleSaveEdit = async () => {
     try {
-     const response =  await axiosClient.put('/department/id/', {
+      const response = await axiosClient.put('/department/id/', {
         id: selectedDept.id,
         shortName: selectedDept.name.short,
         keyName: selectedDept.name.key,
@@ -110,16 +109,16 @@ export default function DepartmentPage() {
       });
       mutate();
       setOpenEditDialog(false);
-        showToast({
-              text: response.data.message || 'Department update successfully',
-              type: 'success'
-            });
+      showToast({
+        text: response.data.message || 'Department update successfully',
+        type: 'success'
+      });
     } catch (err) {
       console.error(err);
-       showToast({
-              text: err.response?.data?.message || 'Error Update Department',
-              type: 'error'
-            })
+      showToast({
+        text: err.response?.data?.message || 'Error Update Department',
+        type: 'error'
+      });
     }
   };
 
@@ -135,16 +134,16 @@ export default function DepartmentPage() {
       mutate();
       setOpenConfirmDelete(false);
       setOpenEditDialog(false);
-           showToast({
-              text: response.data.message || 'Department delete successfully',
-              type: 'success'
-            });
+      showToast({
+        text: response.data.message || 'Department delete successfully',
+        type: 'success'
+      });
     } catch (err) {
       console.error(err);
-       showToast({
-              text: err.response?.data?.message || 'Error delete Department',
-              type: 'error'
-            })
+      showToast({
+        text: err.response?.data?.message || 'Error delete Department',
+        type: 'error'
+      });
     }
   };
 
@@ -270,13 +269,13 @@ export default function DepartmentPage() {
       {/* ====================== EDIT DIALOG ====================== */}
 
       <EditDepartmentDialog
-  open={openEditDialog}
-  onClose={() => setOpenEditDialog(false)}
-  onSave={handleSaveEdit}
-  onDelete={() => setOpenConfirmDelete(true)}
-  department={selectedDept}
-  setDepartment={setSelectedDept}
-/>
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        onSave={handleSaveEdit}
+        onDelete={() => setOpenConfirmDelete(true)}
+        department={selectedDept}
+        setDepartment={setSelectedDept}
+      />
 
       <ConfirmDeleteDialog
         open={openConfirmDelete}

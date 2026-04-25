@@ -12,9 +12,8 @@ export default function EditLecturerSubjectRegistration({
   onSave,
   onDelete
 }) {
-  
-  setRegistration.lecturer = registration?.lecturer?._id
- 
+  setRegistration.lecturer = registration?.lecturer?._id;
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
       <DialogTitle>Edit Registration</DialogTitle>
@@ -36,33 +35,32 @@ export default function EditLecturerSubjectRegistration({
             ))}
           </TextField> */}
 
-
-{/* Lecturer - Textbox (Auto Loaded) */}
-<TextField
-label="Lecturer"
-value={registration?.lecturer?.name?.full_name || ''}
-disabled
-fullWidth
-/>
+          {/* Lecturer - Textbox (Auto Loaded) */}
+          <TextField label="Lecturer" value={registration?.lecturer?.name?.full_name || ''} disabled fullWidth />
 
           <TextField
             select
             label="Subject"
             value={registration.subject._id}
-            onChange={e => setRegistration({ ...registration, subject: e.target.value })}
+            onChange={(e) => setRegistration({ ...registration, subject: e.target.value })}
             SelectProps={{ native: true }}
           >
-           
-            {subjects.map(s => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
             ))}
           </TextField>
         </Box>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" color="success" onClick={onSave}>Save</Button>
-        <Button variant="contained" color="error" onClick={onDelete}>Delete</Button>
+        <Button variant="contained" color="success" onClick={onSave}>
+          Save
+        </Button>
+        <Button variant="contained" color="error" onClick={onDelete}>
+          Delete
+        </Button>
       </DialogActions>
     </Dialog>
   );

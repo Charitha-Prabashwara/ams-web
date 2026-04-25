@@ -42,7 +42,7 @@ const academic = {
       title: 'Subject',
       type: 'item',
       url: '/subject',
-      icon: icons.FileTextOutlined 
+      icon: icons.FileTextOutlined
     },
     {
       id: 'lecture-scheduling',

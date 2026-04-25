@@ -81,12 +81,7 @@ const CreateLectureDialog = ({
   };
 
   // Validation check
-  const isValid =
-    lecture.topic &&
-    lecture.lecturer &&
-    lecture.subject &&
-    lecture.semester &&
-    lecture.scheduledTime;
+  const isValid = lecture.topic && lecture.lecturer && lecture.subject && lecture.semester && lecture.scheduledTime;
 
   // const loadsubjects=(semesterId)=>{
   //   // ---------- FETCH LECTURERS ----------
@@ -101,18 +96,17 @@ const CreateLectureDialog = ({
     <Dialog open={open} maxWidth="md" fullWidth>
       <DialogTitle>Schedule New Lecture</DialogTitle>
 
-      <DialogContent 
+      <DialogContent
         dividers
         sx={{
-          filter: (subjectLoading || lecturerLoading) ? 'blur(3px)' : 'none',
-          pointerEvents: (subjectLoading || lecturerLoading) ? 'none' : 'auto',
+          filter: subjectLoading || lecturerLoading ? 'blur(3px)' : 'none',
+          pointerEvents: subjectLoading || lecturerLoading ? 'none' : 'auto',
           transition: 'filter 0.2s ease'
         }}
       >
         <Box display="flex" flexDirection="column" gap={3} mt={1}>
           {/* Topic */}
 
-          
           <Box>
             <Typography fontWeight="bold" mb={1}>
               Topic <span style={{ color: 'red' }}>*</span>
@@ -129,16 +123,12 @@ const CreateLectureDialog = ({
 
           {/* Lecturer, Subject, Semester */}
           <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
-                        <Box flex="1">
+            <Box flex="1">
               <Typography fontWeight="bold" mb={1}>
                 Semester <span style={{ color: 'red' }}>*</span>
               </Typography>
               <FormControl fullWidth>
-                <Select
-                  value={lecture.semester || ''}
-                  onChange={handleChange('semester')}
-                  displayEmpty
-                >
+                <Select value={lecture.semester || ''} onChange={handleChange('semester')} displayEmpty>
                   <MenuItem value="" disabled>
                     Select Semester
                   </MenuItem>
@@ -151,16 +141,12 @@ const CreateLectureDialog = ({
               </FormControl>
             </Box>
 
-                        <Box flex="1">
+            <Box flex="1">
               <Typography fontWeight="bold" mb={1}>
                 Subject <span style={{ color: 'red' }}>*</span>
               </Typography>
               <FormControl fullWidth disabled={!lecture.semester || subjectLoading}>
-                <Select
-                  value={lecture.subject || ''}
-                  onChange={handleChange('subject')}
-                  displayEmpty
-                >
+                <Select value={lecture.subject || ''} onChange={handleChange('subject')} displayEmpty>
                   <MenuItem value="" disabled>
                     {subjectLoading ? 'Loading subjects...' : !lecture.semester ? 'Select a semester first' : 'Select Subject'}
                   </MenuItem>
@@ -178,11 +164,7 @@ const CreateLectureDialog = ({
                 Lecturer <span style={{ color: 'red' }}>*</span>
               </Typography>
               <FormControl fullWidth disabled={!lecture?.subject || lecturerLoading}>
-                <Select
-                  value={lecture.lecturer || ''}
-                  onChange={handleChange('lecturer')}
-                  displayEmpty
-                >
+                <Select value={lecture.lecturer || ''} onChange={handleChange('lecturer')} displayEmpty>
                   <MenuItem value="" disabled>
                     {lecturerLoading ? 'Loading lecturers...' : !lecture?.subject ? 'Select a subject first' : 'Select Lecturer'}
                   </MenuItem>
@@ -194,9 +176,6 @@ const CreateLectureDialog = ({
                 </Select>
               </FormControl>
             </Box>
-
-
-
           </Box>
 
           {/* Scheduled Time */}
@@ -228,12 +207,10 @@ const CreateLectureDialog = ({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose} disabled={subjectLoading}>Cancel</Button>
-        <Button
-          variant="contained"
-          onClick={onSave}
-          disabled={!isValid || subjectLoading}
-        >
+        <Button onClick={onClose} disabled={subjectLoading}>
+          Cancel
+        </Button>
+        <Button variant="contained" onClick={onSave} disabled={!isValid || subjectLoading}>
           Schedule Lecture
         </Button>
       </DialogActions>

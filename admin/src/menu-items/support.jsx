@@ -17,8 +17,7 @@ const support = {
   title: 'Academic User',
   type: 'group',
   children: [
-   
-     {
+    {
       id: 'student',
       title: 'Student',
       type: 'item',
@@ -32,15 +31,13 @@ const support = {
       url: '/lecturer',
       icon: icons.FaChalkboardTeacher
     },
-     {
+    {
       id: 'hod',
       title: 'Department Executive',
       type: 'item',
       url: '/hod',
       icon: icons.FaUserShield
     }
-
-   
   ]
 };
 

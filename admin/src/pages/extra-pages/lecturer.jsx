@@ -18,31 +18,28 @@ export default function LecturerPage() {
   // ---------- FETCH DEPARTMENTS ----------
   const { data: deptData, error: deptError } = useSWR('/department/find/', fetcher);
   const departments = deptData?.departments || [];
- 
-  
+
   // ---------- FETCH USERS ----------
-  const { data: usersData, error: usersError, mutate } =
-    useSWR(['/admin/find/', { type: 'lecturer' }], fetcher);
-   
+  const { data: usersData, error: usersError, mutate } = useSWR(['/admin/find/', { type: 'lecturer' }], fetcher);
+
   // ---------- MAP HODS ----------
-  const hods =
-    usersData?.data?.users|| [];
+  const hods = usersData?.data?.users || [];
 
-        const [openCreate, setOpenCreate] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
 
-    const [newHOD, setNewHOD] = useState({
-      registrationId: '',
-      firstName: '',
-      lastName: '',
-      fullName: '',
-      nameWithInitial: '',
-      email: '',
-      addressLine1: '',
-      addressZip: '',
-      departmentId: '',
-      password: '',
-      confirmPassword: ''
-    });
+  const [newHOD, setNewHOD] = useState({
+    registrationId: '',
+    firstName: '',
+    lastName: '',
+    fullName: '',
+    nameWithInitial: '',
+    email: '',
+    addressLine1: '',
+    addressZip: '',
+    departmentId: '',
+    password: '',
+    confirmPassword: ''
+  });
 
   // ---------- PAGINATION ----------
   const [page, setPage] = useState(1);
@@ -59,8 +56,6 @@ export default function LecturerPage() {
 
   const handleUpdate = async () => {
     try {
-     
-      
       const data = {
         id: selectedHOD.id,
         registrationId: selectedHOD.registration_id,
@@ -71,96 +66,86 @@ export default function LecturerPage() {
         addressLine1: selectedHOD.address.line1,
         email: selectedHOD.email,
         addressZip: selectedHOD.address.zip,
-        departmentId:selectedHOD.departmentId,
+        departmentId: selectedHOD.departmentId,
         status: selectedHOD.enable_state,
 
+        type: 'department'
+      };
 
-        type:'department'
-      }
-      
       await axiosClient.put('/admin/id/', data);
       showToast({ text: 'HOD updated successfully', type: 'success' });
       mutate();
       setOpenEdit(false);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       showToast({ text: 'Failed to update HOD', type: 'error' });
     }
   };
 
   const handleDelete = async () => {
-    const delete_data = { id: selectedHOD.id, type:"lecturer"}
+    const delete_data = { id: selectedHOD.id, type: 'lecturer' };
     console.log(delete_data);
-    
+
     try {
       await axiosClient.delete('/admin/id/', delete_data);
       mutate();
       setOpenConfirmDelete(false);
       setOpenEdit(false);
     } catch (err) {
-      console.log(err)
+      console.log(err);
       showToast({ text: err.message, type: 'error' });
     }
   };
 
-   const handleCreate = async () => {
-  try {
-  const payload = {
-  registrationId: newHOD.registrationId,
-  firstName: newHOD.firstName,
-  lastName: newHOD.lastName,
-  fullName: newHOD.fullName,
-  nameWithInitial: newHOD.nameWithInitial,
-  email: newHOD.email,
-  addressLine1: newHOD.addressLine1,
-  addressZip: newHOD.addressZip,
-  departmentId: newHOD.departmentId,
-  password: newHOD.password,
-  confirmPassword: newHOD.confirmPassword,
-  type: 'lecturer'
-  };
-  
-  
-  await axiosClient.post('/admin/', payload);
-  
-  
-  showToast({ text: 'HOD created successfully', type: 'success' });
-  mutate(); // refresh table
-  
-  
-  setOpenCreate(false);
-  setNewHOD({
-      registrationId: '',
-      firstName: '',
-      lastName: '',
-      fullName: '',
-      nameWithInitial: '',
-      email: '',
-      addressLine1: '',
-      addressZip: '',
-      departmentId: '',
-      password: '',
-      confirmPassword: ''
-  });
-  } catch (err) {
-  console.error(err);
-  showToast({ text: err.response.data.message || err.message, type: 'error' });
-  }
+  const handleCreate = async () => {
+    try {
+      const payload = {
+        registrationId: newHOD.registrationId,
+        firstName: newHOD.firstName,
+        lastName: newHOD.lastName,
+        fullName: newHOD.fullName,
+        nameWithInitial: newHOD.nameWithInitial,
+        email: newHOD.email,
+        addressLine1: newHOD.addressLine1,
+        addressZip: newHOD.addressZip,
+        departmentId: newHOD.departmentId,
+        password: newHOD.password,
+        confirmPassword: newHOD.confirmPassword,
+        type: 'lecturer'
+      };
+
+      await axiosClient.post('/admin/', payload);
+
+      showToast({ text: 'HOD created successfully', type: 'success' });
+      mutate(); // refresh table
+
+      setOpenCreate(false);
+      setNewHOD({
+        registrationId: '',
+        firstName: '',
+        lastName: '',
+        fullName: '',
+        nameWithInitial: '',
+        email: '',
+        addressLine1: '',
+        addressZip: '',
+        departmentId: '',
+        password: '',
+        confirmPassword: ''
+      });
+    } catch (err) {
+      console.error(err);
+      showToast({ text: err.response.data.message || err.message, type: 'error' });
+    }
   };
 
-  if (deptError || usersError)
-    return <LoadingErrorWrapper isLoading={false} isError />;
+  if (deptError || usersError) return <LoadingErrorWrapper isLoading={false} isError />;
 
-  if (!deptData || !usersData)
-    return <LoadingErrorWrapper isLoading isError={false} />;
+  if (!deptData || !usersData) return <LoadingErrorWrapper isLoading isError={false} />;
 
   return (
     <MainCard title="Head of Departments">
-      <UniversalActionBar
-        buttons={[
-          { label: 'New HOD',color: 'success',onClick: () => setOpenCreate(true) }
-        ]}
-      />
+      <UniversalActionBar buttons={[{ label: 'New HOD', color: 'success', onClick: () => setOpenCreate(true) }]} />
 
       <UniversalTable
         data={paginated}
@@ -168,10 +153,10 @@ export default function LecturerPage() {
         rowsPerPage={rowsPerPage}
         onPageChange={setPage}
         columns={[
-          { label: 'Reg ID', render: r => r.registration_id },
-          { label: 'Full Name', render: r => r?.name?.full_name },
-          { label: 'Email', render: r => r.email },
-          { label: 'Department', render: r => departments.find(d=>d.id === r.department[0])?.name?.long || 'none' }
+          { label: 'Reg ID', render: (r) => r.registration_id },
+          { label: 'Full Name', render: (r) => r?.name?.full_name },
+          { label: 'Email', render: (r) => r.email },
+          { label: 'Department', render: (r) => departments.find((d) => d.id === r.department[0])?.name?.long || 'none' }
         ]}
         renderActions={(hod) => (
           <Button
@@ -191,14 +176,14 @@ export default function LecturerPage() {
         )}
       />
 
-       <CreateUserDialog
-            open={openCreate}
-            onClose={() => setOpenCreate(false)}
-            onCreate={handleCreate}
-            newHOD={newHOD}
-            setNewHOD={setNewHOD}
-            departments={departments}
-            />
+      <CreateUserDialog
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        onCreate={handleCreate}
+        newHOD={newHOD}
+        setNewHOD={setNewHOD}
+        departments={departments}
+      />
 
       <EditUserDialog
         open={openEdit}

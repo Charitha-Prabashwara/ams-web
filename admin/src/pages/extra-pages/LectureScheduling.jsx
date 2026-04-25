@@ -1,10 +1,5 @@
 // material-ui
-import {
-  Chip,
-  Box,
-  Typography,
-  Button
-} from '@mui/material';
+import { Chip, Box, Typography, Button } from '@mui/material';
 
 import MainCard from 'components/MainCard';
 import { useState, useEffect } from 'react';
@@ -22,38 +17,25 @@ import axiosClient from '../../api/axiosClient';
 
 export default function LectureScheduling() {
   // ---------- FETCH LECTURERS ----------
-  const { data: lecturersData, error: lecturersError } = useSWR(
-    ['/admin/find/', { type: 'lecturer' }],
-    fetcher
-  );
+  const { data: lecturersData, error: lecturersError } = useSWR(['/admin/find/', { type: 'lecturer' }], fetcher);
   const lecturers = lecturersData?.data?.users || [];
 
   // ---------- FETCH SUBJECTS ----------
-   const { data: subjectsData, error: subjectsError } = useSWR('/subject/find/', fetcher);
-   const subjects = subjectsData?.subjects || [];
+  const { data: subjectsData, error: subjectsError } = useSWR('/subject/find/', fetcher);
+  const subjects = subjectsData?.subjects || [];
 
   // ---------- FETCH SEMESTERS ----------
-  const { data: semestersResponse, error: semestersError } = useSWR('/semester/find/', fetcher)
-semestersResponse?.semester || semestersResponse?.data?.semesters || semestersResponse?.data?.semester || [];
+  const { data: semestersResponse, error: semestersError } = useSWR('/semester/find/', fetcher);
+  semestersResponse?.semester || semestersResponse?.data?.semesters || semestersResponse?.data?.semester || [];
   //console.log(semestersResponse);
-  const semesters = semestersResponse?.semesters ||[];
+  const semesters = semestersResponse?.semesters || [];
   console.log(semesters);
-  
+
   //console.log('Semesters loaded:', semesters.length, 'Response keys:', semestersResponse ? Object.keys(semestersResponse) : []);
 
   // ---------- FETCH LECTURES ----------
-  const { data: lecturesData, error: lecturesError, mutate } = useSWR(
-    '/lecture/find/',
-    fetcher,
-    { refreshInterval: 10000 }
-  );
-  const lectures = (
-    lecturesData?.lecture ||
-    lecturesData?.lectures ||
-    lecturesData?.data?.lecture ||
-    lecturesData?.data?.lectures ||
-    []
-  );
+  const { data: lecturesData, error: lecturesError, mutate } = useSWR('/lecture/find/', fetcher, { refreshInterval: 10000 });
+  const lectures = lecturesData?.lecture || lecturesData?.lectures || lecturesData?.data?.lecture || lecturesData?.data?.lectures || [];
 
   // ---------- PAGINATION ----------
   const [page, setPage] = useState(1);
@@ -75,10 +57,10 @@ semestersResponse?.semester || semestersResponse?.data?.semesters || semestersRe
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedLecture, setSelectedLecture] = useState(null);
   const [editLecture, setEditLecture] = useState(null);
-const [semesterSubjects, setSemesterSubjects] = useState([]);
-const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
-const [subjectLecturers, setSubjectLecturers] = useState([]);
-const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
+  const [semesterSubjects, setSemesterSubjects] = useState([]);
+  const [loadingSemesterSubjects, setLoadingSemesterSubjects] = useState(false);
+  const [subjectLecturers, setSubjectLecturers] = useState([]);
+  const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
 
   // ---------- DELETE ----------
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
@@ -94,29 +76,9 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
     if (selectedLecture) {
       setEditLecture({
         ...selectedLecture,
-        scheduledTimeDisplay: selectedLecture.scheduledTime
-          ? new Date(selectedLecture.scheduledTime).toISOString().slice(0, 16)
-          : '',
-        endTimeDisplay: selectedLecture.endTime
-          ? new Date(selectedLecture.endTime).toISOString().slice(0, 16)
-          : ''
+        scheduledTimeDisplay: selectedLecture.scheduledTime ? new Date(selectedLecture.scheduledTime).toISOString().slice(0, 16) : '',
+        endTimeDisplay: selectedLecture.endTime ? new Date(selectedLecture.endTime).toISOString().slice(0, 16) : ''
       });
-      
-      // Load subjects for the selected lecture's semester
-      if (selectedLecture.semester) {
-        const semesterId = typeof selectedLecture.semester === 'object' 
-          ? (selectedLecture.semester._id || selectedLecture.semester.id)
-          : selectedLecture.semester;
-        handleSemesterSelected(semesterId);
-      }
-
-      // Load lecturers for the selected lecture's subject
-      if (selectedLecture.subject) {
-        const subjectId = typeof selectedLecture.subject === 'object' 
-          ? (selectedLecture.subject._id || selectedLecture.subject.id)
-          : selectedLecture.subject;
-        handleSubjectSelected(subjectId);
-      }
     }
   }, [selectedLecture]);
 
@@ -145,20 +107,17 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
 
   const handleUpdate = async () => {
     if (!editLecture?.id) return;
-    
+
     try {
-      const allowedFields = [
-        'topic', 'lecturer', 'subject', 'semester',
-        'scheduledTime', 'endTime', 'state', 'deleted'
-      ];
+      const allowedFields = ['topic', 'lecturer', 'subject', 'semester', 'scheduledTime', 'endTime', 'state', 'deleted'];
       const updateData = {};
-      allowedFields.forEach(field => {
+      allowedFields.forEach((field) => {
         const value = editLecture[field];
         if (value !== undefined && value !== null && value !== '') {
           updateData[field] = value;
         }
       });
-      
+
       await lectureAPI.update(editLecture.id, updateData);
       showToast({ text: 'Lecture updated successfully', type: 'success' });
       mutate();
@@ -175,7 +134,7 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
 
   const handleDelete = async () => {
     if (!selectedLecture?.id) return;
-    
+
     try {
       await lectureAPI.delete(selectedLecture.id);
       showToast({ text: 'Lecture deleted successfully', type: 'success' });
@@ -195,7 +154,7 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
   const handleSemesterSelected = async (semesterId) => {
     setLoadingSemesterSubjects(true);
     setSemesterSubjects([]);
-    
+
     if (!semesterId) {
       setLoadingSemesterSubjects(false);
       return;
@@ -205,15 +164,15 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
       const response = await axiosClient.post('/subject-registration/find/', { semester: semesterId });
       const registrations = response.data.registrations || [];
       const subjectMap = new Map();
-      
-      registrations.forEach(reg => {
+
+      registrations.forEach((reg) => {
         const subject = reg.subject;
         if (subject && typeof subject === 'object' && subject._id) {
           if (!subjectMap.has(subject._id)) {
             subjectMap.set(subject._id, subject);
           }
         } else if (subject && typeof subject === 'string') {
-          const fullSubject = subjects.find(s => s.id === subject || s._id === subject);
+          const fullSubject = subjects.find((s) => s.id === subject || s._id === subject);
           if (fullSubject && !subjectMap.has(fullSubject.id)) {
             subjectMap.set(fullSubject.id, fullSubject);
           }
@@ -232,7 +191,7 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
   const handleSubjectSelected = async (subjectId) => {
     setLoadingSubjectLecturers(true);
     setSubjectLecturers([]);
-    
+
     if (!subjectId) {
       setLoadingSubjectLecturers(false);
       return;
@@ -242,15 +201,15 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
       const response = await axiosClient.post('/lecturer-subject-registration/find/', { subject: subjectId });
       const registrations = response.data.registrations || [];
       const lecturerMap = new Map();
-      
-      registrations.forEach(reg => {
+
+      registrations.forEach((reg) => {
         const lecturer = reg.lecturer;
         if (lecturer && typeof lecturer === 'object' && lecturer._id) {
           if (!lecturerMap.has(lecturer._id)) {
             lecturerMap.set(lecturer._id, lecturer);
           }
         } else if (lecturer && typeof lecturer === 'string') {
-          const fullLecturer = lecturers.find(l => l.id === lecturer || l._id === lecturer);
+          const fullLecturer = lecturers.find((l) => l.id === lecturer || l._id === lecturer);
           if (fullLecturer && !lecturerMap.has(fullLecturer.id)) {
             lecturerMap.set(fullLecturer.id, fullLecturer);
           }
@@ -303,13 +262,9 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
     if (Array.isArray(lecturerRef)) {
       lecturerRef = lecturerRef[0];
     }
-    const lecturerId = typeof lecturerRef === 'string'
-      ? lecturerRef
-      : (lecturerRef?._id ? String(lecturerRef._id) : lecturerRef?.id);
+    const lecturerId = typeof lecturerRef === 'string' ? lecturerRef : lecturerRef?._id ? String(lecturerRef._id) : lecturerRef?.id;
     if (!lecturerId) return 'Unknown';
-    const found = lecturers.find((l) => 
-      String(l.id) === String(lecturerId) || String(l._id) === String(lecturerId)
-    );
+    const found = lecturers.find((l) => String(l.id) === String(lecturerId) || String(l._id) === String(lecturerId));
     return found?.name?.full_name || found?.registration_id || 'Unknown';
   };
 
@@ -318,13 +273,9 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
     if (Array.isArray(subjectRef)) {
       subjectRef = subjectRef[0];
     }
-    const subjectId = typeof subjectRef === 'string'
-      ? subjectRef
-      : (subjectRef?._id ? String(subjectRef._id) : subjectRef?.id);
+    const subjectId = typeof subjectRef === 'string' ? subjectRef : subjectRef?._id ? String(subjectRef._id) : subjectRef?.id;
     if (!subjectId) return 'Unknown';
-    const found = subjects.find((s) => 
-      String(s.id) === String(subjectId) || String(s._id) === String(subjectId)
-    );
+    const found = subjects.find((s) => String(s.id) === String(subjectId) || String(s._id) === String(subjectId));
     return found?.name?.long || found?.code || 'Unknown';
   };
 
@@ -333,15 +284,16 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
     if (Array.isArray(semesterRef)) {
       semesterRef = semesterRef[0];
     }
-    const semesterId = typeof semesterRef === 'string'
-      ? semesterRef
-      : (semesterRef?._id ? String(semesterRef._id) : semesterRef?.id);
+    const semesterId = typeof semesterRef === 'string' ? semesterRef : semesterRef?._id ? String(semesterRef._id) : semesterRef?.id;
     if (!semesterId) return 'Unknown';
-    const found = semesters.find((s) => 
-      String(s.id) === String(semesterId) || String(s._id) === String(semesterId)
-    );
+    const found = semesters.find((s) => String(s.id) === String(semesterId) || String(s._id) === String(semesterId));
     if (!found) {
-      console.warn('Semester not found for ID:', semesterId, 'Semesters available IDs:', semesters.map(s => s.id));
+      console.warn(
+        'Semester not found for ID:',
+        semesterId,
+        'Semesters available IDs:',
+        semesters.map((s) => s.id)
+      );
     }
     return found?.name || found?.id;
   };
@@ -352,8 +304,7 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
     return <LoadingErrorWrapper isLoading={false} isError />;
   }
 
-  if (!lecturersData || !subjectsData || !semestersResponse || !lecturesData)
-    return <LoadingErrorWrapper isLoading isError={false} />;
+  if (!lecturersData || !subjectsData || !semestersResponse || !lecturesData) return <LoadingErrorWrapper isLoading isError={false} />;
 
   // Debug: log essential info
   console.log('Semesters loaded count:', semesters.length);
@@ -382,8 +333,8 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
         totalPages={totalPages}
         onPageChange={setPage}
         columns={[
-          { 
-            label: 'Topic', 
+          {
+            label: 'Topic',
             render: (r) => (
               <Box>
                 <Typography variant="body2" fontWeight="medium">
@@ -393,36 +344,29 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
               </Box>
             )
           },
-          { 
-            label: 'Lecturer', 
-            render: (r) => getLecturerName(r.lecturer) 
+          {
+            label: 'Lecturer',
+            render: (r) => getLecturerName(r.lecturer)
           },
-          { 
-            label: 'Subject', 
-            render: (r) => getSubjectName(r.subject) 
+          {
+            label: 'Subject',
+            render: (r) => getSubjectName(r.subject)
           },
-          { 
-            label: 'Semester', 
-            render: (r) => getSemesterName(r.semester) 
+          {
+            label: 'Semester',
+            render: (r) => getSemesterName(r.semester)
           },
-          { 
-            label: 'Scheduled', 
-            render: (r) => formatDate(r.scheduledTime) 
+          {
+            label: 'Scheduled',
+            render: (r) => formatDate(r.scheduledTime)
           },
-          { 
-            label: 'End', 
-            render: (r) => formatDate(r.endTime) 
+          {
+            label: 'End',
+            render: (r) => formatDate(r.endTime)
           },
-          { 
-            label: 'Status', 
-            render: (r) => (
-              <Chip
-                label={r.state || 'SCHEDULED'}
-                color={getStatusColor(r.state)}
-                size="small"
-                variant="outlined"
-              />
-            ) 
+          {
+            label: 'Status',
+            render: (r) => <Chip label={r.state || 'SCHEDULED'} color={getStatusColor(r.state)} size="small" variant="outlined" />
           }
         ]}
         renderActions={(lecture) => (
@@ -440,54 +384,54 @@ const [loadingSubjectLecturers, setLoadingSubjectLecturers] = useState(false);
         )}
       />
 
-{/* Create Dialog */}
-       <CreateLectureDialog
-         open={openCreate}
-         onClose={() => {
-           setOpenCreate(false);
-           setSemesterSubjects([]);
-           setSubjectLecturers([]);
-           setNewLecture({
-             topic: '',
-             lecturer: '',
-             subject: '',
-             semester: '',
-             scheduledTime: ''
-           });
-         }}
-         onSave={handleCreate}
-         lecture={newLecture}
-         setLecture={setNewLecture}
-         lecturers={newLecture.subject ? subjectLecturers : []}
-         subjects={semesterSubjects}
-         semesters={semesters}
-         onSemesterSelected={handleSemesterSelected}
-         onSubjectSelected={handleSubjectSelected}
-         subjectLoading={loadingSemesterSubjects}
-         lecturerLoading={loadingSubjectLecturers}
-       />
+      {/* Create Dialog */}
+      <CreateLectureDialog
+        open={openCreate}
+        onClose={() => {
+          setOpenCreate(false);
+          setSemesterSubjects([]);
+          setSubjectLecturers([]);
+          setNewLecture({
+            topic: '',
+            lecturer: '',
+            subject: '',
+            semester: '',
+            scheduledTime: ''
+          });
+        }}
+        onSave={handleCreate}
+        lecture={newLecture}
+        setLecture={setNewLecture}
+        lecturers={newLecture.subject ? subjectLecturers : []}
+        subjects={semesterSubjects}
+        semesters={semesters}
+        onSemesterSelected={handleSemesterSelected}
+        onSubjectSelected={handleSubjectSelected}
+        subjectLoading={loadingSemesterSubjects}
+        lecturerLoading={loadingSubjectLecturers}
+      />
 
-{/* Edit Dialog */}
-        <EditLectureDialog
-          open={openEdit}
-          onClose={() => {
-            setOpenEdit(false);
-            setSelectedLecture(null);
-            setSemesterSubjects([]);
-            setSubjectLecturers([]);
-          }}
-          onSave={handleUpdate}
-          onDelete={() => setOpenConfirmDelete(true)}
-          lecture={editLecture}
-          setLecture={setEditLecture}
-          lecturers={editLecture?.subject ? subjectLecturers : []}
-          subjects={editLecture?.semester ? semesterSubjects : subjects}
-          semesters={semesters}
-          onSemesterSelected={handleSemesterSelected}
-          onSubjectSelected={handleSubjectSelected}
-          subjectLoading={loadingSemesterSubjects}
-          lecturerLoading={loadingSubjectLecturers}
-        />
+      {/* Edit Dialog */}
+      <EditLectureDialog
+        open={openEdit}
+        onClose={() => {
+          setOpenEdit(false);
+          setSelectedLecture(null);
+          setSemesterSubjects([]);
+          setSubjectLecturers([]);
+        }}
+        onSave={handleUpdate}
+        onDelete={() => setOpenConfirmDelete(true)}
+        lecture={editLecture}
+        setLecture={setEditLecture}
+        lecturers={editLecture?.subject ? subjectLecturers : []}
+        subjects={editLecture?.semester ? semesterSubjects : subjects}
+        semesters={semesters}
+        onSemesterSelected={handleSemesterSelected}
+        onSubjectSelected={handleSubjectSelected}
+        subjectLoading={loadingSemesterSubjects}
+        lecturerLoading={loadingSubjectLecturers}
+      />
 
       {/* Delete Confirmation */}
       <ConfirmDeleteDialog

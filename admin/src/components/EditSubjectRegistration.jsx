@@ -1,13 +1,5 @@
 // EditSubjectRegistration.jsx
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  Box,
-  TextField
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, TextField } from '@mui/material';
 
 export default function EditSubjectRegistration({
   open,
@@ -28,7 +20,6 @@ export default function EditSubjectRegistration({
 
       <DialogContent>
         <Box display="flex" flexDirection="column" gap={2} mt={1}>
-
           {/* STUDENT */}
           <TextField
             select
@@ -94,26 +85,17 @@ export default function EditSubjectRegistration({
               </option>
             ))}
           </TextField>
-
         </Box>
       </DialogContent>
 
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
 
-        <Button
-          variant="contained"
-          color="success"
-          onClick={onSave}
-        >
+        <Button variant="contained" color="success" onClick={onSave}>
           Save
         </Button>
 
-        <Button
-          variant="contained"
-          color="error"
-          onClick={onDelete}
-        >
+        <Button variant="contained" color="error" onClick={onDelete}>
           Delete
         </Button>
       </DialogActions>

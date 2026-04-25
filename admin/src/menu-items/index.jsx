@@ -8,7 +8,7 @@ import academicRegistrations from './academicRegistrations';
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems = {
-  items: [dashboard, academic,academicRegistrations, support]
+  items: [dashboard, academic, academicRegistrations, support]
 };
 
 export default menuItems;

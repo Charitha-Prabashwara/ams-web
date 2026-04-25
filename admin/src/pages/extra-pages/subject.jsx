@@ -1,8 +1,5 @@
 // material-ui
-import {
-  Button,
-  Box
-} from '@mui/material';
+import { Button, Box } from '@mui/material';
 
 import MainCard from 'components/MainCard';
 import { useState } from 'react';
@@ -20,13 +17,7 @@ import UniversalActionBar from '../../components/UniversalActionBar';
 import { subjectHelp } from '../../utils/helpDrawerContents';
 
 // material-ui dialogs
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField
-} from '@mui/material';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 
 export default function SubjectPage() {
   const { data, error, isLoading, mutate } = useSWR('/subject/find/', fetcher, {
@@ -162,10 +153,10 @@ export default function SubjectPage() {
           { label: 'New Subject', color: 'success', onClick: () => setOpenCreateDialog(true) },
           { label: 'Open Help', type: 'help' } // automatically handles drawer
         ]}
-         helpDrawer={{
-                  sections: subjectHelp,
-                  title: 'Subject Guidelines'
-                }}
+        helpDrawer={{
+          sections: subjectHelp,
+          title: 'Subject Guidelines'
+        }}
       />
 
       {/* ================= TABLE ================= */}

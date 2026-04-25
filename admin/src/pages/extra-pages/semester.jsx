@@ -42,8 +42,6 @@ import UniversalActionBar from '../../components/UniversalActionBar';
 import SemesterEditDialog from '../../components/SemesterEditDialog';
 import { showToast } from '../../utils/toast';
 export default function SemesterPage() {
-
-
   const {
     data: semester,
     error: semError,
@@ -103,14 +101,12 @@ export default function SemesterPage() {
   const [deleteText, setDeleteText] = useState('');
 
   const handleOpenEditDialog = (semester) => {
-    
-    setSelectedSemester(
-      {
+    setSelectedSemester({
       ...semester,
-    department: semester.department?.id ?? semester.department,
-    course: semester.course?.id ?? semester.course,
-    batch: semester.batch?.id ?? semester.batch
-  });
+      department: semester.department?.id ?? semester.department,
+      course: semester.course?.id ?? semester.course,
+      batch: semester.batch?.id ?? semester.batch
+    });
     setOpenEditDialog(true);
   };
 
@@ -120,32 +116,29 @@ export default function SemesterPage() {
     try {
       delete selectedSemester.updatedAt_timestamp;
       delete selectedSemester.createdAt_timestamp;
-     
 
       const updateSemObj = {
-        id:selectedSemester.id,
+        id: selectedSemester.id,
         code: selectedSemester.code,
-        name:selectedSemester.code,
-        department:selectedSemester.department._id,
-        course:selectedSemester.course._id,
-        batch:selectedSemester.batch._id
-      }
-     const response =  await axiosClient.put('/semester/id/', updateSemObj);
+        name: selectedSemester.code,
+        department: selectedSemester.department._id,
+        course: selectedSemester.course._id,
+        batch: selectedSemester.batch._id
+      };
+      const response = await axiosClient.put('/semester/id/', updateSemObj);
       mutateSemesters();
       mutateDepartments();
       mutateBatch();
       setOpenEditDialog(false);
-        showToast({
-              text: response.data.message || 'Semester updated successfully',
-              type: 'success'
-            });
+      showToast({
+        text: response.data.message || 'Semester updated successfully',
+        type: 'success'
+      });
     } catch (err) {
-     
-         showToast({
-              text: err.response?.data?.message || 'Error Update Semester',
-              type: 'error'
-            });
-      
+      showToast({
+        text: err.response?.data?.message || 'Error Update Semester',
+        type: 'error'
+      });
     }
   };
 
@@ -182,7 +175,6 @@ export default function SemesterPage() {
     axiosClient
       .post('/course/find/', { department: id })
       .then((courses) => {
-      
         setCourses(courses?.data.courses);
         setIsLoadingCourses(true);
       })

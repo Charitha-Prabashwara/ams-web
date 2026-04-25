@@ -202,26 +202,25 @@ export default function CoursePage() {
 
       {/* ================= CREATE COURSE DIALOG ================= */}
       <CreateCourseDialog
-  open={openCreate}
-  onClose={() => setOpenCreate(false)}
-  onSave={handleCreate}
-  course={newCourse}
-  setCourse={setNewCourse}
-  departments={departments}
-/>
+        open={openCreate}
+        onClose={() => setOpenCreate(false)}
+        onSave={handleCreate}
+        course={newCourse}
+        setCourse={setNewCourse}
+        departments={departments}
+      />
 
       {/* ================= EDIT COURSE DIALOG ================= */}
 
       <EditCourseDialog
-  open={openEdit}
-  onClose={() => setOpenEdit(false)}
-  onSave={handleUpdate}
-  onDelete={() => setOpenConfirmDelete(true)}
-  course={selectedCourse}
-  setCourse={setSelectedCourse}
-  departments={departments}
-/>
-
+        open={openEdit}
+        onClose={() => setOpenEdit(false)}
+        onSave={handleUpdate}
+        onDelete={() => setOpenConfirmDelete(true)}
+        course={selectedCourse}
+        setCourse={setSelectedCourse}
+        departments={departments}
+      />
 
       <ConfirmDeleteDialog
         open={openConfirmDelete}

@@ -19,8 +19,8 @@ export default function App() {
         },
         revalidateOnFocus: true, // auto refresh on window focus
         shouldRetryOnError: false,
-         dedupingInterval: 5 * 60 * 1000, // 5 minutes
-    shouldRetryOnError: false
+        dedupingInterval: 5 * 60 * 1000, // 5 minutes
+        shouldRetryOnError: false
       }}
     >
       <ThemeCustomization>

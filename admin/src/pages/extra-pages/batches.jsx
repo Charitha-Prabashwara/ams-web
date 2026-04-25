@@ -96,8 +96,6 @@ export default function BatchPage() {
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
   const [deleteText, setDeleteText] = useState('');
 
-
-
   const handleSaveEdit = async () => {
     try {
       const response = await axiosClient.put('/batch/id/', {
