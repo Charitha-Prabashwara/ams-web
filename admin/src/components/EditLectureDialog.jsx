@@ -35,10 +35,11 @@ const EditLectureDialog = ({
   console.log('EditLectureDialog render — semesters count:', semesters.length);
   // State options for status
   const stateOptions = [
-    { value: 'SCHEDULED', label: 'Scheduled' },
-    { value: 'IN_PROGRESS', label: 'In Progress' },
-    { value: 'COMPLETED', label: 'Completed' },
-    { value: 'CANCELLED', label: 'Cancelled' }
+    { value: 'scheduled', label: 'scheduled' },
+    { value: 'completed', label: 'completed' },
+    { value: 'postponed', label: 'postponed' },
+    { value: 'canceled', label: 'canceled' },
+    { value: 'rescheduled', label: 'rescheduled' }
   ];
 
   // Helper to extract ID from object, array, or string
@@ -163,7 +164,7 @@ const EditLectureDialog = ({
                     </MenuItem>
                     {semesters.map((semester) => (
                       <MenuItem key={semester._id || semester.id} value={semester._id || semester.id}>
-                        {semester.name?.medium || semester.name?.long || 'Semester'}
+                        {semester?.name || semester?.id}
                       </MenuItem>
                     ))}
                   </Select>
