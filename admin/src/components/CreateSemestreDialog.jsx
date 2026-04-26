@@ -28,7 +28,11 @@ const CreateSemesterDialog = ({
   isLoadingDepartments = false,
   isLoadingCourses = false,
   isLoadingBatches = false,
-  onDepartmentChange
+  onDepartmentChange,
+  departmentError = null,
+  courseError = null,
+  batchError = null,
+  onReload
 }) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth sx={{ position: 'center' }}>
@@ -136,6 +140,28 @@ const CreateSemesterDialog = ({
           </Box>
         </Box>
       </DialogContent>
+
+      {/* Reload section for failed data loads */}
+      {(departmentError || courseError || batchError) && onReload && (
+        <Box sx={{ px: 3, py: 2, bgcolor: 'error.light', borderTop: '1px solid', borderColor: 'error.main' }}>
+          <Typography color="error.contrastText" variant="body2" mb={1}>
+            Failed to load data due to connection issue. Please try again.
+          </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onReload}
+            startIcon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+              </svg>
+            }
+          >
+            Reload Data
+          </Button>
+        </Box>
+      )}
 
       {/* ================= ACTIONS ================= */}
       <DialogActions>

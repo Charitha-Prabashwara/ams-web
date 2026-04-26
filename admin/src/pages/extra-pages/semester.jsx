@@ -62,6 +62,7 @@ export default function SemesterPage() {
   const [rowsPerPage] = useState(5);
 
   const [isLoadingCourses, setIsLoadingCourses] = useState();
+  const [courseError, setCourseError] = useState(null);
 
   // ---------------- CREATE ----------------
   const [openCreateDialog, setOpenCreateDialog] = useState(false);
@@ -172,15 +173,26 @@ export default function SemesterPage() {
 
   const loadCourses = (id) => {
     setIsLoadingCourses(true);
+    setCourseError(null);
     axiosClient
       .post('/course/find/', { department: id })
       .then((courses) => {
         setCourses(courses?.data.courses);
-        setIsLoadingCourses(true);
+      })
+      .catch((error) => {
+        setCourseError(error);
       })
       .finally(() => {
         setIsLoadingCourses(false);
       });
+  };
+
+  const handleReload = () => {
+    mutateDepartments();
+    mutateBatch();
+    if (newSemester.department) {
+      loadCourses(newSemester.department);
+    }
   };
 
   useEffect(() => {}, [newSemester]);
@@ -279,6 +291,10 @@ export default function SemesterPage() {
         isLoadingCourses={isLoadingCourses}
         isLoadingBatches={batchLoading}
         onDepartmentChange={loadCourses}
+        departmentError={deptError}
+        courseError={courseError}
+        batchError={batchError}
+        onReload={handleReload}
       />
 
       {/* ====================== CONFIRM CREATE ====================== */}
