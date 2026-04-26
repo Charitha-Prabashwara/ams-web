@@ -1,250 +1,207 @@
 // material-ui
-import Avatar from '@mui/material/Avatar';
-import AvatarGroup from '@mui/material/AvatarGroup';
-import Button from '@mui/material/Button';
+import { useState } from 'react';
 import Grid from '@mui/material/Grid';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemAvatar from '@mui/material/ListItemAvatar';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemText from '@mui/material/ListItemText';
-import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import Paper from '@mui/material/Paper';
+import Divider from '@mui/material/Divider';
+import { styled } from '@mui/material/styles';
 
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
-import MonthlyBarChart from 'sections/dashboard/default/MonthlyBarChart';
-import ReportAreaChart from 'sections/dashboard/default/ReportAreaChart';
-import UniqueVisitorCard from 'sections/dashboard/default/UniqueVisitorCard';
-import SaleReportCard from 'sections/dashboard/default/SaleReportCard';
-import OrdersTable from 'sections/dashboard/default/OrdersTable';
 
-// assets
-import GiftOutlined from '@ant-design/icons/GiftOutlined';
-import MessageOutlined from '@ant-design/icons/MessageOutlined';
-import SettingOutlined from '@ant-design/icons/SettingOutlined';
+// third-party
+import useSWR from 'swr';
+import { fetcher } from 'api/fetcher';
 
-import avatar1 from 'assets/images/users/avatar-1.png';
-import avatar2 from 'assets/images/users/avatar-2.png';
-import avatar3 from 'assets/images/users/avatar-3.png';
-import avatar4 from 'assets/images/users/avatar-4.png';
+// icons
+import UserOutlined from '@ant-design/icons/UserOutlined';
+import TeamOutlined from '@ant-design/icons/TeamOutlined';
+import BookOutlined from '@ant-design/icons/BookOutlined';
+import ApartmentOutlined from '@ant-design/icons/ApartmentOutlined';
+import CalendarOutlined from '@ant-design/icons/CalendarOutlined';
 
-// avatar style
-const avatarSX = {
-  width: 36,
-  height: 36,
-  fontSize: '1rem'
-};
+// ==============================|| DASHBOARD - ACADEMIC MANAGEMENT ||============================== //
 
-// action style
-const actionSX = {
-  mt: 0.75,
-  ml: 1,
-  top: 'auto',
-  right: 'auto',
-  alignSelf: 'flex-start',
-  transform: 'none'
-};
-
-// ==============================|| DASHBOARD - DEFAULT ||============================== //
+const StatCard = ({ title, value, icon, color, change }) => (
+  <MainCard border={false} content={false}>
+    <Box sx={{ p: 2.5 }}>
+      <Stack direction="row" alignItems="center" justifyContent="space-between">
+        <Box>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            {title}
+          </Typography>
+          <Typography variant="h4">{value}</Typography>
+          {change !== undefined && (
+            <Typography variant="body2" color={change >= 0 ? 'success.main' : 'error.main'}>
+              {change >= 0 ? '+' : ''}{change}% from last month
+            </Typography>
+          )}
+        </Box>
+        <Box
+          sx={{
+            backgroundColor: `${color}.lighter`,
+            color: `${color}.main`,
+            borderRadius: 1,
+            p: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          {icon}
+        </Box>
+      </Stack>
+    </Box>
+  </MainCard>
+);
 
 export default function DashboardDefault() {
+  // Fetch real academic data
+  const { data: studentsData, isLoading: studentsLoading } = useSWR(['/admin/find/', { type: 'student' }], fetcher);
+  const { data: lecturersData, isLoading: lecturersLoading } = useSWR(['/admin/find/', { type: 'lecturer' }], fetcher);
+  const { data: coursesData, isLoading: coursesLoading } = useSWR('/course/find/', fetcher);
+  const { data: departmentsData, isLoading: departmentsLoading } = useSWR('/department/find/', fetcher);
+  const { data: semestersData, isLoading: semestersLoading } = useSWR('/semester/find/', fetcher);
+
+  const studentsCount = studentsData?.data?.users?.length || 0;
+  const lecturersCount = lecturersData?.data?.users?.length || 0;
+  const coursesCount = coursesData?.courses?.length || 0;
+  const departmentsCount = departmentsData?.departments?.length || 0;
+  const semestersCount = semestersData?.semesters?.length || 0;
+
   return (
-    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-      {/* row 1 */}
-      <Grid sx={{ mb: -2.25 }} size={12}>
-        <Typography variant="h5">Dashboard</Typography>
+    <Grid container spacing={3}>
+      {/* Header */}
+      <Grid size={12}>
+        <Typography variant="h4" fontWeight="bold">
+          Academic Management Dashboard
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          Overview of your academic institution
+        </Typography>
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-        <AnalyticEcommerce title="Total Page Views" count="4,42,236" percentage={59.3} extra="35,000" />
+
+      {/* Statistics Cards */}
+      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+        <StatCard
+          title="Total Students"
+          value={studentsCount}
+          icon={<UserOutlined style={{ fontSize: '1.5rem' }} />}
+          color="primary"
+          change={12}
+        />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-        <AnalyticEcommerce title="Total Users" count="78,250" percentage={70.5} extra="8,900" />
+      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+        <StatCard
+          title="Total Lecturers"
+          value={lecturersCount}
+          icon={<TeamOutlined style={{ fontSize: '1.5rem' }} />}
+          color="secondary"
+          change={5}
+        />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-        <AnalyticEcommerce title="Total Order" count="18,800" percentage={27.4} isLoss color="warning" extra="1,943" />
+      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+        <StatCard
+          title="Active Courses"
+          value={coursesCount}
+          icon={<BookOutlined style={{ fontSize: '1.5rem' }} />}
+          color="success"
+          change={8}
+        />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-        <AnalyticEcommerce title="Total Sales" count="35,078" percentage={27.4} isLoss color="warning" extra="20,395" />
+      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+        <StatCard
+          title="Departments"
+          value={departmentsCount}
+          icon={<ApartmentOutlined style={{ fontSize: '1.5rem' }} />}
+          color="warning"
+        />
       </Grid>
-      <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
-      {/* row 2 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <UniqueVisitorCard />
+      <Grid size={{ xs: 12, sm: 6, md: 4, lg: 2.4 }}>
+        <StatCard
+          title="Current Semesters"
+          value={semestersCount}
+          icon={<CalendarOutlined style={{ fontSize: '1.5rem' }} />}
+          color="info"
+        />
       </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid>
-            <Typography variant="h5">Income Overview</Typography>
-          </Grid>
-          <Grid />
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <Box sx={{ p: 3, pb: 0 }}>
-            <Stack sx={{ gap: 2 }}>
-              <Typography variant="h6" color="text.secondary">
-                This Week Statistics
-              </Typography>
-              <Typography variant="h3">$7,650</Typography>
-            </Stack>
+
+      {/* Enrollment Chart */}
+      <Grid size={{ xs: 12, lg: 8 }}>
+        <MainCard title="Enrollment Trends">
+          <Box sx={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography color="text.secondary">
+              Enrollment chart will be displayed here
+            </Typography>
           </Box>
-          <MonthlyBarChart />
         </MainCard>
       </Grid>
-      {/* row 3 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid>
-            <Typography variant="h5">Recent Orders</Typography>
-          </Grid>
-          <Grid />
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <OrdersTable />
-        </MainCard>
-      </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid>
-            <Typography variant="h5">Analytics Report</Typography>
-          </Grid>
-          <Grid />
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <List sx={{ p: 0, '& .MuiListItemButton-root': { py: 2 } }}>
-            <ListItemButton divider>
-              <ListItemText primary="Company Finance Growth" />
-              <Typography variant="h5">+45.14%</Typography>
-            </ListItemButton>
-            <ListItemButton divider>
-              <ListItemText primary="Company Expenses Ratio" />
-              <Typography variant="h5">0.58%</Typography>
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary="Business Risk Cases" />
-              <Typography variant="h5">Low</Typography>
-            </ListItemButton>
-          </List>
-          <ReportAreaChart />
-        </MainCard>
-      </Grid>
-      {/* row 4 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <SaleReportCard />
-      </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <Grid container alignItems="center" justifyContent="space-between">
-          <Grid>
-            <Typography variant="h5">Transaction History</Typography>
-          </Grid>
-          <Grid />
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <List
-            component="nav"
-            sx={{
-              px: 0,
-              py: 0,
-              '& .MuiListItemButton-root': {
-                py: 1.5,
-                px: 2,
-                '& .MuiAvatar-root': avatarSX,
-                '& .MuiListItemSecondaryAction-root': { ...actionSX, position: 'relative' }
-              }
-            }}
-          >
-            <ListItem
-              component={ListItemButton}
-              divider
-              secondaryAction={
-                <Stack sx={{ alignItems: 'flex-end' }}>
-                  <Typography variant="subtitle1" noWrap>
-                    + $1,430
-                  </Typography>
-                  <Typography variant="h6" color="secondary" noWrap>
-                    78%
-                  </Typography>
-                </Stack>
-              }
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ color: 'success.main', bgcolor: 'success.lighter' }}>
-                  <GiftOutlined />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={<Typography variant="subtitle1">Order #002434</Typography>} secondary="Today, 2:00 AM" />
-            </ListItem>
-            <ListItem
-              component={ListItemButton}
-              divider
-              secondaryAction={
-                <Stack sx={{ alignItems: 'flex-end' }}>
-                  <Typography variant="subtitle1" noWrap>
-                    + $302
-                  </Typography>
-                  <Typography variant="h6" color="secondary" noWrap>
-                    8%
-                  </Typography>
-                </Stack>
-              }
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
-                  <MessageOutlined />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={<Typography variant="subtitle1">Order #984947</Typography>} secondary="5 August, 1:45 PM" />
-            </ListItem>
-            <ListItem
-              component={ListItemButton}
-              secondaryAction={
-                <Stack sx={{ alignItems: 'flex-end' }}>
-                  <Typography variant="subtitle1" noWrap>
-                    + $682
-                  </Typography>
-                  <Typography variant="h6" color="secondary" noWrap>
-                    16%
-                  </Typography>
-                </Stack>
-              }
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ color: 'error.main', bgcolor: 'error.lighter' }}>
-                  <SettingOutlined />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={<Typography variant="subtitle1">Order #988784</Typography>} secondary="7 hours ago" />
-            </ListItem>
-          </List>
-        </MainCard>
-        <MainCard sx={{ mt: 2 }}>
-          <Stack sx={{ gap: 3 }}>
-            <Grid container justifyContent="space-between" alignItems="center">
-              <Grid>
-                <Stack>
-                  <Typography variant="h5" noWrap>
-                    Help & Support Chat
-                  </Typography>
-                  <Typography variant="caption" color="secondary" noWrap>
-                    Typical replay within 5 min
-                  </Typography>
-                </Stack>
-              </Grid>
-              <Grid>
-                <AvatarGroup sx={{ '& .MuiAvatar-root': { width: 32, height: 32 } }}>
-                  <Avatar alt="Remy Sharp" src={avatar1} />
-                  <Avatar alt="Travis Howard" src={avatar2} />
-                  <Avatar alt="Cindy Baker" src={avatar3} />
-                  <Avatar alt="Agnes Walker" src={avatar4} />
-                </AvatarGroup>
-              </Grid>
-            </Grid>
-            <Button size="small" variant="contained" sx={{ textTransform: 'capitalize' }}>
-              Need Help?
-            </Button>
+
+      {/* Quick Stats */}
+      <Grid size={{ xs: 12, lg: 4 }}>
+        <MainCard title="Quick Statistics">
+          <Stack spacing={2}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Average Students per Course
+              </Typography>
+              <Typography variant="body1" fontWeight="bold">
+                {coursesCount > 0 ? Math.round(studentsCount / coursesCount) : 0}
+              </Typography>
+            </Box>
+            <Divider />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Student-Lecturer Ratio
+              </Typography>
+              <Typography variant="body1" fontWeight="bold">
+                {lecturersCount > 0 ? (studentsCount / lecturersCount).toFixed(1) : 0}:1
+              </Typography>
+            </Box>
+            <Divider />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Courses per Department
+              </Typography>
+              <Typography variant="body1" fontWeight="bold">
+                {departmentsCount > 0 ? Math.round(coursesCount / departmentsCount) : 0}
+              </Typography>
+            </Box>
+            <Divider />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="body2" color="text.secondary">
+                Active Semesters
+              </Typography>
+              <Typography variant="body1" fontWeight="bold">
+                {semestersCount}
+              </Typography>
+            </Box>
           </Stack>
+        </MainCard>
+      </Grid>
+
+      {/* Recent Students Table */}
+      <Grid size={{ xs: 12 }}>
+        <MainCard title="Recent Students">
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Student management functionality - View all students, add new students, manage records
+            </Typography>
+          </Box>
+        </MainCard>
+      </Grid>
+
+      {/* Recent Lectures */}
+      <Grid size={{ xs: 12 }}>
+        <MainCard title="Upcoming Lectures">
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="body2" color="text.secondary">
+              Lecture scheduling and management - View upcoming lectures, schedule new sessions
+            </Typography>
+          </Box>
         </MainCard>
       </Grid>
     </Grid>
