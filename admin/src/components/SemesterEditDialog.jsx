@@ -1,18 +1,19 @@
+import React from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  Box,
   Button,
-  Typography,
   TextField,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Backdrop,
-  CircularProgress
+  CircularProgress,
+  Box,
+  Typography
 } from '@mui/material';
 
 const SemesterEditDialog = ({
@@ -26,8 +27,25 @@ const SemesterEditDialog = ({
   courses = [],
   batches = [],
   loading = false,
-  onDepartmentChange
+  onDepartmentChange,
+  courseError = null,
+  onReload
 }) => {
+  // Auto-load courses when editing existing semester
+  const prevSemesterIdRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (semester && open && semester.id && prevSemesterIdRef.current !== semester.id) {
+      prevSemesterIdRef.current = semester.id;
+
+      // Extract department ID and trigger loading
+      const departmentId = semester.department?.id || semester.department?._id || semester.department;
+      if (departmentId && onDepartmentChange) {
+        onDepartmentChange(departmentId);
+      }
+    }
+  }, [semester, open, onDepartmentChange]);
+
   if (!semester) return null;
 
   return (
@@ -139,6 +157,28 @@ const SemesterEditDialog = ({
           </FormControl>
         </Box>
       </DialogContent>
+
+      {/* Reload section for failed data loads */}
+      {courseError && onReload && (
+        <Box sx={{ px: 3, py: 2, bgcolor: 'error.light', borderTop: '1px solid', borderColor: 'error.main' }}>
+          <Typography color="error.contrastText" variant="body2" mb={1}>
+            Failed to load courses due to connection issue. Please try again.
+          </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onReload}
+            startIcon={
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+              </svg>
+            }
+          >
+            Reload Courses
+          </Button>
+        </Box>
+      )}
 
       <DialogActions>
         <Button color="error" onClick={onDelete}>

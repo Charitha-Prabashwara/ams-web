@@ -187,10 +187,11 @@ export default function SemesterPage() {
       });
   };
 
-  const handleReload = () => {
-    // Reload courses for the selected department
-    if (newSemester.department) {
-      loadCourses(newSemester.department);
+  const handleReload = (semester = newSemester) => {
+    // Reload courses for the specified semester's department
+    const departmentId = semester?.department?.id || semester?.department?._id || semester?.department;
+    if (departmentId) {
+      loadCourses(departmentId);
     }
   };
 
@@ -199,8 +200,8 @@ export default function SemesterPage() {
   // if (semError || deptError) return <div>Error loading semesters</div>;
   // if (semLoading || deptLoading) return <div>Loading...</div>;
 
-  if (semError || deptError || batchError) return <LoadingErrorWrapper isLoading={false} isError={true} />;
-  if (semLoading || deptLoading || batchLoading) return <LoadingErrorWrapper isLoading={true} isError={false} />;
+  if ((semError || deptError || batchError) && !openCreateDialog && !openEditDialog) return <LoadingErrorWrapper isLoading={false} isError={true} />;
+  if ((semLoading || deptLoading || batchLoading) && !openCreateDialog && !openEditDialog) return <LoadingErrorWrapper isLoading={true} isError={false} />;
 
   return (
     <MainCard title="Semesters">
@@ -319,6 +320,8 @@ export default function SemesterPage() {
         batches={batches}
         loading={deptLoading || batchLoading || isLoadingCourses}
         onDepartmentChange={loadCourses}
+        courseError={courseError}
+        onReload={() => handleReload(selectedSemester)}
       />
 
       {/* ====================== CONFIRM DELETE ====================== */}
