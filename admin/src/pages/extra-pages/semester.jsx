@@ -188,8 +188,7 @@ export default function SemesterPage() {
   };
 
   const handleReload = () => {
-    mutateDepartments();
-    mutateBatch();
+    // Reload courses for the selected department
     if (newSemester.department) {
       loadCourses(newSemester.department);
     }
@@ -291,9 +290,7 @@ export default function SemesterPage() {
         isLoadingCourses={isLoadingCourses}
         isLoadingBatches={batchLoading}
         onDepartmentChange={loadCourses}
-        departmentError={deptError}
         courseError={courseError}
-        batchError={batchError}
         onReload={handleReload}
       />
 

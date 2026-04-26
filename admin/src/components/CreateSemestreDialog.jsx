@@ -29,9 +29,7 @@ const CreateSemesterDialog = ({
   isLoadingCourses = false,
   isLoadingBatches = false,
   onDepartmentChange,
-  departmentError = null,
   courseError = null,
-  batchError = null,
   onReload
 }) => {
   return (
@@ -142,10 +140,10 @@ const CreateSemesterDialog = ({
       </DialogContent>
 
       {/* Reload section for failed data loads */}
-      {(departmentError || courseError || batchError) && onReload && (
+      {courseError && onReload && (
         <Box sx={{ px: 3, py: 2, bgcolor: 'error.light', borderTop: '1px solid', borderColor: 'error.main' }}>
           <Typography color="error.contrastText" variant="body2" mb={1}>
-            Failed to load data due to connection issue. Please try again.
+            Failed to load courses due to connection issue. Please try again.
           </Typography>
           <Button
             variant="contained"
@@ -158,7 +156,7 @@ const CreateSemesterDialog = ({
               </svg>
             }
           >
-            Reload Data
+            Reload Courses
           </Button>
         </Box>
       )}
