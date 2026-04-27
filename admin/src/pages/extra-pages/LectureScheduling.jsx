@@ -100,7 +100,8 @@ export default function LectureScheduling() {
         lecturer: getId(selectedLecture.lecturer),
         state: selectedLecture.state || 'SCHEDULED',
         scheduledTimeDisplay: selectedLecture.scheduledTime ? new Date(selectedLecture.scheduledTime).toISOString().slice(0, 16) : '',
-        endTimeDisplay: selectedLecture.endTime ? new Date(selectedLecture.endTime).toISOString().slice(0, 16) : ''
+        endTimeDisplay: selectedLecture.endTime ? new Date(selectedLecture.endTime).toISOString().slice(0, 16) : '',
+        actualStartTimeDisplay: selectedLecture.actualStartTime ? new Date(selectedLecture.actualStartTime).toISOString().slice(0, 16) : ''
       });
     }
   }, [selectedLecture]);
@@ -132,7 +133,7 @@ export default function LectureScheduling() {
     if (!editLecture?.id) return;
 
     try {
-      const allowedFields = ['topic', 'lecturer', 'subject', 'semester', 'scheduledTime', 'endTime', 'state', 'deleted'];
+      const allowedFields = ['topic', 'lecturer', 'subject', 'semester', 'scheduledTime', 'endTime', 'actualStartTime', 'state', 'deleted'];
       const updateData = {};
       allowedFields.forEach((field) => {
         const value = editLecture[field];
@@ -432,6 +433,10 @@ export default function LectureScheduling() {
           {
             label: 'Scheduled',
             render: (r) => formatDate(r.scheduledTime)
+          },
+          {
+            label: 'Actual Start',
+            render: (r) => formatDate(r.actualStartTime)
           },
           {
             label: 'End',

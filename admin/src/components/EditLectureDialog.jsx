@@ -210,7 +210,7 @@ const EditLectureDialog = ({
               </Box>
             </Box>
 
-            {/* Scheduled Time and End Time */}
+            {/* Scheduled Time, End Time, and Actual Start Time */}
             <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} gap={2}>
               <Box flex="1">
                 <Typography fontWeight="bold" mb={1}>
@@ -239,6 +239,22 @@ const EditLectureDialog = ({
                   InputLabelProps={{
                     shrink: true
                   }}
+                />
+              </Box>
+
+              <Box flex="1">
+                <Typography fontWeight="bold" mb={1}>
+                  Actual Start Time (optional)
+                </Typography>
+                <TextField
+                  fullWidth
+                  type="datetime-local"
+                  value={lecture.actualStartTimeDisplay || ''}
+                  onChange={handleDateChange('actualStartTime')}
+                  InputLabelProps={{
+                    shrink: true
+                  }}
+                  helperText="When the lecture actually started"
                 />
               </Box>
             </Box>
