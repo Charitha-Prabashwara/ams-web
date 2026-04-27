@@ -23,6 +23,9 @@ const Semester = Loadable(lazy(() => import('pages/extra-pages/semester.jsx')));
 const Subjects = Loadable(lazy(() => import('pages/extra-pages/subject.jsx')));
 const LecturerSubjectRegistration = Loadable(lazy(() => import('pages/extra-pages/LecturerSubjectRegistrationPage.jsx')));
 const SemesterSubjectRegistration = Loadable(lazy(() => import('pages/extra-pages/SemesterSubjectRegistration.jsx')));
+const LecturerLectureScheduling = Loadable(lazy(() => import('pages/extra-pages/LecturerLectureScheduling.jsx')));
+const AttendanceMarking = Loadable(lazy(() => import('pages/extra-pages/AttendanceMarking.jsx')));
+const ProfileSettings = Loadable(lazy(() => import('pages/extra-pages/ProfileSettings.jsx')));
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
@@ -94,6 +97,18 @@ const MainRoutes = {
     {
       path:'SemesterSubjectRegistration',
       element:<SemesterSubjectRegistration/>
+    },
+    {
+      path:'lecturerLectureScheduling',
+      element:<LecturerLectureScheduling/>
+    },
+    {
+      path:'attendanceMarking',
+      element:<AttendanceMarking/>
+    },
+    {
+      path:'profileSettings',
+      element:<ProfileSettings/>
     },
     {
       path:'lecturer',

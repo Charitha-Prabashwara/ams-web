@@ -9,7 +9,8 @@ import {
   BookOutlined,
   PartitionOutlined,
   ScheduleOutlined,
-  FileTextOutlined  
+  FileTextOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import { PiBuilding } from 'react-icons/pi';
 
@@ -25,7 +26,8 @@ const icons = {
   BookOutlined,
   PartitionOutlined,
   ScheduleOutlined,
-  FileTextOutlined 
+  FileTextOutlined,
+  UserOutlined
 };
 
 // ==============================|| MENU ITEMS - UTILITIES ||============================== //
@@ -69,6 +71,13 @@ const academic = {
       type: 'item',
       url: '/department',
       icon: icons.PiBuilding
+    },
+    {
+      id: 'profile-settings',
+      title: 'Profile Settings',
+      type: 'item',
+      url: '/profileSettings',
+      icon: icons.UserOutlined
     }
   ]
 };

@@ -8,7 +8,9 @@ import {
   LoadingOutlined,
   BookOutlined,
   PartitionOutlined,
-  ScheduleOutlined
+  ScheduleOutlined,
+  CalendarOutlined,
+  TeamOutlined
 } from '@ant-design/icons';
 import { PiBuilding } from 'react-icons/pi';
 
@@ -23,7 +25,9 @@ const icons = {
   PiBuilding,
   BookOutlined,
   PartitionOutlined,
-  ScheduleOutlined
+  ScheduleOutlined,
+  CalendarOutlined,
+  TeamOutlined
 };
 
 // ==============================|| MENU ITEMS - ACADEMIC REGISTRATIONS ||============================== //
@@ -46,6 +50,20 @@ const academicRegistrations = {
       type: 'item',
       url: '/SemesterSubjectRegistration',
       icon: icons.BookOutlined
+    },
+    {
+      id: 'lecturer-lecture-scheduling',
+      title: 'Lecture Scheduling',
+      type: 'item',
+      url: '/lecturerLectureScheduling',
+      icon: icons.CalendarOutlined
+    },
+    {
+      id: 'attendance-marking',
+      title: 'Attendance Marking',
+      type: 'item',
+      url: '/attendanceMarking',
+      icon: icons.TeamOutlined
     }
   ]
 };
