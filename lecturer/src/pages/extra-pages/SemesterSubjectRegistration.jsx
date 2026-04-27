@@ -25,7 +25,7 @@ export default function SubjectRegistrationPage() {
 
   // ---------- SWR DATA ----------
   const { data: studentsData, error: studentsError, isLoading: studentsLoading, mutate: mutateStudents } =
-    useSWR(['/admin/find/', { type: 'student' }], fetcher, {refreshInterval: 1000});
+    useSWR('/student/find/', fetcher, {refreshInterval: 1000});
 
   const { data: subjectsData, error: subjectsError, isLoading: subjectsLoading, mutate: mutateSubjects } =
     useSWR(['/subject/find/',{}], fetcher);

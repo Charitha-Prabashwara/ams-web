@@ -30,8 +30,8 @@ export default function LecturerLectureScheduling() {
   const currentLecturerId = getCurrentLecturerId();
 
   // ---------- FETCH LECTURERS ----------
-  const { data: lecturersData, error: lecturersError } = useSWR(['/admin/find/', { type: 'lecturer' }], fetcher);
-  const lecturers = lecturersData?.data?.users || [];
+  const { data: lecturersData, error: lecturersError } = useSWR('/lecturer/find/', fetcher);
+  const lecturers = lecturersData?.lecturers || lecturersData?.data?.lecturers || [];
 
   // Current lecturer details
   const currentLecturer = useMemo(() => {

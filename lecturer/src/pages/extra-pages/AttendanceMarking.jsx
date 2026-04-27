@@ -1,8 +1,8 @@
 // material-ui
-import { Box, Typography, TextField, FormControl, InputLabel, Select, MenuItem, Button, Table, TableHead, TableRow, TableCell, TableBody, Paper, Chip, Tabs, Tab, CircularProgress, Switch, FormControlLabel, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
+import { Box, Typography, FormControl, InputLabel, Select, MenuItem, Button, Table, TableHead, TableRow, TableCell, TableBody, Paper, Chip, Tabs, Tab, CircularProgress, Switch, FormControlLabel } from '@mui/material';
 
 import MainCard from 'components/MainCard';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { fetcher } from 'api/fetcher';
 import axiosClient from '../../api/axiosClient';
@@ -34,10 +34,6 @@ export default function AttendanceMarking() {
     return lId === currentLecturerId;
   }) : [];
 
-  // ---------- FETCH STUDENTS (all) ----------
-  const { data: studentsData, error: studentsError } = useSWR(['/admin/find/', { type: 'student' }], fetcher);
-  const allStudents = studentsData?.data?.users || [];
-
   // ---------- FETCH ATTENDANCE HISTORY ----------
   const { data: attendanceData, error: attendanceError, mutate: mutateAttendance } = useSWR(
     currentLecturerId ? ['/attendance/find/', { lecturer: currentLecturerId }] : null,
@@ -48,8 +44,8 @@ export default function AttendanceMarking() {
   // ---------- STATE ----------
   const [tabValue, setTabValue] = useState(0);
   const [selectedLectureId, setSelectedLectureId] = useState('');
-  const [registeredStudents, setRegisteredStudents] = useState([]); // students for selected lecture
-  const [attendanceMap, setAttendanceMap] = useState({}); // { studentId: 'PRESENT'|'ABSENT' }
+  const [registeredStudents, setRegisteredStudents] = useState([]);
+  const [attendanceMap, setAttendanceMap] = useState({});
   const [loadingStudents, setLoadingStudents] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -89,7 +85,7 @@ export default function AttendanceMarking() {
           const s = reg.student;
           if (s && typeof s === 'object' && s._id) return s;
           if (typeof s === 'string') {
-            return allStudents.find(st => st.id === s || st._id === s) || { id: s };
+            return { id: s };
           }
           return null;
         }).filter(Boolean);
@@ -104,7 +100,7 @@ export default function AttendanceMarking() {
     };
 
     fetchStudents();
-  }, [selectedLectureId, myLectures, allStudents]);
+  }, [selectedLectureId, myLectures]);
 
   // Set attendance map when lecture attendance records change
   useEffect(() => {
@@ -129,7 +125,6 @@ export default function AttendanceMarking() {
     if (!selectedLectureId) return;
     setSaving(true);
     try {
-      // For each registered student, create/update attendance
       const promises = registeredStudents.map(student => {
         const studentId = typeof student === 'string' ? student : (student.id || student._id);
         const status = attendanceMap[studentId] || 'ABSENT';
@@ -141,9 +136,7 @@ export default function AttendanceMarking() {
       });
       await Promise.all(promises);
       showToast({ text: 'Attendance saved successfully', type: 'success' });
-      mutateAttendance(); // refresh history
-      // Also refresh lecture attendance for current lecture?
-      // We could refetch lectureAttendanceData, but it's okay.
+      mutateAttendance();
     } catch (err) {
       console.error('Save attendance error:', err);
       showToast({ text: 'Failed to save attendance', type: 'error' });
@@ -156,7 +149,7 @@ export default function AttendanceMarking() {
   const getStudentName = (student) => {
     if (!student) return '-';
     if (typeof student === 'string') return student;
-    return student.name?.full_name || student.registration_id || 'Unknown';
+    return student.name?.full_name || student.registration_id || `ID: ${student.id || student._id || 'Unknown'}`;
   };
 
   // Helper to get lecture topic
@@ -177,10 +170,10 @@ export default function AttendanceMarking() {
   );
 
   // Loading and error states
-  if (lecturesError || studentsError || attendanceError) {
+  if (lecturesError || attendanceError) {
     return <LoadingErrorWrapper isLoading={false} isError />;
   }
-  if (!lecturesData || !studentsData || !attendanceData) {
+  if (!lecturesData || !attendanceData) {
     return <LoadingErrorWrapper isLoading isError={false} />;
   }
 
@@ -288,7 +281,8 @@ export default function AttendanceMarking() {
                   const lectureId = typeof rec.lecture === 'string' ? rec.lecture : rec.lecture?._id || rec.lecture?.id;
                   const studentId = typeof rec.student === 'string' ? rec.student : rec.student?._id || rec.student?.id;
                   const lectureTopic = getLectureTopic(lectureId);
-                  const studentName = getStudentName(allStudents.find(st => st.id === studentId || st._id === studentId));
+                  const studentName = registeredStudents.find(st => st.id === studentId || st._id === studentId)?.name?.full_name
+                    || `ID: ${studentId}`;
                   const date = getLectureDate(lectureId);
                   const status = rec.status || 'PRESENT';
                   return (

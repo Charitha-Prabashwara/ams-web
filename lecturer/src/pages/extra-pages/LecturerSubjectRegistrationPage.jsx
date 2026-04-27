@@ -30,9 +30,7 @@ import EditLecturerSubjectRegistration from '../../components/EditLecturerSubjec
 
 export default function LecturerSubjectRegistrationPage() {
   // ---------- SWR DATA ----------
-  const body = { type: 'lecturer'};
-
-  const { data: lecturersData, error: lecturersError, isLoading: lecturersLoading, mutate: mutateLecturers } = useSWR(['admin/find/', body], fetcher);
+  const { data: lecturersData, error: lecturersError, isLoading: lecturersLoading, mutate: mutateLecturers } = useSWR('/lecturer/find/', fetcher);
   const { data: subjectsData, error: subjectsError, isLoading: subjectsLoading, mutate: mutateSubjects } = useSWR(['/subject/find/'], fetcher);
   const { data: registrationsData, error: regError, isLoading: regLoading, mutate: mutateRegistrations } = useSWR(['/lecturer-subject-registration/find/'], fetcher, { refreshInterval: 1000 });
   

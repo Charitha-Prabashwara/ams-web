@@ -27,15 +27,12 @@ const getCurrentLecturerId = () => {
 export default function ProfileSettings() {
   const currentLecturerId = getCurrentLecturerId();
 
-  // ---------- FETCH LECTURERS ----------
-  const { data: lecturersData, error: lecturersError, mutate: mutateLecturer } = useSWR(['/admin/find/', { type: 'lecturer' }], fetcher);
-  const lecturers = lecturersData?.data?.users || [];
-
-  // Current lecturer details
-  const currentLecturer = useMemo(() => {
-    if (!currentLecturerId) return null;
-    return lecturers.find(l => l.id === currentLecturerId || l._id === currentLecturerId) || null;
-  }, [lecturers, currentLecturerId]);
+  // ---------- FETCH CURRENT LECTURER ----------
+  const { data: lecturerData, error: lecturerError, mutate: mutateLecturer } = useSWR(
+    currentLecturerId ? `/lecturer/findById/${currentLecturerId}` : null,
+    fetcher
+  );
+  const currentLecturer = lecturerData?.lecturer || lecturerData?.data?.lecturer || null;
 
   // ---------- STATE ----------
   const [email, setEmail] = useState('');
@@ -62,10 +59,8 @@ export default function ProfileSettings() {
     setLoadingEmail(true);
     setMessage({ type: '', text: '' });
     try {
-      await axiosClient.put('/admin/id/', {
-        id: currentLecturerId,
+      await axiosClient.put(`/lecturer/id/${currentLecturerId}`, {
         email: email,
-        type: 'lecturer'
       });
       showToast({ text: 'Email updated successfully', type: 'success' });
       mutateLecturer();
@@ -115,15 +110,15 @@ export default function ProfileSettings() {
   };
 
   // Loading and error states
-  if (lecturersError) {
+  if (lecturerError) {
     return <LoadingErrorWrapper isLoading={false} isError />;
   }
-  if (!lecturersData) {
+  if (!lecturerData && currentLecturerId) {
     return <LoadingErrorWrapper isLoading isError={false} />;
   }
 
-  // If lecturer data not yet loaded, show loading? currentLecturer might be null initially if filtered. Wait for lecturers to load.
-  if (!currentLecturer) {
+  // If lecturer data not yet loaded
+  if (!currentLecturer && currentLecturerId) {
     return <LoadingErrorWrapper isLoading isError={false} />;
   }
 
