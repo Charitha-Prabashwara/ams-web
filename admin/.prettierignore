@@ -1,0 +1,6 @@
+# Keep file formatting stable
+src/components/EditLectureDialog.jsx
+src/pages/extra-pages/LectureScheduling.jsx
+
+# Backup files
+*.backup
