@@ -13,8 +13,7 @@ const Typography = Loadable(lazy(() => import('pages/component-overview/typograp
 const Shadow = Loadable(lazy(() => import('pages/component-overview/shadows')));
 
 // render - sample page
-const LecturerSubjectRegistration = Loadable(lazy(() => import('pages/extra-pages/LecturerSubjectRegistrationPage.jsx')));
-const SemesterSubjectRegistration = Loadable(lazy(() => import('pages/extra-pages/SemesterSubjectRegistration.jsx')));
+
 const LecturerLectureScheduling = Loadable(lazy(() => import('pages/extra-pages/LecturerLectureScheduling.jsx')));
 const AttendanceMarking = Loadable(lazy(() => import('pages/extra-pages/AttendanceMarking.jsx')));
 const ProfileSettings = Loadable(lazy(() => import('pages/extra-pages/ProfileSettings.jsx')));
@@ -48,14 +47,6 @@ const MainRoutes = {
     {
       path: 'shadow',
       element: <Shadow />
-    },
-    {
-      path:'lecturerSubjectRegistration',
-      element:<LecturerSubjectRegistration/>
-    },
-    {
-      path:'SemesterSubjectRegistration',
-      element:<SemesterSubjectRegistration/>
     },
     {
       path:'lecturerLectureScheduling',

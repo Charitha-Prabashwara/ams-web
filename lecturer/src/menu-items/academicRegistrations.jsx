@@ -37,20 +37,8 @@ const academicRegistrations = {
   title: 'Academic Registrations',
   type: 'group',
   children: [
-    {
-      id: 'lecturer-subject-assignment',
-      title: 'Subject Instructor Assignment',
-      type: 'item',
-      url: '/lecturerSubjectRegistration',
-      icon: icons.AppstoreAddOutlined
-    },
-    {
-      id: 'semester-subject-registration',
-      title: 'Semester Subject Registration',
-      type: 'item',
-      url: '/SemesterSubjectRegistration',
-      icon: icons.BookOutlined
-    },
+  
+  
     {
       id: 'lecturer-lecture-scheduling',
       title: 'Lecture Scheduling',
