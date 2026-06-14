@@ -1,0 +1,12 @@
+node_modules
+dist
+.yarn
+.yarnrc.yml
+yarn.lock
+.vite
+.git
+*.log
+.env.test
+.env.local
+coverage
+.eslintcache
