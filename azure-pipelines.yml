@@ -1,0 +1,257 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# AMS Web — Azure Pipelines CI/CD
+# Builds: ams-admin, ams-lecturer (Vite/React), served via nginx
+#
+# Required Azure DevOps Variable Group: "ams-web-vars"
+#   ACR_LOGIN_SERVER              e.g. myregistry.azurecr.io
+#   ACR_USERNAME                  Service principal / admin username
+#   ACR_PASSWORD                  Service principal / admin password  (secret)
+#   SSH_HOST                      VM public IP or hostname
+#   SSH_USER                      e.g. azureuser
+#   SSH_PRIVATE_KEY               Contents of VM private key          (secret)
+#   DEPLOY_PATH                   e.g. /home/azureuser/ams
+#
+# Runtime secrets injected into .env on server (mark ALL as secret):
+#   DB_MONGODB_URI
+#   DB_MONGODB_DATABASE
+#   ACCESS_TOKEN_SECRET
+#   REFRESH_TOKEN_SECRET
+#   ALLOWED_ORIGINS
+# ─────────────────────────────────────────────────────────────────────────────
+
+trigger:
+  branches:
+    include:
+      - main
+      - master
+  paths:
+    exclude:
+      - "*.md"
+      - ".gitignore"
+      - "docs/**"
+
+pr:
+  branches:
+    include:
+      - main
+      - master
+
+variables:
+  - group: ams-web-vars
+  - name: IMAGE_TAG
+    value: $(Build.BuildId)
+  - name: ADMIN_IMAGE
+    value: $(ACR_LOGIN_SERVER)/ams-admin:$(IMAGE_TAG)
+  - name: ADMIN_LATEST
+    value: $(ACR_LOGIN_SERVER)/ams-admin:latest
+  - name: LECTURER_IMAGE
+    value: $(ACR_LOGIN_SERVER)/ams-lecturer:$(IMAGE_TAG)
+  - name: LECTURER_LATEST
+    value: $(ACR_LOGIN_SERVER)/ams-lecturer:latest
+
+stages:
+  # ───────────────────────────────────────────────────────────────────────────
+  # Stage 1 — CI: Lint both frontends in parallel
+  # ───────────────────────────────────────────────────────────────────────────
+  - stage: CI
+    displayName: "CI — Lint"
+    jobs:
+      - job: LintAdmin
+        displayName: "Lint Admin"
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: NodeTool@0
+            displayName: "Use Node 22"
+            inputs:
+              versionSpec: "22.x"
+
+          - script: npm install --legacy-peer-deps
+            displayName: "Install dependencies"
+            workingDirectory: admin
+
+          - script: npm run lint
+            displayName: "Lint (ESLint)"
+            workingDirectory: admin
+            continueOnError: true
+
+      - job: LintLecturer
+        displayName: "Lint Lecturer"
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: NodeTool@0
+            displayName: "Use Node 22"
+            inputs:
+              versionSpec: "22.x"
+
+          - script: npm install --legacy-peer-deps
+            displayName: "Install dependencies"
+            workingDirectory: lecturer
+
+          - script: npm run lint
+            displayName: "Lint (ESLint)"
+            workingDirectory: lecturer
+            continueOnError: true
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Stage 2 — Build & Push both images to ACR (parallel jobs)
+  # ───────────────────────────────────────────────────────────────────────────
+  - stage: Build
+    displayName: "Build & Push Images"
+    dependsOn: CI
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    jobs:
+      - job: BuildAdmin
+        displayName: "Build ams-admin"
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: |
+              echo "$(ACR_PASSWORD)" | docker login $(ACR_LOGIN_SERVER) \
+                --username $(ACR_USERNAME) --password-stdin
+            displayName: "Login to ACR"
+
+          - script: |
+              docker build \
+                --target runner \
+                --build-arg VITE_APP_BASE_NAME=/admin/ \
+                --build-arg VITE_APP_VERSION=v$(Build.BuildId) \
+                --build-arg GENERATE_SOURCEMAP=false \
+                --tag $(ADMIN_IMAGE) \
+                --tag $(ADMIN_LATEST) \
+                --label "build=$(Build.BuildId)" \
+                --label "commit=$(Build.SourceVersion)" \
+                admin/
+            displayName: "Build admin image"
+
+          - script: |
+              docker push $(ADMIN_IMAGE)
+              docker push $(ADMIN_LATEST)
+            displayName: "Push admin image"
+
+      - job: BuildLecturer
+        displayName: "Build ams-lecturer"
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: |
+              echo "$(ACR_PASSWORD)" | docker login $(ACR_LOGIN_SERVER) \
+                --username $(ACR_USERNAME) --password-stdin
+            displayName: "Login to ACR"
+
+          - script: |
+              docker build \
+                --target runner \
+                --build-arg VITE_APP_BASE_NAME=/lecturer/ \
+                --build-arg VITE_APP_VERSION=v$(Build.BuildId) \
+                --build-arg GENERATE_SOURCEMAP=false \
+                --tag $(LECTURER_IMAGE) \
+                --tag $(LECTURER_LATEST) \
+                --label "build=$(Build.BuildId)" \
+                --label "commit=$(Build.SourceVersion)" \
+                lecturer/
+            displayName: "Build lecturer image"
+
+          - script: |
+              docker push $(LECTURER_IMAGE)
+              docker push $(LECTURER_LATEST)
+            displayName: "Push lecturer image"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Stage 3 — Deploy full stack to VM via SSH
+  # ───────────────────────────────────────────────────────────────────────────
+  - stage: Deploy
+    displayName: "Deploy to Server"
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployWeb
+        displayName: "Deploy Web Stack"
+        pool:
+          vmImage: ubuntu-latest
+        environment: production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "$(SSH_PRIVATE_KEY)" > /tmp/deploy_key
+                    chmod 600 /tmp/deploy_key
+                  displayName: "Setup SSH key"
+
+                - script: |
+                    ssh -o StrictHostKeyChecking=no \
+                        -i /tmp/deploy_key \
+                        $(SSH_USER)@$(SSH_HOST) \
+                        ADMIN_IMAGE=$(ADMIN_IMAGE) \
+                        LECTURER_IMAGE=$(LECTURER_IMAGE) \
+                        ACR_LOGIN_SERVER=$(ACR_LOGIN_SERVER) \
+                        ACR_USERNAME=$(ACR_USERNAME) \
+                        ACR_PASSWORD=$(ACR_PASSWORD) \
+                        DB_MONGODB_URI='$(DB_MONGODB_URI)' \
+                        DB_MONGODB_DATABASE='$(DB_MONGODB_DATABASE)' \
+                        ACCESS_TOKEN_SECRET='$(ACCESS_TOKEN_SECRET)' \
+                        REFRESH_TOKEN_SECRET='$(REFRESH_TOKEN_SECRET)' \
+                        ALLOWED_ORIGINS='$(ALLOWED_ORIGINS)' \
+                        BUILD_ID=$(Build.BuildId) \
+                        DEPLOY_PATH=$(DEPLOY_PATH) \
+                        bash -s << 'ENDSSH'
+                      set -e
+
+                      # Login to ACR on the remote host
+                      echo "${ACR_PASSWORD}" | docker login "${ACR_LOGIN_SERVER}" \
+                        --username "${ACR_USERNAME}" --password-stdin
+
+                      cd "${DEPLOY_PATH}"
+
+                      # Write fresh .env from pipeline secrets
+                      cat > .env << EOF
+                    PROXY_PORT=3000
+                    NODE_ENV=production
+                    APPLICATION_PORT=8080
+                    DB_MONGODB_URI=${DB_MONGODB_URI}
+                    DB_MONGODB_DATABASE=${DB_MONGODB_DATABASE}
+                    SLAT_ROUNDS=10
+                    ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+                    REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+                    ACCESS_TOKEN_TTL=1h
+                    REFRESH_TOKEN_TTL=30d
+                    REFRESH_TOKEN_COOKIE_TTL=3600
+                    ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+                    ALLOWED_METHODS=["GET","HEAD","PUT","PATCH","POST","DELETE"]
+                    ALLOWED_HEADERS=["Origin","X-Requested-With","Content-Type","Accept","Authorization","X-Token"]
+                    ADMIN_VITE_APP_BASE_NAME=/admin/
+                    ADMIN_VITE_APP_VERSION=v${BUILD_ID}
+                    ADMIN_GENERATE_SOURCEMAP=false
+                    LECTURER_VITE_APP_BASE_NAME=/lecturer/
+                    LECTURER_VITE_APP_VERSION=v${BUILD_ID}
+                    LECTURER_GENERATE_SOURCEMAP=false
+                    EOF
+
+                      # Pull all updated images and restart stack
+                      docker pull "${ADMIN_IMAGE}"
+                      docker pull "${LECTURER_IMAGE}"
+
+                      docker compose up -d --remove-orphans
+
+                      # Tag pulled images as :latest locally for compose reference
+                      docker tag "${ADMIN_IMAGE}"    ams-web/admin:latest
+                      docker tag "${LECTURER_IMAGE}" ams-web/lecturer:latest
+
+                      # Prune dangling images
+                      docker image prune -f
+                    ENDSSH
+                  displayName: "SSH deploy to VM"
+                  env:
+                    ACR_PASSWORD: $(ACR_PASSWORD)
+                    SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)
+                    DB_MONGODB_URI: $(DB_MONGODB_URI)
+                    DB_MONGODB_DATABASE: $(DB_MONGODB_DATABASE)
+                    ACCESS_TOKEN_SECRET: $(ACCESS_TOKEN_SECRET)
+                    REFRESH_TOKEN_SECRET: $(REFRESH_TOKEN_SECRET)
+                    ALLOWED_ORIGINS: $(ALLOWED_ORIGINS)
+
+                - script: rm -f /tmp/deploy_key
+                  displayName: "Cleanup SSH key"
+                  condition: always()
