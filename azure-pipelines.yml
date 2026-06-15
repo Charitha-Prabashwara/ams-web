@@ -1,22 +1,26 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # AMS Web — Azure Pipelines CI/CD
-# Builds: ams-admin, ams-lecturer (Vite/React), served via nginx
+# Covers: ams-admin, ams-lecturer (Vite/React → nginx)
+# The ams-api image is built & deployed from the ams-api repo pipeline.
+# This pipeline only deploys frontend images + restarts the full stack.
 #
-# Required Azure DevOps Variable Group: "ams-web-vars"
-#   ACR_LOGIN_SERVER              e.g. myregistry.azurecr.io
-#   ACR_USERNAME                  Service principal / admin username
-#   ACR_PASSWORD                  Service principal / admin password  (secret)
-#   SSH_HOST                      VM public IP or hostname
-#   SSH_USER                      e.g. azureuser
-#   SSH_PRIVATE_KEY               Contents of VM private key          (secret)
-#   DEPLOY_PATH                   e.g. /home/azureuser/ams
+# Variable Group "ams-web-vars" in Azure DevOps Library:
 #
-# Runtime secrets injected into .env on server (mark ALL as secret):
-#   DB_MONGODB_URI
-#   DB_MONGODB_DATABASE
-#   ACCESS_TOKEN_SECRET
-#   REFRESH_TOKEN_SECRET
-#   ALLOWED_ORIGINS
+#   ACR_LOGIN_SERVER              myregistry.azurecr.io        (plain)
+#   ACR_USERNAME                  <acr-username>               (plain)
+#   ACR_PASSWORD                  <acr-password>               (secret 🔒)
+#   SSH_HOST                      <vm-ip or hostname>          (plain)
+#   SSH_USER                      azureuser                    (plain)
+#   SSH_PRIVATE_KEY               <full PEM key content>       (secret 🔒)
+#   DEPLOY_PATH                   /home/azureuser/ams-web      (plain)
+#
+# Runtime secrets (written to .env on server):
+#   DB_MONGODB_URI                (secret 🔒)
+#   DB_MONGODB_DATABASE           AMS                          (plain)
+#   ACCESS_TOKEN_SECRET           (secret 🔒)
+#   REFRESH_TOKEN_SECRET          (secret 🔒)
+#   ALLOWED_ORIGINS               ["https://yourdomain.com"]  (plain)
+#   API_ACR_IMAGE                 myregistry.azurecr.io/ams-api:latest  (plain)
 # ─────────────────────────────────────────────────────────────────────────────
 
 trigger:
@@ -95,10 +99,10 @@ stages:
             continueOnError: true
 
   # ───────────────────────────────────────────────────────────────────────────
-  # Stage 2 — Build & Push both images to ACR (parallel jobs)
+  # Stage 2 — Build & Push both frontend images to ACR (parallel)
   # ───────────────────────────────────────────────────────────────────────────
   - stage: Build
-    displayName: "Build & Push Images"
+    displayName: "Build & Push to ACR"
     dependsOn: CI
     condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     jobs:
@@ -108,27 +112,27 @@ stages:
           vmImage: ubuntu-latest
         steps:
           - script: |
-              echo "$(ACR_PASSWORD)" | docker login $(ACR_LOGIN_SERVER) \
-                --username $(ACR_USERNAME) --password-stdin
+              echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
+                --username "$(ACR_USERNAME)" --password-stdin
             displayName: "Login to ACR"
 
           - script: |
               docker build \
-                --target runner \
                 --build-arg VITE_APP_BASE_NAME=/admin/ \
                 --build-arg VITE_APP_VERSION=v$(Build.BuildId) \
                 --build-arg GENERATE_SOURCEMAP=false \
-                --tag $(ADMIN_IMAGE) \
-                --tag $(ADMIN_LATEST) \
+                --build-arg PUBLIC_URL= \
+                --tag "$(ADMIN_IMAGE)" \
+                --tag "$(ADMIN_LATEST)" \
                 --label "build=$(Build.BuildId)" \
                 --label "commit=$(Build.SourceVersion)" \
                 admin/
             displayName: "Build admin image"
 
           - script: |
-              docker push $(ADMIN_IMAGE)
-              docker push $(ADMIN_LATEST)
-            displayName: "Push admin image"
+              docker push "$(ADMIN_IMAGE)"
+              docker push "$(ADMIN_LATEST)"
+            displayName: "Push admin image to ACR"
 
       - job: BuildLecturer
         displayName: "Build ams-lecturer"
@@ -136,37 +140,38 @@ stages:
           vmImage: ubuntu-latest
         steps:
           - script: |
-              echo "$(ACR_PASSWORD)" | docker login $(ACR_LOGIN_SERVER) \
-                --username $(ACR_USERNAME) --password-stdin
+              echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
+                --username "$(ACR_USERNAME)" --password-stdin
             displayName: "Login to ACR"
 
           - script: |
               docker build \
-                --target runner \
                 --build-arg VITE_APP_BASE_NAME=/lecturer/ \
                 --build-arg VITE_APP_VERSION=v$(Build.BuildId) \
                 --build-arg GENERATE_SOURCEMAP=false \
-                --tag $(LECTURER_IMAGE) \
-                --tag $(LECTURER_LATEST) \
+                --build-arg PUBLIC_URL= \
+                --tag "$(LECTURER_IMAGE)" \
+                --tag "$(LECTURER_LATEST)" \
                 --label "build=$(Build.BuildId)" \
                 --label "commit=$(Build.SourceVersion)" \
                 lecturer/
             displayName: "Build lecturer image"
 
           - script: |
-              docker push $(LECTURER_IMAGE)
-              docker push $(LECTURER_LATEST)
-            displayName: "Push lecturer image"
+              docker push "$(LECTURER_IMAGE)"
+              docker push "$(LECTURER_LATEST)"
+            displayName: "Push lecturer image to ACR"
 
   # ───────────────────────────────────────────────────────────────────────────
-  # Stage 3 — Deploy full stack to VM via SSH
+  # Stage 3 — Deploy full stack to server via SSH
+  # Writes .env, pulls ACR images, restarts all containers
   # ───────────────────────────────────────────────────────────────────────────
   - stage: Deploy
     displayName: "Deploy to Server"
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
-      - deployment: DeployWeb
+      - deployment: DeployWebStack
         displayName: "Deploy Web Stack"
         pool:
           vmImage: ubuntu-latest
@@ -182,32 +187,25 @@ stages:
 
                 - script: |
                     ssh -o StrictHostKeyChecking=no \
+                        -o BatchMode=yes \
                         -i /tmp/deploy_key \
-                        $(SSH_USER)@$(SSH_HOST) \
-                        ADMIN_IMAGE=$(ADMIN_IMAGE) \
-                        LECTURER_IMAGE=$(LECTURER_IMAGE) \
-                        ACR_LOGIN_SERVER=$(ACR_LOGIN_SERVER) \
-                        ACR_USERNAME=$(ACR_USERNAME) \
-                        ACR_PASSWORD=$(ACR_PASSWORD) \
-                        DB_MONGODB_URI='$(DB_MONGODB_URI)' \
-                        DB_MONGODB_DATABASE='$(DB_MONGODB_DATABASE)' \
-                        ACCESS_TOKEN_SECRET='$(ACCESS_TOKEN_SECRET)' \
-                        REFRESH_TOKEN_SECRET='$(REFRESH_TOKEN_SECRET)' \
-                        ALLOWED_ORIGINS='$(ALLOWED_ORIGINS)' \
-                        BUILD_ID=$(Build.BuildId) \
-                        DEPLOY_PATH=$(DEPLOY_PATH) \
-                        bash -s << 'ENDSSH'
+                        "$(SSH_USER)@$(SSH_HOST)" bash << REMOTE
                       set -e
 
-                      # Login to ACR on the remote host
+                      # Login to ACR on remote host
                       echo "${ACR_PASSWORD}" | docker login "${ACR_LOGIN_SERVER}" \
                         --username "${ACR_USERNAME}" --password-stdin
 
+                      mkdir -p "${DEPLOY_PATH}"
                       cd "${DEPLOY_PATH}"
 
-                      # Write fresh .env from pipeline secrets
-                      cat > .env << EOF
+                      # Write fresh .env — all values come from pipeline env: block below
+                      # Unquoted heredoc so shell variables expand here
+                      cat > .env << ENVEOF
+                    # ── Proxy ──────────────────────────────────────────────
                     PROXY_PORT=3000
+
+                    # ── Backend API ────────────────────────────────────────
                     NODE_ENV=production
                     APPLICATION_PORT=8080
                     DB_MONGODB_URI=${DB_MONGODB_URI}
@@ -221,31 +219,56 @@ stages:
                     ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
                     ALLOWED_METHODS=["GET","HEAD","PUT","PATCH","POST","DELETE"]
                     ALLOWED_HEADERS=["Origin","X-Requested-With","Content-Type","Accept","Authorization","X-Token"]
-                    ADMIN_VITE_APP_BASE_NAME=/admin/
-                    ADMIN_VITE_APP_VERSION=v${BUILD_ID}
-                    ADMIN_GENERATE_SOURCEMAP=false
-                    LECTURER_VITE_APP_BASE_NAME=/lecturer/
-                    LECTURER_VITE_APP_VERSION=v${BUILD_ID}
-                    LECTURER_GENERATE_SOURCEMAP=false
-                    EOF
 
-                      # Pull all updated images and restart stack
+                    # ── Admin Frontend ─────────────────────────────────────
+                    ADMIN_VITE_APP_BASE_NAME=/admin/
+                    ADMIN_VITE_APP_VERSION=v${IMAGE_TAG}
+                    ADMIN_PUBLIC_URL=
+                    ADMIN_GENERATE_SOURCEMAP=false
+
+                    # ── Lecturer Frontend ──────────────────────────────────
+                    LECTURER_VITE_APP_BASE_NAME=/lecturer/
+                    LECTURER_VITE_APP_VERSION=v${IMAGE_TAG}
+                    LECTURER_PUBLIC_URL=
+                    LECTURER_GENERATE_SOURCEMAP=false
+                    ENVEOF
+
+                      # Write a docker-compose.override.yml so compose uses
+                      # ACR images instead of building from source
+                      cat > docker-compose.override.yml << OVERRIDE
+                    services:
+                      ams-api:
+                        image: ${API_ACR_IMAGE}
+                        build: !reset null
+                      ams-admin:
+                        image: ${ADMIN_IMAGE}
+                        build: !reset null
+                      ams-lecturer:
+                        image: ${LECTURER_IMAGE}
+                        build: !reset null
+                    OVERRIDE
+
+                      # Pull all three images from ACR
+                      docker pull "${API_ACR_IMAGE}"
                       docker pull "${ADMIN_IMAGE}"
                       docker pull "${LECTURER_IMAGE}"
 
-                      docker compose up -d --remove-orphans
-
-                      # Tag pulled images as :latest locally for compose reference
-                      docker tag "${ADMIN_IMAGE}"    ams-web/admin:latest
-                      docker tag "${LECTURER_IMAGE}" ams-web/lecturer:latest
+                      # Restart the full stack without rebuilding
+                      docker compose up -d --no-build --remove-orphans
 
                       # Prune dangling images
                       docker image prune -f
-                    ENDSSH
+                    REMOTE
                   displayName: "SSH deploy to VM"
                   env:
                     ACR_PASSWORD: $(ACR_PASSWORD)
-                    SSH_PRIVATE_KEY: $(SSH_PRIVATE_KEY)
+                    ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
+                    ACR_USERNAME: $(ACR_USERNAME)
+                    DEPLOY_PATH: $(DEPLOY_PATH)
+                    IMAGE_TAG: $(IMAGE_TAG)
+                    ADMIN_IMAGE: $(ADMIN_IMAGE)
+                    LECTURER_IMAGE: $(LECTURER_IMAGE)
+                    API_ACR_IMAGE: $(API_ACR_IMAGE)
                     DB_MONGODB_URI: $(DB_MONGODB_URI)
                     DB_MONGODB_DATABASE: $(DB_MONGODB_DATABASE)
                     ACCESS_TOKEN_SECRET: $(ACCESS_TOKEN_SECRET)
