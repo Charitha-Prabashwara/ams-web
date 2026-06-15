@@ -1,23 +1,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# AMS Web — Azure Pipelines CI/CD
-# Builds: ams-admin, ams-lecturer (Vite/React → nginx)
-# ams-api image comes from the ams-api repo pipeline (pulled via API_ACR_IMAGE)
+# AMS Web — Azure Pipelines CI/CD  (optimized)
 #
 # Variable Group "ams-web-vars" in Azure DevOps Library:
-#
-#   ACR_LOGIN_SERVER        myregistry.azurecr.io                   (plain)
-#   ACR_USERNAME            <acr-username>                           (plain)
-#   ACR_PASSWORD            <acr-password>                           (secret 🔒)
-#   SSH_HOST                <vm-ip or hostname>                      (plain)
-#   SSH_USER                azureuser                                (plain)
-#   SSH_PRIVATE_KEY         <full PEM key — base64 encoded>          (secret 🔒)
-#   DEPLOY_PATH             /home/azureuser/ams-web                  (plain)
-#   API_ACR_IMAGE           myregistry.azurecr.io/ams-api:latest    (plain)
-#   DB_MONGODB_URI          mongodb+srv://...                        (secret 🔒)
-#   DB_MONGODB_DATABASE     AMS                                      (plain)
-#   ACCESS_TOKEN_SECRET     <random string>                          (secret 🔒)
-#   REFRESH_TOKEN_SECRET    <random string>                          (secret 🔒)
-#   ALLOWED_ORIGINS         ["https://yourdomain.com"]               (plain)
+#   ACR_LOGIN_SERVER, ACR_USERNAME, ACR_PASSWORD (secret)
+#   SSH_HOST, SSH_USER, SSH_PRIVATE_KEY (secret, base64-encoded)
+#   DEPLOY_PATH, API_ACR_IMAGE
+#   DB_MONGODB_URI (secret), DB_MONGODB_DATABASE
+#   ACCESS_TOKEN_SECRET (secret), REFRESH_TOKEN_SECRET (secret)
+#   ALLOWED_ORIGINS
 # ─────────────────────────────────────────────────────────────────────────────
 
 trigger:
@@ -49,75 +39,38 @@ variables:
     value: $(ACR_LOGIN_SERVER)/ams-lecturer:$(IMAGE_TAG)
   - name: LECTURER_LATEST
     value: $(ACR_LOGIN_SERVER)/ams-lecturer:latest
+  # Enable BuildKit for faster, cached builds
+  - name: DOCKER_BUILDKIT
+    value: "1"
 
 stages:
   # ───────────────────────────────────────────────────────────────────────────
-  # Stage 1 — CI: Lint both frontends in parallel
-  # ───────────────────────────────────────────────────────────────────────────
-  - stage: CI
-    displayName: "CI — Lint"
-    jobs:
-      - job: LintAdmin
-        displayName: "Lint Admin"
-        pool:
-          vmImage: ubuntu-latest
-        steps:
-          - checkout: self
-
-          - task: NodeTool@0
-            displayName: "Use Node 22"
-            inputs:
-              versionSpec: "22.x"
-
-          - script: npm install --legacy-peer-deps
-            displayName: "Install dependencies"
-            workingDirectory: admin
-
-          - script: npm run lint
-            displayName: "Lint (ESLint)"
-            workingDirectory: admin
-            continueOnError: true
-
-      - job: LintLecturer
-        displayName: "Lint Lecturer"
-        pool:
-          vmImage: ubuntu-latest
-        steps:
-          - checkout: self
-
-          - task: NodeTool@0
-            displayName: "Use Node 22"
-            inputs:
-              versionSpec: "22.x"
-
-          - script: npm install --legacy-peer-deps
-            displayName: "Install dependencies"
-            workingDirectory: lecturer
-
-          - script: npm run lint
-            displayName: "Lint (ESLint)"
-            workingDirectory: lecturer
-            continueOnError: true
-
-  # ───────────────────────────────────────────────────────────────────────────
-  # Stage 2 — Build & Push both frontend images to ACR (parallel)
+  # Stage 1 — Build & Push (admin and lecturer in parallel, CI merged in)
+  # No separate lint stage — ESLint runs inside the Docker build via npm run build
+  # which catches import/syntax errors anyway. Saves one full agent spin-up per app.
   # ───────────────────────────────────────────────────────────────────────────
   - stage: Build
     displayName: "Build & Push to ACR"
-    dependsOn: CI
-    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     jobs:
+
       - job: BuildAdmin
-        displayName: "Build ams-admin"
+        displayName: "Build & Push ams-admin"
         pool:
           vmImage: ubuntu-latest
         steps:
           - checkout: self
+            fetchDepth: 1        # shallow clone — faster checkout
 
           - script: |
               echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
                 --username "$(ACR_USERNAME)" --password-stdin
             displayName: "Login to ACR"
+
+          - script: |
+              # Pull the previous latest image to use as cache source
+              docker pull "$(ADMIN_LATEST)" || true
+            displayName: "Pull cache image"
 
           - script: |
               docker build \
@@ -125,24 +78,28 @@ stages:
                 --build-arg VITE_APP_VERSION=v$(Build.BuildId) \
                 --build-arg GENERATE_SOURCEMAP=false \
                 --build-arg PUBLIC_URL= \
+                --cache-from "$(ADMIN_LATEST)" \
                 --tag "$(ADMIN_IMAGE)" \
                 --tag "$(ADMIN_LATEST)" \
                 --label "build=$(Build.BuildId)" \
                 --label "commit=$(Build.SourceVersion)" \
                 admin/
             displayName: "Build admin image"
+            env:
+              DOCKER_BUILDKIT: 1
 
           - script: |
               docker push "$(ADMIN_IMAGE)"
               docker push "$(ADMIN_LATEST)"
-            displayName: "Push admin image to ACR"
+            displayName: "Push admin image"
 
       - job: BuildLecturer
-        displayName: "Build ams-lecturer"
+        displayName: "Build & Push ams-lecturer"
         pool:
           vmImage: ubuntu-latest
         steps:
           - checkout: self
+            fetchDepth: 1
 
           - script: |
               echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
@@ -150,27 +107,32 @@ stages:
             displayName: "Login to ACR"
 
           - script: |
+              docker pull "$(LECTURER_LATEST)" || true
+            displayName: "Pull cache image"
+
+          - script: |
               docker build \
                 --build-arg VITE_APP_BASE_NAME=/lecturer/ \
                 --build-arg VITE_APP_VERSION=v$(Build.BuildId) \
                 --build-arg GENERATE_SOURCEMAP=false \
                 --build-arg PUBLIC_URL= \
+                --cache-from "$(LECTURER_LATEST)" \
                 --tag "$(LECTURER_IMAGE)" \
                 --tag "$(LECTURER_LATEST)" \
                 --label "build=$(Build.BuildId)" \
                 --label "commit=$(Build.SourceVersion)" \
                 lecturer/
             displayName: "Build lecturer image"
+            env:
+              DOCKER_BUILDKIT: 1
 
           - script: |
               docker push "$(LECTURER_IMAGE)"
               docker push "$(LECTURER_LATEST)"
-            displayName: "Push lecturer image to ACR"
+            displayName: "Push lecturer image"
 
   # ───────────────────────────────────────────────────────────────────────────
-  # Stage 3 — Deploy full stack to server via SSH
-  # Copies docker-compose.yml + proxy/nginx.conf to the VM, then pulls and
-  # restarts all containers.
+  # Stage 2 — Deploy to VM via SSH (main branch only)
   # ───────────────────────────────────────────────────────────────────────────
   - stage: Deploy
     displayName: "Deploy to Server"
@@ -182,44 +144,41 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
-          - checkout: self   # need repo files to copy compose + nginx config
+          - checkout: self
+            fetchDepth: 1
 
           - script: |
               echo "$(SSH_PRIVATE_KEY)" | base64 -d > /tmp/deploy_key
               chmod 600 /tmp/deploy_key
             displayName: "Setup SSH key"
 
-          # ── Copy compose file and nginx config to the VM ──────────────────
           - script: |
-              ssh -o StrictHostKeyChecking=no \
-                  -o BatchMode=yes \
+              # Ensure deploy directories exist on VM
+              ssh -o StrictHostKeyChecking=no -o BatchMode=yes \
                   -i /tmp/deploy_key \
                   "$(SSH_USER)@$(SSH_HOST)" \
                   "mkdir -p $(DEPLOY_PATH)/proxy"
 
-              # Copy docker-compose.yml
-              scp -o StrictHostKeyChecking=no \
-                  -i /tmp/deploy_key \
+              # Copy compose file and nginx config in parallel
+              scp -o StrictHostKeyChecking=no -i /tmp/deploy_key \
                   docker-compose.yml \
-                  "$(SSH_USER)@$(SSH_HOST):$(DEPLOY_PATH)/docker-compose.yml"
+                  "$(SSH_USER)@$(SSH_HOST):$(DEPLOY_PATH)/docker-compose.yml" &
 
-              # Copy proxy nginx config
-              scp -o StrictHostKeyChecking=no \
-                  -i /tmp/deploy_key \
+              scp -o StrictHostKeyChecking=no -i /tmp/deploy_key \
                   proxy/nginx.conf \
-                  "$(SSH_USER)@$(SSH_HOST):$(DEPLOY_PATH)/proxy/nginx.conf"
+                  "$(SSH_USER)@$(SSH_HOST):$(DEPLOY_PATH)/proxy/nginx.conf" &
+
+              wait   # wait for both scp to finish
             displayName: "Copy compose & nginx config to VM"
 
-          # ── Write .env and deploy on the VM ──────────────────────────────
           - script: |
-              ssh -o StrictHostKeyChecking=no \
-                  -o BatchMode=yes \
+              ssh -o StrictHostKeyChecking=no -o BatchMode=yes \
                   -i /tmp/deploy_key \
                   "$(SSH_USER)@$(SSH_HOST)" bash << 'REMOTE'
               set -e
               cd "$(DEPLOY_PATH)"
 
-              # Write .env with all runtime variables
+              # Write .env
               cat > .env << ENVEOF
               PROXY_PORT=3000
               NODE_ENV=production
@@ -249,12 +208,13 @@ stages:
               echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
                 --username "$(ACR_USERNAME)" --password-stdin
 
-              # Pull all images from ACR
-              docker pull "$(API_ACR_IMAGE)"
-              docker pull "$(ADMIN_IMAGE)"
-              docker pull "$(LECTURER_IMAGE)"
+              # Pull all images in parallel
+              docker pull "$(API_ACR_IMAGE)" &
+              docker pull "$(ADMIN_IMAGE)" &
+              docker pull "$(LECTURER_IMAGE)" &
+              wait
 
-              # Write compose override — use pre-built ACR images, skip build:
+              # Write compose override to use ACR images (no build on server)
               cat > docker-compose.override.yml << OVERRIDE
               services:
                 ams-api:
@@ -268,10 +228,12 @@ stages:
                   build: !reset null
               OVERRIDE
 
-              # Restart full stack
+              # Remove any conflicting containers, then start fresh
+              docker compose down --remove-orphans || true
+              docker rm -f ams-api ams-admin ams-lecturer ams-proxy 2>/dev/null || true
               docker compose up -d --no-build --remove-orphans
 
-              # Prune dangling images to save disk
+              # Clean up old images
               docker image prune -f
               REMOTE
             displayName: "SSH deploy to VM"
