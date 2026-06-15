@@ -13,7 +13,7 @@ services:
       - lecturer
     restart: unless-stopped
     networks:
-      - ams-net
+      - ams-network
 
   # ─── Admin Frontend (internal only) ─────────────────────────────────────────
   admin:
@@ -31,7 +31,7 @@ services:
       - "80"
     restart: unless-stopped
     networks:
-      - ams-net
+      - ams-network
 
   # ─── Lecturer Frontend (internal only) ──────────────────────────────────────
   lecturer:
@@ -49,8 +49,8 @@ services:
       - "80"
     restart: unless-stopped
     networks:
-      - ams-net
+      - ams-network
 
 networks:
-  ams-net:
+  ams-network:
     driver: bridge
