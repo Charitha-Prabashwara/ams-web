@@ -10,7 +10,7 @@
 #   ACR_PASSWORD            <acr-password>                           (secret 🔒)
 #   SSH_HOST                <vm-ip or hostname>                      (plain)
 #   SSH_USER                azureuser                                (plain)
-#   SSH_PRIVATE_KEY         <full PEM key content>                   (secret 🔒)
+#   SSH_PRIVATE_KEY         <full PEM key — base64 encoded>          (secret 🔒)
 #   DEPLOY_PATH             /home/azureuser/ams-web                  (plain)
 #   API_ACR_IMAGE           myregistry.azurecr.io/ams-api:latest    (plain)
 #   DB_MONGODB_URI          mongodb+srv://...                        (secret 🔒)
@@ -169,7 +169,8 @@ stages:
 
   # ───────────────────────────────────────────────────────────────────────────
   # Stage 3 — Deploy full stack to server via SSH
-  # Regular job (not deployment) — avoids "No pipeline artifacts found" error
+  # Copies docker-compose.yml + proxy/nginx.conf to the VM, then pulls and
+  # restarts all containers.
   # ───────────────────────────────────────────────────────────────────────────
   - stage: Deploy
     displayName: "Deploy to Server"
@@ -181,94 +182,113 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
-          - checkout: none  # no source needed in deploy stage
+          - checkout: self   # need repo files to copy compose + nginx config
 
           - script: |
               echo "$(SSH_PRIVATE_KEY)" | base64 -d > /tmp/deploy_key
-              ssh-keygen -l -f /tmp/deploy_key
               chmod 600 /tmp/deploy_key
             displayName: "Setup SSH key"
 
+          # ── Copy compose file and nginx config to the VM ──────────────────
           - script: |
               ssh -o StrictHostKeyChecking=no \
                   -o BatchMode=yes \
                   -i /tmp/deploy_key \
-                  "$(SSH_USER)@$(SSH_HOST)" bash << REMOTE
+                  "$(SSH_USER)@$(SSH_HOST)" \
+                  "mkdir -p $(DEPLOY_PATH)/proxy"
+
+              # Copy docker-compose.yml
+              scp -o StrictHostKeyChecking=no \
+                  -i /tmp/deploy_key \
+                  docker-compose.yml \
+                  "$(SSH_USER)@$(SSH_HOST):$(DEPLOY_PATH)/docker-compose.yml"
+
+              # Copy proxy nginx config
+              scp -o StrictHostKeyChecking=no \
+                  -i /tmp/deploy_key \
+                  proxy/nginx.conf \
+                  "$(SSH_USER)@$(SSH_HOST):$(DEPLOY_PATH)/proxy/nginx.conf"
+            displayName: "Copy compose & nginx config to VM"
+
+          # ── Write .env and deploy on the VM ──────────────────────────────
+          - script: |
+              ssh -o StrictHostKeyChecking=no \
+                  -o BatchMode=yes \
+                  -i /tmp/deploy_key \
+                  "$(SSH_USER)@$(SSH_HOST)" bash << 'REMOTE'
               set -e
+              cd "$(DEPLOY_PATH)"
 
-              # Login to ACR
-              echo "${ACR_PASSWORD}" | docker login "${ACR_LOGIN_SERVER}" \
-                --username "${ACR_USERNAME}" --password-stdin
-
-              mkdir -p "${DEPLOY_PATH}"
-              cd "${DEPLOY_PATH}"
-
-              # Write .env — unquoted heredoc so vars expand from env: block
+              # Write .env with all runtime variables
               cat > .env << ENVEOF
               PROXY_PORT=3000
               NODE_ENV=production
               APPLICATION_PORT=8080
-              DB_MONGODB_URI=${DB_MONGODB_URI}
-              DB_MONGODB_DATABASE=${DB_MONGODB_DATABASE}
+              DB_MONGODB_URI=$(DB_MONGODB_URI)
+              DB_MONGODB_DATABASE=$(DB_MONGODB_DATABASE)
               SLAT_ROUNDS=10
-              ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
-              REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+              ACCESS_TOKEN_SECRET=$(ACCESS_TOKEN_SECRET)
+              REFRESH_TOKEN_SECRET=$(REFRESH_TOKEN_SECRET)
               ACCESS_TOKEN_TTL=1h
               REFRESH_TOKEN_TTL=30d
               REFRESH_TOKEN_COOKIE_TTL=3600
-              ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+              ALLOWED_ORIGINS=$(ALLOWED_ORIGINS)
               ALLOWED_METHODS=["GET","HEAD","PUT","PATCH","POST","DELETE"]
               ALLOWED_HEADERS=["Origin","X-Requested-With","Content-Type","Accept","Authorization","X-Token"]
               ADMIN_VITE_APP_BASE_NAME=/admin/
-              ADMIN_VITE_APP_VERSION=v${IMAGE_TAG}
+              ADMIN_VITE_APP_VERSION=v$(IMAGE_TAG)
               ADMIN_PUBLIC_URL=
               ADMIN_GENERATE_SOURCEMAP=false
               LECTURER_VITE_APP_BASE_NAME=/lecturer/
-              LECTURER_VITE_APP_VERSION=v${IMAGE_TAG}
+              LECTURER_VITE_APP_VERSION=v$(IMAGE_TAG)
               LECTURER_PUBLIC_URL=
               LECTURER_GENERATE_SOURCEMAP=false
               ENVEOF
 
-              # Write compose override so compose uses ACR images, not build:
+              # Login to ACR
+              echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
+                --username "$(ACR_USERNAME)" --password-stdin
+
+              # Pull all images from ACR
+              docker pull "$(API_ACR_IMAGE)"
+              docker pull "$(ADMIN_IMAGE)"
+              docker pull "$(LECTURER_IMAGE)"
+
+              # Write compose override — use pre-built ACR images, skip build:
               cat > docker-compose.override.yml << OVERRIDE
               services:
                 ams-api:
-                  image: ${API_ACR_IMAGE}
+                  image: $(API_ACR_IMAGE)
                   build: !reset null
                 ams-admin:
-                  image: ${ADMIN_IMAGE}
+                  image: $(ADMIN_IMAGE)
                   build: !reset null
                 ams-lecturer:
-                  image: ${LECTURER_IMAGE}
+                  image: $(LECTURER_IMAGE)
                   build: !reset null
               OVERRIDE
 
-              # Pull all images from ACR
-              docker pull "${API_ACR_IMAGE}"
-              docker pull "${ADMIN_IMAGE}"
-              docker pull "${LECTURER_IMAGE}"
-
-              # Restart full stack without rebuilding
+              # Restart full stack
               docker compose up -d --no-build --remove-orphans
 
-              # Prune dangling images
+              # Prune dangling images to save disk
               docker image prune -f
               REMOTE
             displayName: "SSH deploy to VM"
             env:
-              ACR_PASSWORD: $(ACR_PASSWORD)
-              ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
-              ACR_USERNAME: $(ACR_USERNAME)
-              DEPLOY_PATH: $(DEPLOY_PATH)
-              IMAGE_TAG: $(IMAGE_TAG)
-              ADMIN_IMAGE: $(ADMIN_IMAGE)
-              LECTURER_IMAGE: $(LECTURER_IMAGE)
-              API_ACR_IMAGE: $(API_ACR_IMAGE)
-              DB_MONGODB_URI: $(DB_MONGODB_URI)
-              DB_MONGODB_DATABASE: $(DB_MONGODB_DATABASE)
-              ACCESS_TOKEN_SECRET: $(ACCESS_TOKEN_SECRET)
+              ACR_PASSWORD:         $(ACR_PASSWORD)
+              ACR_LOGIN_SERVER:     $(ACR_LOGIN_SERVER)
+              ACR_USERNAME:         $(ACR_USERNAME)
+              DEPLOY_PATH:          $(DEPLOY_PATH)
+              IMAGE_TAG:            $(IMAGE_TAG)
+              ADMIN_IMAGE:          $(ADMIN_IMAGE)
+              LECTURER_IMAGE:       $(LECTURER_IMAGE)
+              API_ACR_IMAGE:        $(API_ACR_IMAGE)
+              DB_MONGODB_URI:       $(DB_MONGODB_URI)
+              DB_MONGODB_DATABASE:  $(DB_MONGODB_DATABASE)
+              ACCESS_TOKEN_SECRET:  $(ACCESS_TOKEN_SECRET)
               REFRESH_TOKEN_SECRET: $(REFRESH_TOKEN_SECRET)
-              ALLOWED_ORIGINS: $(ALLOWED_ORIGINS)
+              ALLOWED_ORIGINS:      $(ALLOWED_ORIGINS)
 
           - script: rm -f /tmp/deploy_key
             displayName: "Cleanup SSH key"
