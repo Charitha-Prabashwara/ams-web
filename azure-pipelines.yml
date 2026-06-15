@@ -1,26 +1,23 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # AMS Web — Azure Pipelines CI/CD
-# Covers: ams-admin, ams-lecturer (Vite/React → nginx)
-# The ams-api image is built & deployed from the ams-api repo pipeline.
-# This pipeline only deploys frontend images + restarts the full stack.
+# Builds: ams-admin, ams-lecturer (Vite/React → nginx)
+# ams-api image comes from the ams-api repo pipeline (pulled via API_ACR_IMAGE)
 #
 # Variable Group "ams-web-vars" in Azure DevOps Library:
 #
-#   ACR_LOGIN_SERVER              myregistry.azurecr.io        (plain)
-#   ACR_USERNAME                  <acr-username>               (plain)
-#   ACR_PASSWORD                  <acr-password>               (secret 🔒)
-#   SSH_HOST                      <vm-ip or hostname>          (plain)
-#   SSH_USER                      azureuser                    (plain)
-#   SSH_PRIVATE_KEY               <full PEM key content>       (secret 🔒)
-#   DEPLOY_PATH                   /home/azureuser/ams-web      (plain)
-#
-# Runtime secrets (written to .env on server):
-#   DB_MONGODB_URI                (secret 🔒)
-#   DB_MONGODB_DATABASE           AMS                          (plain)
-#   ACCESS_TOKEN_SECRET           (secret 🔒)
-#   REFRESH_TOKEN_SECRET          (secret 🔒)
-#   ALLOWED_ORIGINS               ["https://yourdomain.com"]  (plain)
-#   API_ACR_IMAGE                 myregistry.azurecr.io/ams-api:latest  (plain)
+#   ACR_LOGIN_SERVER        myregistry.azurecr.io                   (plain)
+#   ACR_USERNAME            <acr-username>                           (plain)
+#   ACR_PASSWORD            <acr-password>                           (secret 🔒)
+#   SSH_HOST                <vm-ip or hostname>                      (plain)
+#   SSH_USER                azureuser                                (plain)
+#   SSH_PRIVATE_KEY         <full PEM key content>                   (secret 🔒)
+#   DEPLOY_PATH             /home/azureuser/ams-web                  (plain)
+#   API_ACR_IMAGE           myregistry.azurecr.io/ams-api:latest    (plain)
+#   DB_MONGODB_URI          mongodb+srv://...                        (secret 🔒)
+#   DB_MONGODB_DATABASE     AMS                                      (plain)
+#   ACCESS_TOKEN_SECRET     <random string>                          (secret 🔒)
+#   REFRESH_TOKEN_SECRET    <random string>                          (secret 🔒)
+#   ALLOWED_ORIGINS         ["https://yourdomain.com"]               (plain)
 # ─────────────────────────────────────────────────────────────────────────────
 
 trigger:
@@ -65,6 +62,8 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
+          - checkout: self
+
           - task: NodeTool@0
             displayName: "Use Node 22"
             inputs:
@@ -84,6 +83,8 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
+          - checkout: self
+
           - task: NodeTool@0
             displayName: "Use Node 22"
             inputs:
@@ -111,6 +112,8 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
+          - checkout: self
+
           - script: |
               echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
                 --username "$(ACR_USERNAME)" --password-stdin
@@ -139,6 +142,8 @@ stages:
         pool:
           vmImage: ubuntu-latest
         steps:
+          - checkout: self
+
           - script: |
               echo "$(ACR_PASSWORD)" | docker login "$(ACR_LOGIN_SERVER)" \
                 --username "$(ACR_USERNAME)" --password-stdin
@@ -164,117 +169,107 @@ stages:
 
   # ───────────────────────────────────────────────────────────────────────────
   # Stage 3 — Deploy full stack to server via SSH
-  # Writes .env, pulls ACR images, restarts all containers
+  # Regular job (not deployment) — avoids "No pipeline artifacts found" error
   # ───────────────────────────────────────────────────────────────────────────
   - stage: Deploy
     displayName: "Deploy to Server"
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
-      - deployment: DeployWebStack
+      - job: DeployWebStack
         displayName: "Deploy Web Stack"
         pool:
           vmImage: ubuntu-latest
-        environment: production
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - script: |
-                    echo "$(SSH_PRIVATE_KEY)" > /tmp/deploy_key
-                    chmod 600 /tmp/deploy_key
-                  displayName: "Setup SSH key"
+        steps:
+          - checkout: none  # no source needed in deploy stage
 
-                - script: |
-                    ssh -o StrictHostKeyChecking=no \
-                        -o BatchMode=yes \
-                        -i /tmp/deploy_key \
-                        "$(SSH_USER)@$(SSH_HOST)" bash << REMOTE
-                      set -e
+          - script: |
+              echo "$(SSH_PRIVATE_KEY)" | base64 -d > /tmp/deploy_key
+              ssh-keygen -l -f /tmp/deploy_key
+              chmod 600 /tmp/deploy_key
+            displayName: "Setup SSH key"
 
-                      # Login to ACR on remote host
-                      echo "${ACR_PASSWORD}" | docker login "${ACR_LOGIN_SERVER}" \
-                        --username "${ACR_USERNAME}" --password-stdin
+          - script: |
+              ssh -o StrictHostKeyChecking=no \
+                  -o BatchMode=yes \
+                  -i /tmp/deploy_key \
+                  "$(SSH_USER)@$(SSH_HOST)" bash << REMOTE
+              set -e
 
-                      mkdir -p "${DEPLOY_PATH}"
-                      cd "${DEPLOY_PATH}"
+              # Login to ACR
+              echo "${ACR_PASSWORD}" | docker login "${ACR_LOGIN_SERVER}" \
+                --username "${ACR_USERNAME}" --password-stdin
 
-                      # Write fresh .env — all values come from pipeline env: block below
-                      # Unquoted heredoc so shell variables expand here
-                      cat > .env << ENVEOF
-                    # ── Proxy ──────────────────────────────────────────────
-                    PROXY_PORT=3000
+              mkdir -p "${DEPLOY_PATH}"
+              cd "${DEPLOY_PATH}"
 
-                    # ── Backend API ────────────────────────────────────────
-                    NODE_ENV=production
-                    APPLICATION_PORT=8080
-                    DB_MONGODB_URI=${DB_MONGODB_URI}
-                    DB_MONGODB_DATABASE=${DB_MONGODB_DATABASE}
-                    SLAT_ROUNDS=10
-                    ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
-                    REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
-                    ACCESS_TOKEN_TTL=1h
-                    REFRESH_TOKEN_TTL=30d
-                    REFRESH_TOKEN_COOKIE_TTL=3600
-                    ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
-                    ALLOWED_METHODS=["GET","HEAD","PUT","PATCH","POST","DELETE"]
-                    ALLOWED_HEADERS=["Origin","X-Requested-With","Content-Type","Accept","Authorization","X-Token"]
+              # Write .env — unquoted heredoc so vars expand from env: block
+              cat > .env << ENVEOF
+              PROXY_PORT=3000
+              NODE_ENV=production
+              APPLICATION_PORT=8080
+              DB_MONGODB_URI=${DB_MONGODB_URI}
+              DB_MONGODB_DATABASE=${DB_MONGODB_DATABASE}
+              SLAT_ROUNDS=10
+              ACCESS_TOKEN_SECRET=${ACCESS_TOKEN_SECRET}
+              REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
+              ACCESS_TOKEN_TTL=1h
+              REFRESH_TOKEN_TTL=30d
+              REFRESH_TOKEN_COOKIE_TTL=3600
+              ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+              ALLOWED_METHODS=["GET","HEAD","PUT","PATCH","POST","DELETE"]
+              ALLOWED_HEADERS=["Origin","X-Requested-With","Content-Type","Accept","Authorization","X-Token"]
+              ADMIN_VITE_APP_BASE_NAME=/admin/
+              ADMIN_VITE_APP_VERSION=v${IMAGE_TAG}
+              ADMIN_PUBLIC_URL=
+              ADMIN_GENERATE_SOURCEMAP=false
+              LECTURER_VITE_APP_BASE_NAME=/lecturer/
+              LECTURER_VITE_APP_VERSION=v${IMAGE_TAG}
+              LECTURER_PUBLIC_URL=
+              LECTURER_GENERATE_SOURCEMAP=false
+              ENVEOF
 
-                    # ── Admin Frontend ─────────────────────────────────────
-                    ADMIN_VITE_APP_BASE_NAME=/admin/
-                    ADMIN_VITE_APP_VERSION=v${IMAGE_TAG}
-                    ADMIN_PUBLIC_URL=
-                    ADMIN_GENERATE_SOURCEMAP=false
+              # Write compose override so compose uses ACR images, not build:
+              cat > docker-compose.override.yml << OVERRIDE
+              services:
+                ams-api:
+                  image: ${API_ACR_IMAGE}
+                  build: !reset null
+                ams-admin:
+                  image: ${ADMIN_IMAGE}
+                  build: !reset null
+                ams-lecturer:
+                  image: ${LECTURER_IMAGE}
+                  build: !reset null
+              OVERRIDE
 
-                    # ── Lecturer Frontend ──────────────────────────────────
-                    LECTURER_VITE_APP_BASE_NAME=/lecturer/
-                    LECTURER_VITE_APP_VERSION=v${IMAGE_TAG}
-                    LECTURER_PUBLIC_URL=
-                    LECTURER_GENERATE_SOURCEMAP=false
-                    ENVEOF
+              # Pull all images from ACR
+              docker pull "${API_ACR_IMAGE}"
+              docker pull "${ADMIN_IMAGE}"
+              docker pull "${LECTURER_IMAGE}"
 
-                      # Write a docker-compose.override.yml so compose uses
-                      # ACR images instead of building from source
-                      cat > docker-compose.override.yml << OVERRIDE
-                    services:
-                      ams-api:
-                        image: ${API_ACR_IMAGE}
-                        build: !reset null
-                      ams-admin:
-                        image: ${ADMIN_IMAGE}
-                        build: !reset null
-                      ams-lecturer:
-                        image: ${LECTURER_IMAGE}
-                        build: !reset null
-                    OVERRIDE
+              # Restart full stack without rebuilding
+              docker compose up -d --no-build --remove-orphans
 
-                      # Pull all three images from ACR
-                      docker pull "${API_ACR_IMAGE}"
-                      docker pull "${ADMIN_IMAGE}"
-                      docker pull "${LECTURER_IMAGE}"
+              # Prune dangling images
+              docker image prune -f
+              REMOTE
+            displayName: "SSH deploy to VM"
+            env:
+              ACR_PASSWORD: $(ACR_PASSWORD)
+              ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
+              ACR_USERNAME: $(ACR_USERNAME)
+              DEPLOY_PATH: $(DEPLOY_PATH)
+              IMAGE_TAG: $(IMAGE_TAG)
+              ADMIN_IMAGE: $(ADMIN_IMAGE)
+              LECTURER_IMAGE: $(LECTURER_IMAGE)
+              API_ACR_IMAGE: $(API_ACR_IMAGE)
+              DB_MONGODB_URI: $(DB_MONGODB_URI)
+              DB_MONGODB_DATABASE: $(DB_MONGODB_DATABASE)
+              ACCESS_TOKEN_SECRET: $(ACCESS_TOKEN_SECRET)
+              REFRESH_TOKEN_SECRET: $(REFRESH_TOKEN_SECRET)
+              ALLOWED_ORIGINS: $(ALLOWED_ORIGINS)
 
-                      # Restart the full stack without rebuilding
-                      docker compose up -d --no-build --remove-orphans
-
-                      # Prune dangling images
-                      docker image prune -f
-                    REMOTE
-                  displayName: "SSH deploy to VM"
-                  env:
-                    ACR_PASSWORD: $(ACR_PASSWORD)
-                    ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
-                    ACR_USERNAME: $(ACR_USERNAME)
-                    DEPLOY_PATH: $(DEPLOY_PATH)
-                    IMAGE_TAG: $(IMAGE_TAG)
-                    ADMIN_IMAGE: $(ADMIN_IMAGE)
-                    LECTURER_IMAGE: $(LECTURER_IMAGE)
-                    API_ACR_IMAGE: $(API_ACR_IMAGE)
-                    DB_MONGODB_URI: $(DB_MONGODB_URI)
-                    DB_MONGODB_DATABASE: $(DB_MONGODB_DATABASE)
-                    ACCESS_TOKEN_SECRET: $(ACCESS_TOKEN_SECRET)
-                    REFRESH_TOKEN_SECRET: $(REFRESH_TOKEN_SECRET)
-                    ALLOWED_ORIGINS: $(ALLOWED_ORIGINS)
-
-                - script: rm -f /tmp/deploy_key
-                  displayName: "Cleanup SSH key"
-                  condition: always()
+          - script: rm -f /tmp/deploy_key
+            displayName: "Cleanup SSH key"
+            condition: always()
